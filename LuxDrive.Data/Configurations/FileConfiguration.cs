@@ -48,8 +48,9 @@ namespace LuxDrive.Data.Configurations
             entity
                 .HasOne(f=>f.User)
                 .WithMany(u=>u.Files)
-                .HasForeignKey(f => f.UserId);
-             
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
         }
     }
 }
