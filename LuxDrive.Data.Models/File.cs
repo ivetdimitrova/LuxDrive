@@ -9,6 +9,7 @@
         public string StorageUrl { get; set;} = null!;
         public DateTime UploadAt { get; set; }
 
+        public Guid UserId { get; set; }
         public virtual ApplicationUser User { get; set; } = null!;
     }
 }
