@@ -8,60 +8,33 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/LuxDrive.styles.css" asp-append-version="true" />
-
-    <style>
-        html, body {
-            background-color: #000 !important;
-            margin: 0;
-            padding: 0;
-            color: #fff;
-            overflow-x: hidden;
-        }
-
-        main {
-            background-color: #000;
-            min-height: 90vh;
-        }
-
-        /* LUXDRIVE FOOTER */
-        footer.lux-footer {
-            background-color: #000;
-            border-top: 1px solid #1a1a1a;
-            text-align: center;
-            padding: 30px 0;
-            color: #888;
-            font-size: 0.95rem;
-            letter-spacing: 0.5px;
-        }
-
-        footer.lux-footer a {
-            color: #c6a664;
-            text-decoration: none;
-            margin: 0 10px;
-            transition: color 0.3s ease;
-        }
-
-        footer.lux-footer a:hover {
-            color: #b18c4b;
-        }
-
-        .gold {
-            color: #c6a664;
-        }
-
-        .glow {
-            text-shadow: 0 0 6px rgba(198, 166, 100, 0.5);
-        }
-    </style>
 </head>
 <body>
     <div class="container-fluid p-0 m-0" style="background-color:#000;">
+        <!-- HEADER -->
+        <header class="header">
+            <div class="header-inner">
+                <div class="logo">
+                    <span class="gold glow">Lux</span>Drive
+                </div>
+                <nav class="nav">
+                    <a href="/">Home</a>
+                    <a href="/Features">Features</a>
+                    <a href="/Pricing">Pricing</a>
+                    <a href="/Account/Login">Sign In</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- MAIN CONTENT -->
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
 
+        <!-- FOOTER -->
         <footer class="lux-footer">
-            <p>© 2025 <span class="gold glow">LuxDrive</span> — All rights reserved |
+            <p>
+                © 2025 <span class="gold glow">LuxDrive</span> — All rights reserved |
                 <a href="#">Privacy Policy</a> |
                 <a href="#">Terms of Use</a>
             </p>
@@ -71,7 +44,6 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

@@ -23,6 +23,7 @@ html, body {
     backdrop-filter: blur(12px);
 }
 
+/* ???? */
 .logo {
     font-size: 1.9rem;
     font-weight: 700;
@@ -31,24 +32,26 @@ html, body {
 }
 
 .gold {
-    color: #c6a664;
+    color: #c6a664; 
 }
 
 .glow {
     text-shadow: 0 0 8px rgba(198, 166, 100, 0.6);
 }
 
+/* ????????? */
 .nav a {
     margin: 0 15px;
     text-decoration: none;
-    color: #ccc;
+    color: #c6a664; 
     font-weight: 500;
     transition: color 0.3s ease;
 }
 
     .nav a:hover {
-        color: #c6a664;
+        color: #b18c4b; 
     }
+
 
 /* HERO SECTION */
 .hero {
@@ -149,6 +152,36 @@ html, body {
         line-height: 1.6;
     }
 
+/* FOOTER */
+footer.lux-footer {
+    background-color: #000;
+    border-top: 1px solid #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 0;
+    color: #888;
+    font-size: 0.95rem;
+    letter-spacing: 0.5px;
+}
+
+    footer.lux-footer p {
+        max-width: 800px;
+        text-align: center;
+        margin: 0;
+    }
+
+    footer.lux-footer a {
+        color: #c6a664;
+        text-decoration: none;
+        margin: 0 10px;
+        transition: color 0.3s ease;
+    }
+
+        footer.lux-footer a:hover {
+            color: #b18c4b;
+        }
+
 /* ANIMATIONS */
 @keyframes fadeUp {
     from {
@@ -160,18 +193,6 @@ html, body {
         opacity: 1;
         transform: translateY(0);
     }
-}
-
-/* FADE-IN ON SCROLL */
-.hidden {
-    opacity: 0;
-    transform: translateY(40px);
-    transition: opacity 1.2s ease, transform 1.2s ease;
-}
-
-.show {
-    opacity: 1;
-    transform: translateY(0);
 }
 
 /* RESPONSIVE */

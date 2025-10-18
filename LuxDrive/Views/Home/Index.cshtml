@@ -2,52 +2,31 @@
     ViewData["Title"] = "LuxDrive - The Future of Cloud";
 }
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"]</title>
-    <link rel="stylesheet" href="~/css/site.css" />
-</head>
-<body>
-    <header class="header">
-        <div class="logo">
-            <span class="gold glow">Lux</span>Drive
-        </div>
-        <nav class="nav">
-            <a href="#">Home</a>
-            <a href="#">Features</a>
-            <a href="#">Pricing</a>
-            <a href="#">Sign In</a>
-        </nav>
-    </header>
+<section class="hero">
+    <div class="hero-text fade-in">
+        <h1>The <span class="gold">Next Generation</span> of Cloud Storage</h1>
+        <p>Fast. Secure. Limitless. LuxDrive redefines how you interact with your digital world — where performance meets perfection.</p>
+        <a href="#" class="btn">Get Started</a>
+    </div>
+    <div class="hero-bg"></div>
+</section>
 
-    <section class="hero">
-        <div class="hero-text fade-in">
-            <h1>The <span class="gold">Next Generation</span> of Cloud Storage</h1>
-            <p>Fast. Secure. Limitless. LuxDrive redefines how you interact with your digital world — where performance meets perfection.</p>
-       
-            <a asp-controller="Home" asp-action="GetStart" class="btn">Get Started</a>
-        </div>
-        <div class="hero-bg"></div>
-    </section>
+<section class="features">
+    <div class="feature hidden">
+        <h2>⚡ Lightning Fast</h2>
+        <p>Powered by next-gen infrastructure that adapts to your speed. Upload, sync, and access files instantly — built for users who don’t wait.</p>
+    </div>
+    <div class="feature hidden">
+        <h2>🔒 Ultra Secure</h2>
+        <p>Every file is protected with dynamic end-to-end encryption and biometric verification options. You’re in full control of your data, always.</p>
+    </div>
+    <div class="feature hidden">
+        <h2>🌍 Always Connected</h2>
+        <p>Designed to integrate seamlessly with your ecosystem — from desktop to mobile. LuxDrive moves as you move, effortlessly.</p>
+    </div>
+</section>
 
-    <section class="features">
-        <div class="feature hidden">
-            <h2>⚡ Lightning Fast</h2>
-            <p>Powered by next-gen infrastructure that adapts to your speed. Upload, sync, and access files instantly — built for users who don’t wait.</p>
-        </div>
-        <div class="feature hidden">
-            <h2>🔒 Ultra Secure</h2>
-            <p>Every file is protected with dynamic end-to-end encryption and biometric verification options. You’re in full control of your data, always.</p>
-        </div>
-        <div class="feature hidden">
-            <h2>🌍 Always Connected</h2>
-            <p>Designed to integrate seamlessly with your ecosystem — from desktop to mobile. LuxDrive moves as you move, effortlessly.</p>
-        </div>
-    </section>
-
+@section Scripts {
     <script>
         // Fade-in effects on scroll
         const features = document.querySelectorAll('.feature');
@@ -67,5 +46,4 @@
             document.querySelector('.hero-bg').style.transform = `translateY(${scroll * 0.4}px)`;
         });
     </script>
-</body>
-</html>
+}
