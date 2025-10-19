@@ -1,4 +1,7 @@
-﻿<!DOCTYPE html>
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -12,18 +15,17 @@
 <body>
     <div class="container-fluid p-0 m-0" style="background-color:#000;">
         <!-- HEADER -->
-        <header class="header">
-            <div class="header-inner">
-                <div class="logo">
-                    <span class="gold glow">Lux</span>Drive
-                </div>
-                <nav class="nav">
-                    <a href="/">Home</a>
-                    <a href="/Features">Features</a>
-                    <a href="/Pricing">Pricing</a>
-                    <a href="/Account/Login">Sign In</a>
-                </nav>
+        <header class="header" style="padding:15px 30px;display:flex;justify-content:space-between;align-items:center;">
+            <div class="logo" style="color:#fff;font-size:26px;font-weight:bold;">
+                <span class="gold glow">Lux</span>Drive
             </div>
+
+            <nav class="nav" style="display:flex;align-items:center;gap:20px;">
+                <a href="/" class="nav-link text-gold">Home</a>
+                <a href="/Features" class="nav-link text-gold">Features</a>
+                <a href="/Pricing" class="nav-link text-gold">Pricing</a>
+                <partial name="_LoginPartial" />
+            </nav>
         </header>
 
         <!-- MAIN CONTENT -->
@@ -32,11 +34,11 @@
         </main>
 
         <!-- FOOTER -->
-        <footer class="lux-footer">
+        <footer class="lux-footer text-center p-3" style="background-color:#111;color:#c6a664;">
             <p>
                 © 2025 <span class="gold glow">LuxDrive</span> — All rights reserved |
-                <a href="#">Privacy Policy</a> |
-                <a href="#">Terms of Use</a>
+                <a href="#" class="text-gold">Privacy Policy</a> |
+                <a href="#" class="text-gold">Terms of Use</a>
             </p>
         </footer>
     </div>
