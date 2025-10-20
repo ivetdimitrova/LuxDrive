@@ -21,9 +21,9 @@
             </div>
 
             <nav class="nav" style="display:flex;align-items:center;gap:20px;">
-                <a href="/" class="nav-link text-gold">Home</a>
+                <a class="nav-link text-gold" asp-controller="Home" asp-action="Index" >Home</a>
                 <a href="/Features" class="nav-link text-gold">Features</a>
-                <a href="/Pricing" class="nav-link text-gold">Pricing</a>
+                <a class="nav-link text-gold" asp-controller="Pricing" asp-action="Index">Pricing</a>
                 <partial name="_LoginPartial" />
             </nav>
         </header>
