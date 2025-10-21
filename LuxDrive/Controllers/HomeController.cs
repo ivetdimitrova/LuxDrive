@@ -1,6 +1,7 @@
 using System.Diagnostics;
 
 using LuxDrive.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LuxDrive.Controllers
@@ -13,7 +14,7 @@ namespace LuxDrive.Controllers
         {
             _logger = logger;
         }
-
+        [AllowAnonymous]
         public IActionResult Index()
         {
             return View();
@@ -28,11 +29,6 @@ namespace LuxDrive.Controllers
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
-
-        public IActionResult GetStart()
-        {
-            return View();
         }
     }
 }
