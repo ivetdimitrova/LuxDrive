@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace LuxDrive.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
 

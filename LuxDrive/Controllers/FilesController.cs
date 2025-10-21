@@ -2,7 +2,7 @@
 
 namespace LuxDrive.Controllers
 {
-    public class FilesController : Controller
+    public class FilesController : BaseController
     {
         public IActionResult Index()
         {

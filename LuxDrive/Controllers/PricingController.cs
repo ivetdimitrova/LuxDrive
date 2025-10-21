@@ -2,7 +2,7 @@
 
 namespace LuxDrive.Controllers
 {
-    public class PricingController : Controller
+    public class PricingController : BaseController
     {
         public IActionResult Index()
         {
