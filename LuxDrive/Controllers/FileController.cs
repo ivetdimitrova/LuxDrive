@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LuxDrive.Controllers
 {
-    public class FilesController : BaseController
+    [Authorize]
+    public class FileController : BaseController
     {
         public IActionResult Index()
         {
