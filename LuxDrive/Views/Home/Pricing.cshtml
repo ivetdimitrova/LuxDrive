@@ -15,13 +15,15 @@
         <h2>💼 Basic Plan</h2>
         <p>50 GB of secure storage, basic file sharing, and 24/7 support.</p>
         <p style="color:#c6a664; font-size:1.2rem; margin-top:10px;">$4.99 / month</p>
+
+        @* Динамичен бутон за логин или Checkout *@
         @if (User.Identity.IsAuthenticated)
         {
-            <a href="/Payment/Checkout?plan=basic" class="btn" style="margin-top:20px;">Get Started</a>
+            <a href="/Pricing/Checkout?plan=basic" class="btn" style="margin-top:20px;">Get Started</a>
         }
         else
         {
-            <a href="/Account/Login?returnUrl=/Payment/Checkout?plan=basic" class="btn" style="margin-top:20px;">Get Started</a>
+            <a href="/Identity/Account/Login?returnUrl=/Pricing/Checkout?plan=basic" class="btn" style="margin-top:20px;">Get Started</a>
         }
     </div>
 
@@ -29,13 +31,14 @@
         <h2>🚀 Pro Plan</h2>
         <p>2 TB of cloud storage, priority support, and advanced sync features.</p>
         <p style="color:#c6a664; font-size:1.2rem; margin-top:10px;">$14.99 / month</p>
+
         @if (User.Identity.IsAuthenticated)
         {
-            <a href="/Payment/Checkout?plan=pro" class="btn" style="margin-top:20px;">Upgrade Now</a>
+            <a href="/Pricing/Checkout?plan=pro" class="btn" style="margin-top:20px;">Upgrade Now</a>
         }
         else
         {
-            <a href="/Account/Login?returnUrl=/Payment/Checkout?plan=pro" class="btn" style="margin-top:20px;">Upgrade Now</a>
+            <a href="/Identity/Account/Login?returnUrl=/Pricing/Checkout?plan=pro" class="btn" style="margin-top:20px;">Upgrade Now</a>
         }
     </div>
 
@@ -43,13 +46,14 @@
         <h2>🏢 Enterprise Plan</h2>
         <p>Unlimited storage, dedicated account manager, and full enterprise integrations.</p>
         <p style="color:#c6a664; font-size:1.2rem; margin-top:10px;">Custom Pricing</p>
+
         @if (User.Identity.IsAuthenticated)
         {
-            <a href="/Payment/ContactSales" class="btn" style="margin-top:20px;">Contact Sales</a>
+            <a href="/Pricing/ContactSales" class="btn" style="margin-top:20px;">Contact Sales</a>
         }
         else
         {
-            <a href="/Account/Login?returnUrl=/Payment/ContactSales" class="btn" style="margin-top:20px;">Contact Sales</a>
+            <a href="/Identity/Account/Login?returnUrl=/Pricing/ContactSales" class="btn" style="margin-top:20px;">Contact Sales</a>
         }
     </div>
 

@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace LuxDrive.Controllers
 {
     [Authorize] 
-    public class PaymentController : Controller
+    public class PricingController : Controller
     {
         public IActionResult Checkout(string plan)
         {
