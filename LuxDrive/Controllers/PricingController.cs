@@ -1,10 +1,18 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace LuxDrive.Controllers
 {
-    public class PricingController : BaseController
+    [Authorize] 
+    public class PaymentController : Controller
     {
-        public IActionResult Index()
+        public IActionResult Checkout(string plan)
+        {
+            ViewBag.Plan = plan;
+            return View();
+        }
+
+        public IActionResult ContactSales()
         {
             return View();
         }
