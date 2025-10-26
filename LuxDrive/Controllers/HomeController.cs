@@ -1,5 +1,4 @@
 using System.Diagnostics;
-
 using LuxDrive.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,6 +13,7 @@ namespace LuxDrive.Controllers
         {
             _logger = logger;
         }
+
         [AllowAnonymous]
         public IActionResult Index()
         {
@@ -21,6 +21,13 @@ namespace LuxDrive.Controllers
         }
 
         public IActionResult Privacy()
+        {
+            return View();
+        }
+
+        [AllowAnonymous]
+        [Route("Pricing")] 
+        public IActionResult Pricing()
         {
             return View();
         }
