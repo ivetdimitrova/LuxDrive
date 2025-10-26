@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Checkout";
+    var plan = ViewBag.Plan?.ToString() ?? "unknown";
+}
+
+<section class="checkout">
+    <h1>Payment for @plan plan</h1>
+    <p>Enter your card details below to complete your purchase.</p>
+
+    <form method="post" action="/Payment/Process">
+        <label>Card Number:</label><br />
+        <input type="text" name="CardNumber" required /><br />
+
+        <label>Expiration Date:</label><br />
+        <input type="text" name="Expiry" required /><br />
+
+        <label>CVC:</label><br />
+        <input type="text" name="CVC" required /><br />
+
+        <button type="submit" class="btn">Pay Now</button>
+    </form>
+</section>
