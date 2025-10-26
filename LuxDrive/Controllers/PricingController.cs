@@ -16,5 +16,13 @@ namespace LuxDrive.Controllers
         {
             return View();
         }
+
+        [HttpPost]
+        [Authorize]
+        public IActionResult Process(string cardNumber, string expiry, string cvc)
+        {
+            ViewBag.Message = "Payment successful!";
+            return View("Success");
+        }
     }
 }
