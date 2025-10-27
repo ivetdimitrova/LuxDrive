@@ -10,7 +10,7 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/LuxDrive.styles.css" asp-append-version="true" />
+   @*  <link rel="stylesheet" href="~/LuxDrive.styles.css" asp-append-version="true" /> *@
 </head>
 <body>
     <div class="container-fluid p-0 m-0" style="background-color:#000;">
@@ -22,7 +22,7 @@
 
             <nav class="nav" style="display:flex;align-items:center;gap:20px;">
                 <a class="nav-link text-gold" asp-controller="Home" asp-action="Index" >Home</a>
-                <a href="/Features" class="nav-link text-gold">Features</a>
+                <a class="nav-link text-gold" asp-controller="Features" asp-action="Index">Features</a>
                 <a class="nav-link text-gold" asp-controller="Pricing" asp-action="Index">Pricing</a>
                 <partial name="_LoginPartial" />
             </nav>

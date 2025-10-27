@@ -1,1 +1,63 @@
-﻿<>Files</>
+﻿@* <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" /> *@
+<link rel="stylesheet" href="~/css/site.css" />
+
+<link rel="stylesheet" href="~/css/fileIndex.css" />
+
+
+<div class="sidebar">
+	<h5>Навигация</h5>
+	<a>💼 All files</a>
+	<a>📄 Documents</a>
+	<a>🖼️ Images</a>
+	<a>🎵 Music</a>
+	<a>🎬 Videos</a>
+	<a>📁 Zip files</a>
+
+</div>
+
+<div class="files">
+	@for(int i =0 ; i<= 250;i++)
+	{
+		<div class="file-info">
+		<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSH12PTiSMjiP8fUByGCvJdvlqtCtvCZ7ZR9Q&s" />
+		<label>snimka.png</label>
+		<button class="btn-more" onclick="showMenu(this)">⋯</button>
+		<div class="context-menu bg-secondary text-light rounded p-2 shadow">
+			<div class="menu-item">📂 Отвори</div>
+			<div class="menu-item">✏️ Преименувай</div>
+			<div class="menu-item">🗑️ Изтрий</div>
+			<div class="menu-item">ℹ️ Свойства</div>
+		</div>
+	</div>
+	}
+	
+	
+</div>
+
+
+<script>
+	function showMenu(btn) {
+		// Скриваме всички други менюта
+		document.querySelectorAll('.context-menu').forEach(menu => {
+			if (menu !== btn.nextElementSibling) {
+				menu.classList.remove('show');
+			}
+		});
+
+		// Показваме или скриваме текущото
+		const menu = btn.nextElementSibling;
+		menu.classList.toggle('show');
+	}
+
+	// Скриваме менюто при клик извън него
+	document.addEventListener('click', function(event) {
+		document.querySelectorAll('.context-menu').forEach(menu => {
+			if (!menu.contains(event.target) && !menu.previousElementSibling.contains(event.target)) {
+				menu.classList.remove('show');
+			}
+		});
+	});
+</script>
+
+@* <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+ *@
