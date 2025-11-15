@@ -233,3 +233,53 @@ footer.lux-footer {
 main {
     flex: 1; 
 }
+
+.register-wrapper {
+    min-height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.register-container {
+    width: 420px;
+    padding: 20px;
+    color: white;
+}
+
+    .register-container h1 {
+        margin-bottom: 10px;
+        font-size: 32px;
+    }
+
+    .register-container p {
+        margin-top: -10px;
+        margin-bottom: 20px;
+        font-size: 18px;
+        color: #ccc;
+    }
+
+    .register-container input {
+        width: 100%;
+        padding: 15px;
+        border-radius: 6px;
+        border: none;
+        margin-bottom: 15px;
+        font-size: 16px;
+    }
+
+.register-btn {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(90deg, #caa152, #a1782a);
+    border: none;
+    border-radius: 25px;
+    font-size: 18px;
+    cursor: pointer;
+    color: black;
+    font-weight: bold;
+}
+
+    .register-btn:hover {
+        opacity: 0.9;
+    }
