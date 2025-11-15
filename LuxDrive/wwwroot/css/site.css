@@ -283,3 +283,15 @@ main {
     .register-btn:hover {
         opacity: 0.9;
     }
+
+input[type="checkbox"] {
+    appearance: checkbox !important;
+    -webkit-appearance: checkbox !important;
+    margin-right: 6px;
+}
+
+    input[type="checkbox"]:checked {
+        background-color: transparent !important;
+        border-color: white !important;
+    }
+
