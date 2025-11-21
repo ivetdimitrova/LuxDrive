@@ -28,7 +28,6 @@ html, body {
     backdrop-filter: blur(12px);
 }
 
-/* ???? */
 .logo {
     font-size: 1.9rem;
     font-weight: 700;
@@ -44,7 +43,6 @@ html, body {
     text-shadow: 0 0 8px rgba(198, 166, 100, 0.6);
 }
 
-/* ????????? */
 .nav a {
     margin: 0 15px;
     text-decoration: none;
