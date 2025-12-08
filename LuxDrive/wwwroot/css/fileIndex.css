@@ -1,194 +1,271 @@
-﻿/* ======== ГЛОБАЛНИ НАСТРОЙКИ ======== */
+﻿/*
+   CSS стилове за таблото LuxDrive
+   Файл: luxdrive-dashboard.css
+*/
+
+/* ОСНОВНИ НАСТРОЙКИ */
 body {
+    background-color: #050505; /* Дълбоко черно */
+    color: #e0e0e0;
+    font-family: 'Montserrat', sans-serif;
     margin: 0;
     padding: 0;
-    height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Container: Flexbox за Sidebar + Content */
+.lux-wrapper {
+    display: flex; /* Връщаме Flexbox */
+    min-height: 85vh;
+    width: 100%;
+    margin-top: 0;
+}
+
+/* --- СТРАНИЧНА ЛЕНТА (НАВИГАЦИЯ) --- */
+.lux-sidebar {
+    width: 250px;
+    background: linear-gradient(180deg, #121212 0%, #0a0a0a 100%);
+    border-right: 1px solid #333;
+    border-radius: 0 16px 16px 0;
     display: flex;
-    font-family: "Poppins", sans-serif;
-    background: radial-gradient(circle at top left, #1a1a1a 0%, #0d0d0d 80%);
-    color: #f5f5f5;
-    overflow-y: auto;
+    flex-direction: column;
+    padding: 30px 20px;
+    flex-shrink: 0;
+    height: fit-content;
+    min-height: 600px;
+    box-shadow: 5px 0 20px rgba(0,0,0,0.5);
 }
 
-/* ======== СТРАНИЧНО МЕНЮ ======== */
-.sidebar {
-    position: fixed;
-    left: 0;
-    width: 240px;
-    height: 90%;
-    background: linear-gradient(180deg, #111, #1a1a1a);
-    border-right: 1px solid rgba(212, 175, 55, 0.2);
-    box-shadow: 3px 0 20px rgba(212, 175, 55, 0.2);
+/* Заглавие "Навигация" */
+.lux-nav h5 {
     color: #d4af37;
-    padding: 25px 20px;
-    z-index: 1000;
+    text-transform: uppercase;
+    font-size: 16px; /* Уголемен размер */
+    font-weight: 700;
+    margin-bottom: 20px;
+    letter-spacing: 1.5px;
+    opacity: 1;
+    margin-top: 0;
 }
 
-    .sidebar h5 {
-        text-align: center;
-        font-weight: 600;
-        letter-spacing: 1px;
-        color: #f5d46a;
-        text-shadow: 0 0 6px rgba(212,175,55,0.5);
-        margin-bottom: 30px;
-    }
-
-    .sidebar a {
-        display: block;
-        padding: 10px 15px;
-        margin-bottom: 10px;
-        border-radius: 8px;
-        text-decoration: none;
-        color: #d4af37;
-        font-size: 15px;
-        transition: all 0.3s ease;
-    }
-
-        .sidebar a:hover {
-            background-color: rgba(212, 175, 55, 0.15);
-            transform: translateX(5px);
-            color: #ffd966;
-        }
-
-/* ======== СЕКЦИЯ С ФАЙЛОВЕ ======== */
-.files {
-    margin-left: 260px;
-    flex: 1;
-    height: 100vh;
-    overflow-y: auto;
+/* Линк от навигацията */
+.lux-nav a {
     display: flex;
-    flex-wrap: wrap;
-    gap: 25px;
-    padding: 30px;
-    box-sizing: border-box;
-    
-}
-
-    
-
-/* ======== КАРТИ НА ФАЙЛОВЕ ======== */
-.file-info {
-    position: relative;
-    width: 180px;
-    height:150px;
-    background: linear-gradient(180deg, #1c1c1c, #151515);
-    border: 1px solid rgba(212,175,55,0.2);
-    border-radius: 14px;
-    padding: 18px;
-    text-align: center;
-    color: #fff;
-    transition: all 0.4s ease;
-    box-shadow: 0 0 10px rgba(0,0,0,0.6);
-    overflow: visible; /* важно за менюто */
-}
-
-    .file-info:hover {
-        transform: translateY(-6px);
-        border-color: #d4af37;
-        box-shadow: 0 0 20px rgba(212,175,55,0.3);
-    }
-
-    /* === Снимка на файла === */
-    .file-info img {
-        width: 80px;
-        height: 80px;
-        object-fit: cover;
-        border-radius: 10px;
-        margin-bottom: 12px;
-        transition: transform 0.4s ease;
-    }
-
-    .file-info:hover img {
-        transform: scale(1.1) rotate(3deg);
-    }
-
-    /* === Име на файла === */
-    .file-info label {
-        display: block;
-        font-size: 14px;
-        font-weight: 500;
-        margin-bottom: 5px;
-        color: #f8f8f8;
-    }
-
-/* === Бутон ⋯ === */
-.btn-more {
-    position: absolute;
-    top: 10px;
-    right: 12px;
-    background: none;
-    border: none;
-    color: #d4af37;
-    font-size: 22px;
-    cursor: pointer;
-    transition: transform 0.3s ease, color 0.3s ease;
-}
-
-    .btn-more:hover {
-        color: #ffd966;
-        transform: rotate(90deg);
-    }
-
-/* ======== КОНТЕКСТНО МЕНЮ ======== */
-.context-menu {
-    display: none;
-    position: absolute;
-    top: 60px;
-    right: 10px;
-    background: linear-gradient(180deg, #222, #151515);
-    border: 1px solid rgba(212,175,55,0.3);
-    border-radius: 10px;
-    min-width: 160px;
-    z-index: 9999;
-    box-shadow: 0 6px 20px rgba(212,175,55,0.2);
-    animation: fadeOut 0.2s ease;
-}
-
-    /* Показване чрез клас .show */
-    .context-menu.show {
-        display: block;
-        animation: fadeIn 0.25s ease forwards;
-    }
-
-/* Анимации */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.9) translateY(-5px);
-    }
-
-    to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-    }
-}
-
-@keyframes fadeOut {
-    from {
-        opacity: 1;
-    }
-
-    to {
-        opacity: 0;
-    }
-}
-
-/* Елементи в менюто */
-.menu-item {
-    padding: 10px 14px;
-    cursor: pointer;
-    color: #f5f5f5;
-    transition: all 0.3s ease;
+    align-items: center;
+    color: #a0a0a0;
+    text-decoration: none;
+    padding: 12px 15px;
+    margin-bottom: 8px;
     border-radius: 8px;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    font-weight: 600;
 }
 
-    .menu-item:hover {
-        background: rgba(212,175,55,0.15);
-        color: #ffd966;
+    .lux-nav a i {
+        width: 25px;
+        margin-right: 10px;
+    }
+
+    .lux-nav a:hover, .lux-nav a.active {
+        background: rgba(212, 175, 55, 0.15);
+        color: #d4af37;
         transform: translateX(5px);
     }
 
-footer
-{
-    clear:both;
+/* --- ОСНОВНО СЪДЪРЖАНИЕ --- */
+.lux-main {
+    flex-grow: 1;
+    padding: 20px 40px;
+    background-color: #050505;
 }
+
+/* --- БЛОК ЗА ЗАГЛАВИЕ И КАЧВАНЕ --- */
+.upload-section {
+    display: block; /* Заглавието и бутонът се показват един под друг */
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #222;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 300;
+    margin: 0 0 20px 0; /* Отстъп под заглавието */
+}
+
+    .page-title span {
+        color: #d4af37;
+        font-weight: 700;
+    }
+
+/* Бутон за Качване */
+.btn-upload-gold {
+    background: linear-gradient(135deg, #d4af37, #aa8c2c);
+    color: #000;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+    border: none;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 1px;
+}
+
+    .btn-upload-gold:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
+    }
+
+/* --- ГРЕШКИ --- */
+.alert-error {
+    background: rgba(255, 77, 77, 0.1);
+    border-left: 4px solid #ff4d4d;
+    color: #ff4d4d;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+/* --- МРЕЖА С ФАЙЛОВЕ (GRID) --- */
+.lux-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 25px;
+}
+
+.lux-card {
+    background-color: #161616;
+    border: 1px solid #333;
+    border-radius: 16px;
+    padding: 15px;
+    position: relative;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 200px;
+}
+
+    .lux-card:hover {
+        border-color: #d4af37;
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        background-color: #1a1a1a;
+    }
+
+/* Иконка/Преглед на файла */
+.card-preview {
+    width: 100%;
+    height: 110px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    background-color: #0a0a0a;
+    border-radius: 10px;
+    font-size: 40px;
+    color: #555;
+}
+
+/* Детайли за файла */
+.card-info {
+    width: 100%;
+    text-align: center;
+}
+
+.file-name {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 5px;
+}
+
+.file-meta {
+    color: #666;
+    font-size: 11px;
+}
+
+/* Меню с опции (3 точки) */
+.card-menu-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: #d4af37;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.lux-card:hover .card-menu-btn {
+    opacity: 1;
+}
+
+/* Падащо меню */
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 35px;
+    right: 10px;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 8px;
+    width: 140px;
+    z-index: 999;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    overflow: hidden;
+}
+
+    .dropdown-menu.show {
+        display: block;
+    }
+
+.menu-item {
+    display: block;
+    padding: 10px 15px;
+    color: #ccc;
+    font-size: 12px;
+    text-decoration: none;
+    transition: 0.2s;
+    text-align: left;
+}
+
+    .menu-item:hover {
+        background-color: #d4af37;
+        color: #000;
+    }
+
+    .menu-item.delete {
+        color: #ff4d4d;
+    }
+
+        .menu-item.delete:hover {
+            background-color: #ff4d4d;
+            color: #fff;
+        }
+
+/* Съобщение "Няма файлове" */
+.empty-state {
+    text-align: center;
+    margin-top: 80px;
+    color: #444;
+}
+
+    .empty-state i {
+        font-size: 60px;
+        margin-bottom: 20px;
+        color: #222;
+    }
