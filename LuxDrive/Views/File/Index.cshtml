@@ -8,7 +8,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="~/css/FileIndex.css" />
 
-
 <div class="lux-wrapper">
     <aside class="lux-sidebar">
         <nav class="lux-nav">
@@ -32,7 +31,12 @@
                 <label for="file-upload" class="btn-upload-gold">
                     <i class="fas fa-cloud-upload-alt"></i> КАЧИ ФАЙЛОВЕ
                 </label>
-                <input type="file" id="file-upload" name="files" multiple style="display:none;" onchange="this.form.submit()" />
+                <input type="file"
+                       id="file-upload"
+                       name="files"
+                       multiple
+                       style="display:none;"
+                       onchange="this.form.submit()" />
             </form>
         </section>
 
@@ -55,9 +59,21 @@
                                 string iconClass = "fas fa-file";
                                 string iconColor = "#95a5a6";
 
-                                if (extension == ".png" || extension == ".jpg" || extension == ".jpeg") { iconClass = "fas fa-image"; iconColor = "#d4af37"; }
-                                else if (extension == ".pdf") { iconClass = "fas fa-file-pdf"; iconColor = "#e74c3c"; }
-                                else if (extension.Contains("doc")) { iconClass = "fas fa-file-word"; iconColor = "#3498db"; }
+                                if (extension == ".png" || extension == ".jpg" || extension == ".jpeg")
+                                {
+                                    iconClass = "fas fa-image";
+                                    iconColor = "#d4af37";
+                                }
+                                else if (extension == ".pdf")
+                                {
+                                    iconClass = "fas fa-file-pdf";
+                                    iconColor = "#e74c3c";
+                                }
+                                else if (extension.Contains("doc"))
+                                {
+                                    iconClass = "fas fa-file-word";
+                                    iconColor = "#3498db";
+                                }
                             }
                             <i class="@iconClass" style="color: @iconColor;"></i>
                         </div>
@@ -65,8 +81,13 @@
                         <div class="card-info">
                             <span class="file-name" title="@file.Name">@file.Name</span>
                             <div class="file-meta">
-                                @((double)file.Size / 1024 / 1024 < 1 ? ((double)file.Size / 1024).ToString("0.0") + " KB" : ((double)file.Size / 1024 / 1024).ToString("0.00") + " MB")
-                                • @file.UploadAt.ToLocalTime().ToString("dd.MM")
+                                @{
+                                    var sizeInKb = (double)file.Size / 1024;
+                                    var sizeText = sizeInKb < 1024
+                                    ? sizeInKb.ToString("0.0") + " KB"
+                                    : (sizeInKb / 1024).ToString("0.00") + " MB";
+                                }
+                                @sizeText • @file.UploadAt.ToLocalTime().ToString("dd.MM")
                             </div>
                         </div>
 
@@ -75,9 +96,21 @@
                         </button>
 
                         <div class="dropdown-menu">
-                            <a href="@file.StorageUrl" target="_blank" class="menu-item"><i class="fas fa-download"></i> Изтегли</a>
-                            <a href="#" class="menu-item"><i class="fas fa-pen"></i> Преименувай</a>
-                            <a href="#" class="menu-item delete"><i class="fas fa-trash"></i> Изтрий</a>
+                            <a href="@file.StorageUrl" target="_blank" class="menu-item">
+                                <i class="fas fa-download"></i> Изтегли
+                            </a>
+
+                            <a href="#"
+                               class="menu-item"
+                               onclick="renameFile('@file.Id', '@file.Name'); return false;">
+                                <i class="fas fa-pen"></i> Преименувай
+                            </a>
+
+                            <a href="#"
+                               class="menu-item delete"
+                               onclick="deleteFile('@file.Id'); return false;">
+                                <i class="fas fa-trash"></i> Изтрий
+                            </a>
                         </div>
                     </div>
                 }
@@ -91,7 +124,30 @@
                 <p>Използвайте златния бутон горе, за да качите първия си файл.</p>
             </div>
         }
+
+        <!-- Скрит формуляр за изтриване -->
+        <form id="deleteForm"
+              asp-controller="File"
+              asp-action="Delete"
+              method="post"
+              style="display:none;">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="deleteFileId" />
+        </form>
+
+        <!-- Скрит формуляр за преименуване -->
+        <form id="renameForm"
+              asp-controller="File"
+              asp-action="Rename"
+              method="post"
+              style="display:none;">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="id" id="renameFileId" />
+            <input type="hidden" name="newName" id="renameFileNewName" />
+        </form>
+
     </main>
 </div>
 
 <script src="~/js/luxdrive-scripts.js"></script>
+
