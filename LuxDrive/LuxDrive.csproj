@@ -22,5 +22,4 @@
     <ProjectReference Include="..\LuxDrive.Services\LuxDrive.Services.csproj" />
     <ProjectReference Include="..\LuxDrive.ViewModels\LuxDrive.ViewModels.csproj" />
   </ItemGroup>
-
 </Project>

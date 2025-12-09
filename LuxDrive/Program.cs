@@ -1,6 +1,6 @@
 using LuxDrive.Data;
 using LuxDrive.Data.Models;
-using LuxDrive.Services;                    
+using LuxDrive.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,7 +30,7 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
 })
 .AddEntityFrameworkStores<LuxDriveDbContext>();
 
-builder.Services.AddScoped<SpacesService>();    
+builder.Services.AddScoped<SpacesService>();
 
 builder.Services.AddControllersWithViews();
 
@@ -51,7 +51,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseAuthentication();        
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
