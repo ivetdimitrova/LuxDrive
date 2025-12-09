@@ -1,9 +1,4 @@
-﻿/*
-   CSS стилове за таблото LuxDrive
-   Файл: luxdrive-dashboard.css
-*/
-
-/* ОСНОВНИ НАСТРОЙКИ */
+﻿/* ОСНОВНИ НАСТРОЙКИ */
 body {
     background-color: #050505; /* Дълбоко черно */
     color: #e0e0e0;
@@ -40,7 +35,7 @@ body {
 .lux-nav h5 {
     color: #d4af37;
     text-transform: uppercase;
-    font-size: 16px; /* Уголемен размер */
+    font-size: 16px; 
     font-weight: 700;
     margin-bottom: 20px;
     letter-spacing: 1.5px;
@@ -123,7 +118,7 @@ body {
         box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
     }
 
-/* --- ГРЕШКИ --- */
+/*  ГРЕШКИ  */
 .alert-error {
     background: rgba(255, 77, 77, 0.1);
     border-left: 4px solid #ff4d4d;
@@ -133,7 +128,7 @@ body {
     border-radius: 4px;
 }
 
-/* --- МРЕЖА С ФАЙЛОВЕ (GRID) --- */
+/*  МРЕЖА С ФАЙЛОВЕ (GRID)  */
 .lux-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
