@@ -54,5 +54,17 @@ namespace LuxDrive.Services
 
             return response.S3Objects.Select(x => x.Key).ToList();
         }
+    
+    public async Task DeleteAsync(string key)
+        {
+            var deleteRequest = new DeleteObjectRequest
+            {
+                BucketName = bucketName,
+                Key = key
+            };
+
+            await client.DeleteObjectAsync(deleteRequest);
+        }
+
     }
 }
