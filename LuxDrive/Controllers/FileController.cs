@@ -1,5 +1,6 @@
 ﻿using LuxDrive.Data;
 using LuxDrive.Services;
+using LuxDrive.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,11 +12,13 @@ namespace LuxDrive.Controllers
     {
         private readonly LuxDriveDbContext _dbContext;
         private readonly SpacesService _spacesService;
+        private readonly IFileService fileService;
 
-        public FileController(LuxDriveDbContext dbContext, SpacesService spacesService)
+        public FileController(LuxDriveDbContext dbContext ,SpacesService spacesService,IFileService fileService)
         {
-            _dbContext = dbContext;
             _spacesService = spacesService;
+            this.fileService = fileService;
+            _dbContext = dbContext;
         }
 
         // Това е методът, към който HomeController пренасочва
@@ -63,29 +66,31 @@ namespace LuxDrive.Controllers
                     continue;
                 }
 
-                var extension = Path.GetExtension(file.FileName);
-                var key = $"{userId}/{Guid.NewGuid()}{extension}";
+                 Guid? fileId = await this.fileService.CreateFileAsync(userIdStr,file);
+                if(fileId==null)
+                {
+                    return NotFound();
+                }
+
+                 string? extension = await this.fileService.GetFileExtensionAsync(fileId);
+
+                if(extension==null)
+                {
+                    return NotFound();
+                }
+
+                    var key = $"{userId}/{fileId}{extension}";
 
                 using var stream = file.OpenReadStream();
                 var url = await _spacesService.UploadAsync(stream, key, file.ContentType);
 
-                var entity = new LuxDrive.Data.Models.File
-                {
-                    Id = Guid.NewGuid(),
-                    Name = Path.GetFileNameWithoutExtension(file.FileName),
-                    Extension = extension,
-                    Size = file.Length,
-                    StorageUrl = url,
-                    UploadAt = DateTime.UtcNow,
-                    UserId = userId
-                };
+               
+                bool isUpdated = await this.fileService.UpdateFileUrlAsync(fileId, url);
 
-                _dbContext.Files.Add(entity);
             }
 
-            await _dbContext.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
+             return RedirectToAction(nameof(Index));
+           
         }
 
         // --------  Преименуване на файл --------

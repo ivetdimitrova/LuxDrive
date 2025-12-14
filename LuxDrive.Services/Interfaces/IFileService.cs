@@ -4,6 +4,10 @@ namespace LuxDrive.Services.Interfaces
 {
     public interface IFileService
     {
-        Task<bool> CreateFileAsync(string url,IFormFile file);
+        Task<Guid?> CreateFileAsync(string userId,IFormFile file);
+
+        Task<string?> GetFileExtensionAsync(Guid? fileId);
+
+        Task<bool> UpdateFileUrlAsync(Guid? fileId, string url);
     }
 }
