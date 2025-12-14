@@ -10,10 +10,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims; 
 
 namespace LuxDrive.Controllers
 {
-    [Authorize]
+    [Authorize] // Това гарантира, че само логнати потребители влизат тук
     public class FileController : BaseController
     {
         private readonly LuxDriveDbContext _dbContext;
@@ -25,6 +26,7 @@ namespace LuxDrive.Controllers
             _spacesService = spacesService;
         }
 
+        // Това е методът, към който HomeController пренасочва
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -100,10 +102,7 @@ namespace LuxDrive.Controllers
         public async Task<IActionResult> Rename(Guid id, string newName)
         {
             var userIdStr = GetUserId();
-            if (userIdStr == null)
-            {
-                return Unauthorized();
-            }
+            if (userIdStr == null) return Unauthorized();
 
             if (string.IsNullOrWhiteSpace(newName))
             {
@@ -116,14 +115,11 @@ namespace LuxDrive.Controllers
             var file = await _dbContext.Files
                 .FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
 
-            if (file == null)
-            {
-                return NotFound();
-            }
+            if (file == null) return NotFound();
 
             var clean = newName.Trim();
 
-            // ако потребителят е написал и разширение – махаме го
+            // Логика за почистване на името
             if (!string.IsNullOrEmpty(file.Extension) &&
                 clean.EndsWith(file.Extension, StringComparison.OrdinalIgnoreCase))
             {
@@ -131,7 +127,6 @@ namespace LuxDrive.Controllers
             }
             else
             {
-                // ако има някаква друга точка – режем след последната
                 var dotIndex = clean.LastIndexOf('.');
                 if (dotIndex > 0)
                 {
@@ -140,7 +135,6 @@ namespace LuxDrive.Controllers
             }
 
             file.Name = clean;
-
             await _dbContext.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
@@ -152,20 +146,14 @@ namespace LuxDrive.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var userIdStr = GetUserId();
-            if (userIdStr == null)
-            {
-                return Unauthorized();
-            }
+            if (userIdStr == null) return Unauthorized();
 
             var userId = Guid.Parse(userIdStr);
 
             var file = await _dbContext.Files
                 .FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
 
-            if (file == null)
-            {
-                return NotFound();
-            }
+            if (file == null) return NotFound();
 
             try
             {
@@ -173,12 +161,12 @@ namespace LuxDrive.Controllers
                 {
                     var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/";
                     var key = file.StorageUrl.Replace(endpoint, string.Empty);
-
                     await _spacesService.DeleteAsync(key);
                 }
             }
             catch
             {
+                // Логване на грешка при нужда
             }
 
             _dbContext.Files.Remove(file);
