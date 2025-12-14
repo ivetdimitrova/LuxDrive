@@ -10,30 +10,36 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-   @*  <link rel="stylesheet" href="~/LuxDrive.styles.css" asp-append-version="true" /> *@
+    @* <link rel="stylesheet" href="~/LuxDrive.styles.css" asp-append-version="true" /> *@
 </head>
 <body>
     <div class="container-fluid p-0 m-0" style="background-color:#000;">
-        <!-- HEADER -->
         <header class="header" style="padding:15px 30px;display:flex;justify-content:space-between;align-items:center;">
             <div class="logo" style="color:#fff;font-size:26px;font-weight:bold;">
                 <span class="gold glow">Lux</span>Drive
             </div>
 
             <nav class="nav" style="display:flex;align-items:center;gap:20px;">
-                <a class="nav-link text-gold" asp-controller="Home" asp-action="Index" >Home</a>
+                @* ЛОГИКА ЗА БУТОНА HOME *@
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a class="nav-link text-gold" asp-controller="File" asp-action="Index">Home</a>
+                }
+                else
+                {
+                    <a class="nav-link text-gold" asp-controller="Home" asp-action="Index">Home</a>
+                }
+
                 <a class="nav-link text-gold" asp-controller="Features" asp-action="Index">Features</a>
                 <a class="nav-link text-gold" asp-controller="Pricing" asp-action="Index">Pricing</a>
                 <partial name="_LoginPartial" />
             </nav>
         </header>
 
-        <!-- MAIN CONTENT -->
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
 
-        <!-- FOOTER -->
         <footer class="lux-footer text-center p-3" style="background-color:#111;color:#c6a664;">
             <p>
                 © 2025 <span class="gold glow">LuxDrive</span> — All rights reserved |
