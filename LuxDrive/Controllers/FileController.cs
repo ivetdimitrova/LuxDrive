@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LuxDrive.Controllers
 {
-    [Authorize] // Това гарантира, че само логнати потребители влизат тук
+    [Authorize]
     public class FileController : BaseController
     {
         private readonly LuxDriveDbContext _dbContext;
@@ -21,7 +21,6 @@ namespace LuxDrive.Controllers
             _dbContext = dbContext;
         }
 
-        // Това е методът, към който HomeController пренасочва
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -31,12 +30,8 @@ namespace LuxDrive.Controllers
                 return Unauthorized();
             }
 
-            var userId = Guid.Parse(userIdStr);
-
-            var files = await _dbContext.Files
-                .Where(f => f.UserId == userId)
-                .OrderByDescending(f => f.UploadAt)
-                .ToListAsync();
+           IEnumerable<Data.Models.File> files = await this.fileService
+                .GetUserFiles(Guid.Parse(userIdStr));
 
             return View(files);
         }
@@ -93,10 +88,9 @@ namespace LuxDrive.Controllers
            
         }
 
-        // --------  Преименуване на файл --------
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Rename(Guid id, string newName)
+        public async Task<IActionResult> Rename(Guid fileId, string newName)
         {
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
@@ -107,33 +101,14 @@ namespace LuxDrive.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var userId = Guid.Parse(userIdStr);
 
-            var file = await _dbContext.Files
-                .FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
+            bool isRenamed = await this.fileService.ChangeFileName(Guid.Parse(userIdStr),fileId,newName);
 
-            if (file == null) return NotFound();
-
-            var clean = newName.Trim();
-
-            // Логика за почистване на името
-            if (!string.IsNullOrEmpty(file.Extension) &&
-                clean.EndsWith(file.Extension, StringComparison.OrdinalIgnoreCase))
+            if (!isRenamed)
             {
-                clean = clean[..^file.Extension.Length];
+                return NotFound();
             }
-            else
-            {
-                var dotIndex = clean.LastIndexOf('.');
-                if (dotIndex > 0)
-                {
-                    clean = clean.Substring(0, dotIndex);
-                }
-            }
-
-            file.Name = clean;
-            await _dbContext.SaveChangesAsync();
-
+            
             return RedirectToAction(nameof(Index));
         }
 

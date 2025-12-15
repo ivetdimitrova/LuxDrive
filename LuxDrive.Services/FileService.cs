@@ -16,6 +16,44 @@ namespace LuxDrive.Services
             _dbContext = dbContext;
         }
 
+        public async Task<bool> ChangeFileName(Guid userId, Guid fileId, string newName)
+        {
+            Data.Models.File? file = await _dbContext.Files
+                .FirstOrDefaultAsync(f => f.Id == fileId && f.UserId == userId);
+
+            if (file == null) 
+                return false;
+
+            string clean = newName.Trim();
+
+            if (!string.IsNullOrEmpty(file.Extension) &&
+                clean.EndsWith(file.Extension, StringComparison.OrdinalIgnoreCase))
+            {
+                clean = clean[..^file.Extension.Length];
+            }
+            else
+            {
+                var dotIndex = clean.LastIndexOf('.');
+                if (dotIndex > 0)
+                {
+                    clean = clean.Substring(0, dotIndex);
+                }
+            }
+
+            file.Name = clean;
+           int changes = await _dbContext.SaveChangesAsync();
+
+            if(changes ==1)
+            {
+                return true;
+            }
+            else
+            {
+                               return false;
+            }
+
+        }
+
         public async Task<Guid?> CreateFileAsync(string userId, IFormFile file)
         {
             bool isValidUserId = Guid.TryParse(userId, out Guid userIdGuid);
@@ -53,6 +91,12 @@ namespace LuxDrive.Services
                 .Select(f => f.Extension)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<IEnumerable<Data.Models.File>> GetUserFiles(Guid userId)
+        => await _dbContext.Files
+            .AsNoTracking()
+            .Where(f => f.UserId == userId)
+            .ToListAsync();
 
         public async Task<bool> UpdateFileUrlAsync(Guid? fileId, string url)
         {

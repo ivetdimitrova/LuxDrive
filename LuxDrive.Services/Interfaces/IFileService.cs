@@ -9,5 +9,8 @@ namespace LuxDrive.Services.Interfaces
         Task<string?> GetFileExtensionAsync(Guid? fileId);
 
         Task<bool> UpdateFileUrlAsync(Guid? fileId, string url);
+        Task<IEnumerable<Data.Models.File>> GetUserFiles(Guid userId);
+
+        Task<bool> ChangeFileName(Guid userId,Guid fileId,string newName);
     }
 }
