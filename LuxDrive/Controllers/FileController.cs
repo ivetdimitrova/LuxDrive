@@ -10,15 +10,13 @@ namespace LuxDrive.Controllers
     [Authorize]
     public class FileController : BaseController
     {
-        private readonly LuxDriveDbContext _dbContext;
         private readonly SpacesService _spacesService;
         private readonly IFileService fileService;
 
-        public FileController(LuxDriveDbContext dbContext, SpacesService spacesService, IFileService fileService)
+        public FileController(SpacesService spacesService, IFileService fileService)
         {
             _spacesService = spacesService;
             this.fileService = fileService;
-            _dbContext = dbContext;
         }
 
         [HttpGet]
