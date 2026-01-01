@@ -1,6 +1,4 @@
-﻿using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
-using LuxDrive.Data;
-using LuxDrive.Data.Models;
+﻿using LuxDrive.Data;
 using LuxDrive.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -16,12 +14,12 @@ namespace LuxDrive.Services
             _dbContext = dbContext;
         }
 
-        public async Task<bool> ChangeFileName(Guid userId, Guid fileId, string newName)
+        public async Task<bool> ChangeFileNameAsync(Guid userId, Guid fileId, string newName)
         {
             Data.Models.File? file = await _dbContext.Files
                 .FirstOrDefaultAsync(f => f.Id == fileId && f.UserId == userId);
 
-            if (file == null) 
+            if (file == null)
                 return false;
 
             string clean = newName.Trim();
@@ -41,15 +39,15 @@ namespace LuxDrive.Services
             }
 
             file.Name = clean;
-           int changes = await _dbContext.SaveChangesAsync();
+            int changes = await _dbContext.SaveChangesAsync();
 
-            if(changes ==1)
+            if (changes == 1)
             {
                 return true;
             }
             else
             {
-                               return false;
+                return false;
             }
 
         }
@@ -92,11 +90,33 @@ namespace LuxDrive.Services
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<IEnumerable<Data.Models.File>> GetUserFiles(Guid userId)
+        public async Task<Data.Models.File?> GetUserFileAsync(Guid fileId, Guid userId)
+            =>await _dbContext.Files
+                .Where(f => f.Id == fileId && f.UserId == userId)
+                .FirstOrDefaultAsync();
+
+
+        public async Task<IEnumerable<Data.Models.File>> GetUserFilesAsync(Guid userId)
         => await _dbContext.Files
             .AsNoTracking()
             .Where(f => f.UserId == userId)
             .ToListAsync();
+
+        public async Task<bool> RemoveFileAsync(Data.Models.File file)
+        {
+            _dbContext.Files.Remove(file);
+            int changesCount = await _dbContext.SaveChangesAsync();
+
+            if (changesCount == 1)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
 
         public async Task<bool> UpdateFileUrlAsync(Guid? fileId, string url)
         {
@@ -118,8 +138,8 @@ namespace LuxDrive.Services
                 return true;
             }
             else
-            { 
-                return false; 
+            {
+                return false;
             }
         }
     }

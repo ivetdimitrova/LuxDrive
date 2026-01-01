@@ -14,7 +14,7 @@ namespace LuxDrive.Controllers
         private readonly SpacesService _spacesService;
         private readonly IFileService fileService;
 
-        public FileController(LuxDriveDbContext dbContext ,SpacesService spacesService,IFileService fileService)
+        public FileController(LuxDriveDbContext dbContext, SpacesService spacesService, IFileService fileService)
         {
             _spacesService = spacesService;
             this.fileService = fileService;
@@ -30,8 +30,8 @@ namespace LuxDrive.Controllers
                 return Unauthorized();
             }
 
-           IEnumerable<Data.Models.File> files = await this.fileService
-                .GetUserFiles(Guid.Parse(userIdStr));
+            IEnumerable<Data.Models.File> files = await this.fileService
+                 .GetUserFilesAsync(Guid.Parse(userIdStr));
 
             return View(files);
         }
@@ -61,31 +61,31 @@ namespace LuxDrive.Controllers
                     continue;
                 }
 
-                 Guid? fileId = await this.fileService.CreateFileAsync(userIdStr,file);
-                if(fileId==null)
+                Guid? fileId = await this.fileService.CreateFileAsync(userIdStr, file);
+                if (fileId == null)
                 {
                     return NotFound();
                 }
 
-                 string? extension = await this.fileService.GetFileExtensionAsync(fileId);
+                string? extension = await this.fileService.GetFileExtensionAsync(fileId);
 
-                if(extension==null)
+                if (extension == null)
                 {
                     return NotFound();
                 }
 
-                    var key = $"{userId}/{fileId}{extension}";
+                var key = $"{userId}/{fileId}{extension}";
 
                 using var stream = file.OpenReadStream();
                 var url = await _spacesService.UploadAsync(stream, key, file.ContentType);
 
-               
+
                 bool isUpdated = await this.fileService.UpdateFileUrlAsync(fileId, url);
 
             }
 
-             return RedirectToAction(nameof(Index));
-           
+            return RedirectToAction(nameof(Index));
+
         }
 
         [HttpPost]
@@ -101,18 +101,16 @@ namespace LuxDrive.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-
-            bool isRenamed = await this.fileService.ChangeFileName(Guid.Parse(userIdStr),fileId,newName);
+            bool isRenamed = await this.fileService.ChangeFileNameAsync(Guid.Parse(userIdStr), fileId, newName);
 
             if (!isRenamed)
             {
                 return NotFound();
             }
-            
+
             return RedirectToAction(nameof(Index));
         }
 
-        // --------  Изтриване на файл --------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
@@ -122,9 +120,7 @@ namespace LuxDrive.Controllers
 
             var userId = Guid.Parse(userIdStr);
 
-            var file = await _dbContext.Files
-                .FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
-
+            var file = await fileService.GetUserFileAsync(id,userId);
             if (file == null) return NotFound();
 
             try
@@ -135,16 +131,22 @@ namespace LuxDrive.Controllers
                     var key = file.StorageUrl.Replace(endpoint, string.Empty);
                     await _spacesService.DeleteAsync(key);
                 }
+               
+                bool isDeleted =  await fileService.RemoveFileAsync(file);
+
+                if (!isDeleted)
+                {
+                    return NotFound();
+                }
+
+                return RedirectToAction(nameof(Index));
             }
             catch
             {
-                // Логване на грешка при нужда
+                return NotFound();
             }
 
-            _dbContext.Files.Remove(file);
-            await _dbContext.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Index));
         }
     }
 }
