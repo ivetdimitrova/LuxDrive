@@ -29,21 +29,8 @@ namespace LuxDrive.Data
 
             builder.ApplyConfiguration(new ApplicationUserConfiguration());
             builder.ApplyConfiguration(new FileConfiguration());
+            builder.ApplyConfiguration(new UserFriendConfiguration());
 
-            builder.Entity<UserFriend>()
-                .HasKey(x => new { x.UserId, x.FriendId });
-
-            builder.Entity<UserFriend>()
-                .HasOne(x => x.User)
-                .WithMany()
-                .HasForeignKey(x => x.UserId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<UserFriend>()
-                .HasOne(x => x.Friend)
-                .WithMany()
-                .HasForeignKey(x => x.FriendId)
-                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<FriendRequest>()
                 .HasOne(x => x.Sender)
