@@ -1,5 +1,4 @@
 ﻿using LuxDrive.Data;
-using LuxDrive.Data.Models;
 using LuxDrive.Services;
 using LuxDrive.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +21,6 @@ namespace LuxDrive.Controllers
             this.fileService = fileService;
         }
 
-        // -------- Всички файлове (Index) --------
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -73,7 +71,6 @@ namespace LuxDrive.Controllers
             }
         }
 
-        // -------- Качване (Upload) --------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(List<IFormFile> files)
@@ -91,30 +88,29 @@ namespace LuxDrive.Controllers
             {
                 if (file == null || file.Length == 0) continue;
 
-                // 1. Създаваме запис в базата
+              
                 Guid? fileId = await this.fileService.CreateFileAsync(userIdStr, file);
                 if (fileId == null) continue;
 
-                // 2. Взимаме разширението
+               
                 string? extension = await this.fileService.GetFileExtensionAsync(fileId);
                 if (extension == null) continue;
 
                 var userId = Guid.Parse(userIdStr);
 
-                // 3. Формираме ключ и качваме в Spaces
+                
                 var key = $"{userId}/{fileId}{extension}";
 
                 using var stream = file.OpenReadStream();
                 var url = await _spacesService.UploadAsync(stream, key, file.ContentType);
 
-                // 4. Обновяваме URL-а в базата
+               
                 await this.fileService.UpdateFileUrlAsync(fileId, url);
             }
 
             return RedirectToAction(nameof(Index));
         }
 
-        // -------- Преименуване (Rename) --------
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Rename(Guid fileId, string newName)
@@ -138,7 +134,7 @@ namespace LuxDrive.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // -------- Изтриване (Delete) --------
+       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
@@ -153,7 +149,6 @@ namespace LuxDrive.Controllers
 
             try
             {
-                // Трием от DigitalOcean Spaces
                 if (!string.IsNullOrEmpty(file.StorageUrl))
                 {
                     var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/";
@@ -161,7 +156,6 @@ namespace LuxDrive.Controllers
                     await _spacesService.DeleteAsync(key);
                 }
 
-                // Трием от базата данни
                 bool isDeleted = await fileService.RemoveFileAsync(file);
 
                 if (!isDeleted)
