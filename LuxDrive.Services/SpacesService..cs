@@ -1,10 +1,11 @@
 ﻿using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
+using LuxDrive.Services.Interfaces;
 
 namespace LuxDrive.Services
 {
-    public class SpacesService
+    public class SpacesService : ISpacesService
     {
         private readonly string accessKey = "DO8013YB8VKAUKLVHYVQ";
         private readonly string secretKey = "ECZMfQfsmhpZJfwwZpqWsW274VI+uJuS77pxAvAqoCM";
