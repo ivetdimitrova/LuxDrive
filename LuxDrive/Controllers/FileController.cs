@@ -33,7 +33,6 @@ namespace LuxDrive.Controllers
             return View(files);
         }
 
-        // -------- НОВО: Споделени с мен --------
         [HttpGet]
         public async Task<IActionResult> SharedWithMe()
         {
@@ -51,7 +50,6 @@ namespace LuxDrive.Controllers
             return View("Index", sharedFiles);
         }
 
-        // -------- НОВО: Действие за споделяне (за JS) --------
         [HttpPost]
         public async Task<IActionResult> Share(Guid fileId, Guid receiverId)
         {
@@ -61,7 +59,6 @@ namespace LuxDrive.Controllers
 
             try
             {
-                // Ползваме новия метод от сървиса, за да е по-чисто
                 await fileService.ShareFileAsync(fileId, senderId, receiverId);
                 return Ok();
             }
@@ -171,7 +168,6 @@ namespace LuxDrive.Controllers
             }
         }
 
-        // -------- НОВО: Масово изтриване --------
         [HttpPost]
         public async Task<IActionResult> DeleteMultiple([FromBody] List<Guid> ids)
         {
@@ -201,7 +197,6 @@ namespace LuxDrive.Controllers
             return Ok();
         }
 
-        // -------- НОВО: Масово споделяне --------
         [HttpPost]
         public async Task<IActionResult> ShareMultiple(Guid receiverId, [FromBody] List<Guid> fileIds)
         {
@@ -213,14 +208,12 @@ namespace LuxDrive.Controllers
             {
                 foreach (var fileId in fileIds)
                 {
-                    // Използваме сървиса, за да не дублираме логика
                     try
                     {
                         await fileService.ShareFileAsync(fileId, senderId, receiverId);
                     }
                     catch
                     {
-                        // Ако един файл не се сподели (напр. вече е споделен), продължаваме със следващия
                         continue;
                     }
                 }

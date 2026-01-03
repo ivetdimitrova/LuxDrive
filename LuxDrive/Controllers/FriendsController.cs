@@ -11,9 +11,8 @@ namespace LuxDrive.Controllers
     public class FriendsController : ControllerBase
     {
         private readonly IFriendService _friendService;
-        private readonly IFileService _fileService; // <--- НОВО: Добавяме файл сървиса
+        private readonly IFileService _fileService; 
 
-        // Инжектираме и двата сървиса в конструктора
         public FriendsController(IFriendService friendService, IFileService fileService)
         {
             _friendService = friendService;
@@ -79,7 +78,6 @@ namespace LuxDrive.Controllers
         {
             try
             {
-                // Извикваме логиката за споделяне от FileService
                 await _fileService.ShareFileAsync(fileId, CurrentUserId, receiverId);
                 return Ok();
             }

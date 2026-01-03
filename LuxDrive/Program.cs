@@ -30,10 +30,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
 })
 .AddEntityFrameworkStores<LuxDriveDbContext>();
 
-// ?? SERVICES
 builder.Services.AddScoped<SpacesService>();
 builder.Services.AddScoped<IFileService, FileService>();
-builder.Services.AddScoped<IFriendService, FriendService>(); // ? ????????
+builder.Services.AddScoped<IFriendService, FriendService>(); 
 
 builder.Services.AddControllersWithViews();
 

@@ -10,7 +10,6 @@
 
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    @* <link rel="stylesheet" href="~/LuxDrive.styles.css" asp-append-version="true" /> *@
 </head>
 <body>
     <div class="container-fluid p-0 m-0" style="background-color:#000;">
@@ -20,7 +19,6 @@
             </div>
 
             <nav class="nav" style="display:flex;align-items:center;gap:20px;">
-                @* ЛОГИКА ЗА БУТОНА HOME *@
                 @if (User.Identity.IsAuthenticated)
                 {
                     <a class="nav-link text-gold" asp-controller="File" asp-action="Index">Home</a>

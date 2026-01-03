@@ -8,7 +8,6 @@
             public const int LastNameLength = 150;
 
 
-            //Table column comments
             public const string FirstNameComment = "User's first name";
             public const string LastNameComment = "User's last name";
         }
@@ -18,7 +17,6 @@
             public const int NameLength = 255;
             public const int ExtensionLength = 10;
 
-            //Table column comments
             public const string IdComment = "Unique identifier for the file record";
             public const string NameComment = "Original name of the uploaded file";
             public const string ExtensionComment = "File extension including the dot";

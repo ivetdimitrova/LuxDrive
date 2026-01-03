@@ -1,7 +1,4 @@
-﻿/* =========================================
-   1. ОСНОВНИ НАСТРОЙКИ (LAYOUT) & SIDEBAR
-   ========================================= */
-body {
+﻿body {
     background-color: #050505;
     color: #e0e0e0;
     font-family: 'Montserrat', sans-serif;
@@ -66,9 +63,7 @@ body {
         transform: translateX(5px);
     }
 
-/* =========================================
-   2. ОСНОВНО СЪДЪРЖАНИЕ (MAIN)
-   ========================================= */
+
 .lux-main {
     flex-grow: 1;
     padding: 20px 40px;
@@ -93,7 +88,6 @@ body {
         font-weight: 700;
     }
 
-/* Бутон за Качване (Големия) */
 .btn-upload-gold {
     background: linear-gradient(135deg, #d4af37, #aa8c2c);
     color: #000;
@@ -126,9 +120,6 @@ body {
     border-radius: 4px;
 }
 
-/* =========================================
-   3. КАРТИ И МРЕЖА (GRID SYSTEM)
-   ========================================= */
 .lux-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -155,7 +146,6 @@ body {
         background-color: #1a1a1a;
     }
 
-/* Преглед на файла */
 .card-preview {
     width: 100%;
     height: 140px;
@@ -206,7 +196,6 @@ body {
     font-size: 11px;
 }
 
-/* Меню с опции (3 точки) */
 .card-menu-btn {
     position: absolute;
     top: 10px;
@@ -231,7 +220,6 @@ body {
     opacity: 1;
 }
 
-/* Падащо меню */
 .dropdown-menu {
     display: none;
     position: absolute;
@@ -286,9 +274,7 @@ body {
         color: #222;
     }
 
-/* =========================================
-   4. МОДАЛНИ ПРОЗОРЦИ (MODALS)
-   ========================================= */
+
 .lux-modal {
     display: none;
     position: fixed;
@@ -339,9 +325,7 @@ body {
         transform: rotate(90deg);
     }
 
-/* =========================================
-   5. ФОРМИ И БУТОНИ В МОДАЛИ
-   ========================================= */
+
 .lux-input, .lux-select {
     width: 100%;
     padding: 12px;
@@ -379,7 +363,6 @@ body {
         box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
     }
 
-/* Табове (Tabs) */
 .tab-container {
     display: flex;
     margin-bottom: 20px;
@@ -410,9 +393,7 @@ body {
         background: #d4af37;
     }
 
-/* =========================================
-   6. СТИЛОВЕ ЗА ПРИЯТЕЛИ
-   ========================================= */
+
 .friend-card {
     display: flex;
     align-items: center;
@@ -501,9 +482,7 @@ body {
     border: 1px solid #444;
 }
 
-/* =========================================
-   7. МАСОВ ИЗБОР (CHECKBOXES & BULK ACTIONS)
-   ========================================= */
+
 .file-checkbox {
     position: absolute;
     top: 10px;

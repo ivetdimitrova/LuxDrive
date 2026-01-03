@@ -26,7 +26,7 @@ namespace LuxDrive.Services
             bool exists = await _context.FriendRequests
                 .AnyAsync(x => x.SenderId == senderId && x.ReceiverId == receiverId && x.Status == FriendRequestStatus.Pending);
 
-            if (exists) return; // Вече има такава покана
+            if (exists) return; 
 
             var request = new FriendRequest
             {
@@ -50,7 +50,6 @@ namespace LuxDrive.Services
 
             request.Status = FriendRequestStatus.Accepted;
 
-            // Създаваме връзката и в двете посоки
             var friendship1 = new UserFriend { UserId = request.SenderId, FriendId = request.ReceiverId };
             var friendship2 = new UserFriend { UserId = request.ReceiverId, FriendId = request.SenderId };
 
@@ -70,23 +69,21 @@ namespace LuxDrive.Services
             }
         }
 
-        // НОВ МЕТОД: Взима списъка с покани
         public async Task<IEnumerable<object>> GetPendingRequestsAsync(Guid userId)
         {
             return await _context.FriendRequests
-                .Include(r => r.Sender) // Важно: зареждаме данните на изпращача
+                .Include(r => r.Sender) 
                 .Where(r => r.ReceiverId == userId && r.Status == FriendRequestStatus.Pending)
                 .Select(r => new
                 {
-                    Id = r.Id,                    // ID на поканата (за бутона "Приеми")
-                    SenderName = r.Sender.UserName, // Име на човека
-                    SenderEmail = r.Sender.Email,   // Имейл на човека
+                    Id = r.Id,                    
+                    SenderName = r.Sender.UserName, 
+                    SenderEmail = r.Sender.Email,   
                     SentOn = r.CreatedOn
                 })
                 .ToListAsync();
         }
 
-        // НОВ МЕТОД: Намира потребител по имейл
         public async Task<ApplicationUser?> FindUserByEmailAsync(string email)
         {
             return await _context.Users
@@ -107,14 +104,12 @@ namespace LuxDrive.Services
         }
         public async Task RemoveFriendAsync(Guid userId, Guid friendId)
         {
-            // Намираме и двете връзки
             var friendship1 = await _context.UserFriends
                 .FirstOrDefaultAsync(x => x.UserId == userId && x.FriendId == friendId);
 
             var friendship2 = await _context.UserFriends
                 .FirstOrDefaultAsync(x => x.UserId == friendId && x.FriendId == userId);
 
-            // Изтриваме ги, ако съществуват
             if (friendship1 != null) _context.UserFriends.Remove(friendship1);
             if (friendship2 != null) _context.UserFriends.Remove(friendship2);
 
@@ -123,7 +118,7 @@ namespace LuxDrive.Services
         public async Task<IEnumerable<object>> GetSentPendingRequestsAsync(Guid userId)
         {
             return await _context.FriendRequests
-                .Include(r => r.Receiver) // Важно: Тук ни трябва Получателят (Receiver)
+                .Include(r => r.Receiver) 
                 .Where(r => r.SenderId == userId && r.Status == FriendRequestStatus.Pending)
                 .Select(r => new
                 {

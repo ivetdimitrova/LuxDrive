@@ -116,26 +116,21 @@ namespace LuxDrive.Services
             return await _dbContext.SaveChangesAsync() == 1;
         }
 
-        // СПОДЕЛЯНЕ НА ФАЙЛ
         public async Task ShareFileAsync(Guid fileId, Guid senderId, Guid receiverId)
         {
-            // 1. Проверка дали са приятели
             bool areFriends = await _dbContext.UserFriends
                 .AnyAsync(x => x.UserId == senderId && x.FriendId == receiverId);
 
             if (!areFriends)
             {
-                // Ако НЕ са приятели, хвърляме грешка и спираме дотук
                 throw new InvalidOperationException("Users are not friends.");
             }
 
-            // 2. Проверка дали файлът вече не е споделен (за да не се дублира)
             bool alreadyShared = await _dbContext.SharedFiles
                 .AnyAsync(x => x.FileId == fileId && x.ReceiverId == receiverId);
 
-            if (alreadyShared) return; // Ако вече е споделен, просто излизаме
+            if (alreadyShared) return; 
 
-            // 3. Създаване на записа
             var sharedFile = new SharedFile
             {
                 FileId = fileId,

@@ -1,21 +1,17 @@
-﻿// Показване / скриване на менюто с трите точки
-function toggleMenu(button) {
+﻿function toggleMenu(button) {
     const card = button.closest('.lux-card');
     const menu = card.querySelector('.dropdown-menu');
 
     const isVisible = menu.classList.contains('show');
 
-    // Скрий всички отворени менюта
     document.querySelectorAll('.dropdown-menu.show')
         .forEach(m => m.classList.remove('show'));
 
-    // Ако текущото беше скрито – покажи го
     if (!isVisible) {
         menu.classList.add('show');
     }
 }
 
-// Затваряне на всички менюта при клик извън картата
 document.addEventListener('click', function (e) {
     if (!e.target.closest('.lux-card')) {
         document.querySelectorAll('.dropdown-menu.show')
@@ -23,7 +19,6 @@ document.addEventListener('click', function (e) {
     }
 });
 
-// Преименуване на файл – prompt + POST към File/Rename
 function renameFile(id, currentName) {
     const newName = prompt('Ново име на файла:', currentName);
 
@@ -38,7 +33,6 @@ function renameFile(id, currentName) {
     form.submit();
 }
 
-// Изтриване на файл – confirm + POST към File/Delete
 function deleteFile(id) {
     if (!confirm('Наистина ли искаш да изтриеш този файл?')) {
         return;

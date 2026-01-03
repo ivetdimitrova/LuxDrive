@@ -16,7 +16,6 @@
         <p>50 GB of secure storage, basic file sharing, and 24/7 support.</p>
         <p style="color:#c6a664; font-size:1.2rem; margin-top:10px;">$4.99 / month</p>
 
-        @* Динамичен бутон за логин или Checkout *@
         @if (User.Identity.IsAuthenticated)
         {
             <a href="/Pricing/Checkout?plan=basic" class="btn" style="margin-top:20px;">Get Started</a>

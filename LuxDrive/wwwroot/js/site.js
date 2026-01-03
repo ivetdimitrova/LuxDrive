@@ -1,5 +1,4 @@
-﻿/* Бутонът с трите точки */
-.card - menu - btn {
+﻿.card - menu - btn {
     position: absolute;
     top: 12px;
     right: 12px;
@@ -11,7 +10,6 @@
     z - index: 20;
 }
 
-/* Самото меню */
 .dropdown - menu {
     position: absolute;
     right: 10px;
@@ -25,12 +23,10 @@
     z - index: 999;
 }
 
-/* Когато JS добави .show → менюто се показва */
 .dropdown - menu.show {
     display: block;
 }
 
-/* Елементи в менюто */
 .menu - item {
     display: block;
     padding: 10px 15px;
@@ -49,7 +45,6 @@
     background - color: #333;
 }
 
-/* Червено за Изтрий */
 .menu - item.delete {
     color: #ff6b6b;
 }

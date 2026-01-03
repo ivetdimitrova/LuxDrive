@@ -1,5 +1,4 @@
-﻿/* --- ОСНОВНИ НАСТРОЙКИ --- */
-html, body {
+﻿html, body {
     margin: 0;
     padding: 0;
     background-color: #000;
@@ -15,7 +14,6 @@ main {
     flex: 1;
 }
 
-/* --- HEADER / НАВИГАЦИЯ --- */
 .header {
     display: flex;
     justify-content: space-between;
@@ -49,7 +47,6 @@ main {
         color: #b18c4b;
     }
 
-/* --- HERO SECTION --- */
 .hero {
     height: 100vh;
     display: flex;
@@ -90,7 +87,6 @@ main {
         line-height: 1.6;
     }
 
-/* --- FEATURES / ПЛАНОВЕ --- */
 .features {
     display: flex;
     flex-wrap: wrap;
@@ -130,7 +126,6 @@ main {
         line-height: 1.6;
     }
 
-/* --- БУТОНИ И АКЦЕНТИ --- */
 .btn {
     background: linear-gradient(90deg, #c6a664, #b18c4b);
     color: #000;
@@ -167,7 +162,6 @@ main {
     text-shadow: 0 0 5px #b18c4b, 0 0 10px #c6a664;
 }
 
-/* --- ФОРМИ И КОНТЕЙНЕРИ --- */
 .register-wrapper, .checkout-wrapper {
     min-height: 80vh;
     display: flex;
@@ -202,7 +196,6 @@ main {
     font-weight: bold;
 }
 
-/* --- EMPTY STATE С 3D ОБЛАК --- */
 .empty-state-container {
     position: relative;
     width: 100%;
@@ -244,7 +237,6 @@ main {
     text-align: center;
 }
 
-/* --- FOOTER --- */
 footer.lux-footer {
     background-color: #000;
     border-top: 1px solid #1a1a1a;
@@ -256,7 +248,6 @@ footer.lux-footer {
     margin-top: auto;
 }
 
-/* --- АНИМАЦИИ --- */
 @keyframes fadeUp {
     from {
         opacity: 0;
@@ -279,7 +270,6 @@ footer.lux-footer {
     }
 }
 
-/* --- RESPONSIVE --- */
 @media (max-width: 768px) {
     .hero-text h1 {
         font-size: 2.2rem;
