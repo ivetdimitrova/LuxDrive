@@ -16,6 +16,36 @@ namespace LuxDrive.Services
             _dbContext = dbContext;
         }
 
+        public async Task<bool> ChangeFileNameAsync(Guid userId, Guid fileId, string newName)
+        {
+            Data.Models.File? file = await _dbContext.Files
+                .FirstOrDefaultAsync(f => f.Id == fileId && f.UserId == userId);
+
+            if (file == null)
+                return false;
+
+            string clean = newName.Trim();
+
+            if (!string.IsNullOrEmpty(file.Extension) &&
+                clean.EndsWith(file.Extension, StringComparison.OrdinalIgnoreCase))
+            {
+                clean = clean[..^file.Extension.Length];
+            }
+            else
+            {
+                var dotIndex = clean.LastIndexOf('.');
+                if (dotIndex > 0)
+                {
+                    clean = clean.Substring(0, dotIndex);
+                }
+            }
+
+            file.Name = clean;
+            int changes = await _dbContext.SaveChangesAsync();
+
+            return changes == 1;
+        }
+
         public async Task<Guid?> CreateFileAsync(string userId, IFormFile file)
         {
             if (!Guid.TryParse(userId, out Guid userIdGuid))
@@ -48,6 +78,26 @@ namespace LuxDrive.Services
                 .Where(f => f.Id == fileId)
                 .Select(f => f.Extension)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<Data.Models.File?> GetUserFileAsync(Guid fileId, Guid userId)
+            => await _dbContext.Files
+                .Where(f => f.Id == fileId && f.UserId == userId)
+                .FirstOrDefaultAsync();
+
+
+        public async Task<IEnumerable<Data.Models.File>> GetUserFilesAsync(Guid userId)
+        => await _dbContext.Files
+            .AsNoTracking()
+            .Where(f => f.UserId == userId)
+            .ToListAsync();
+
+        public async Task<bool> RemoveFileAsync(Data.Models.File file)
+        {
+            _dbContext.Files.Remove(file);
+            int changesCount = await _dbContext.SaveChangesAsync();
+
+            return changesCount == 1;
         }
 
         public async Task<bool> UpdateFileUrlAsync(Guid? fileId, string url)
