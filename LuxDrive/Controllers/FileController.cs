@@ -1,5 +1,5 @@
 ﻿using LuxDrive.Data;
-using LuxDrive.Data.Models; // Трябва за SharedFile
+using LuxDrive.Data.Models;
 using LuxDrive.Services;
 using LuxDrive.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -17,9 +17,9 @@ namespace LuxDrive.Controllers
 
         public FileController(LuxDriveDbContext dbContext, SpacesService spacesService, IFileService fileService)
         {
+            _dbContext = dbContext;
             _spacesService = spacesService;
             this.fileService = fileService;
-            _dbContext = dbContext;
         }
 
         // -------- Всички файлове (Index) --------
@@ -29,12 +29,8 @@ namespace LuxDrive.Controllers
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
 
-            var userId = Guid.Parse(userIdStr);
-
-            var files = await _dbContext.Files
-                .Where(f => f.UserId == userId)
-                .OrderByDescending(f => f.UploadAt)
-                .ToListAsync();
+            IEnumerable<Data.Models.File> files = await this.fileService
+                 .GetUserFilesAsync(Guid.Parse(userIdStr));
 
             return View(files);
         }
@@ -47,16 +43,13 @@ namespace LuxDrive.Controllers
             if (userIdStr == null) return Unauthorized();
             var userId = Guid.Parse(userIdStr);
 
-            // Взимаме записите от SharedFiles, където ние сме Получател (Receiver)
-            // И чрез .Select(sf => sf.File) взимаме директно файла
             var sharedFiles = await _dbContext.SharedFiles
                 .Where(sf => sf.ReceiverId == userId)
-                .Include(sf => sf.File) // Зареждаме данните за файла
-                .Select(sf => sf.File)  // Избираме само обекта File
+                .Include(sf => sf.File)
+                .Select(sf => sf.File)
                 .OrderByDescending(f => f.UploadAt)
                 .ToListAsync();
 
-           
             return View("Index", sharedFiles);
         }
 
@@ -70,30 +63,13 @@ namespace LuxDrive.Controllers
 
             try
             {
-
-                // Проверка дали вече е споделен
-                bool alreadyShared = await _dbContext.SharedFiles
-                    .AnyAsync(sf => sf.FileId == fileId && sf.ReceiverId == receiverId);
-
-                if (!alreadyShared)
-                {
-                    var share = new SharedFile
-                    {
-                        FileId = fileId,
-                        SenderId = senderId,
-                        ReceiverId = receiverId,
-                        SharedOn = DateTime.UtcNow
-                    };
-
-                    _dbContext.SharedFiles.Add(share);
-                    await _dbContext.SaveChangesAsync();
-                }
-
+                // Ползваме новия метод от сървиса, за да е по-чисто
+                await fileService.ShareFileAsync(fileId, senderId, receiverId);
                 return Ok();
             }
-            catch
+            catch (Exception ex)
             {
-                return BadRequest("Грешка при споделяне.");
+                return BadRequest("Грешка при споделяне: " + ex.Message);
             }
         }
 
@@ -115,18 +91,23 @@ namespace LuxDrive.Controllers
             {
                 if (file == null || file.Length == 0) continue;
 
+                // 1. Създаваме запис в базата
                 Guid? fileId = await this.fileService.CreateFileAsync(userIdStr, file);
                 if (fileId == null) continue;
 
+                // 2. Взимаме разширението
                 string? extension = await this.fileService.GetFileExtensionAsync(fileId);
                 if (extension == null) continue;
 
                 var userId = Guid.Parse(userIdStr);
+
+                // 3. Формираме ключ и качваме в Spaces
                 var key = $"{userId}/{fileId}{extension}";
 
                 using var stream = file.OpenReadStream();
                 var url = await _spacesService.UploadAsync(stream, key, file.ContentType);
 
+                // 4. Обновяваме URL-а в базата
                 await this.fileService.UpdateFileUrlAsync(fileId, url);
             }
 
@@ -136,7 +117,7 @@ namespace LuxDrive.Controllers
         // -------- Преименуване (Rename) --------
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Rename(Guid id, string newName)
+        public async Task<IActionResult> Rename(Guid fileId, string newName)
         {
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
@@ -147,23 +128,12 @@ namespace LuxDrive.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var userId = Guid.Parse(userIdStr);
+            bool isRenamed = await this.fileService.ChangeFileNameAsync(Guid.Parse(userIdStr), fileId, newName);
 
-            var file = await _dbContext.Files
-                .FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
-
-            if (file == null) return NotFound();
-
-            var clean = newName.Trim();
-
-            // Логика за запазване на разширението
-            if (!string.IsNullOrEmpty(file.Extension) && !clean.EndsWith(file.Extension, StringComparison.OrdinalIgnoreCase))
+            if (!isRenamed)
             {
-                
+                return NotFound();
             }
-
-            file.Name = clean;
-            await _dbContext.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
         }
@@ -178,27 +148,35 @@ namespace LuxDrive.Controllers
 
             var userId = Guid.Parse(userIdStr);
 
-            var file = await _dbContext.Files
-                .FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
-
+            var file = await fileService.GetUserFileAsync(id, userId);
             if (file == null) return NotFound();
 
             try
             {
+                // Трием от DigitalOcean Spaces
                 if (!string.IsNullOrEmpty(file.StorageUrl))
                 {
                     var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/";
                     var key = file.StorageUrl.Replace(endpoint, string.Empty);
                     await _spacesService.DeleteAsync(key);
                 }
+
+                // Трием от базата данни
+                bool isDeleted = await fileService.RemoveFileAsync(file);
+
+                if (!isDeleted)
+                {
+                    return NotFound();
+                }
+
+                return RedirectToAction(nameof(Index));
             }
-            catch { }
-
-            _dbContext.Files.Remove(file);
-            await _dbContext.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
+            catch
+            {
+                return NotFound();
+            }
         }
+
         // -------- НОВО: Масово изтриване --------
         [HttpPost]
         public async Task<IActionResult> DeleteMultiple([FromBody] List<Guid> ids)
@@ -216,7 +194,7 @@ namespace LuxDrive.Controllers
                     {
                         if (!string.IsNullOrEmpty(file.StorageUrl))
                         {
-                            var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/"; // Твоят endpoint
+                            var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/";
                             var key = file.StorageUrl.Replace(endpoint, string.Empty);
                             await _spacesService.DeleteAsync(key);
                         }
@@ -241,23 +219,17 @@ namespace LuxDrive.Controllers
             {
                 foreach (var fileId in fileIds)
                 {
-                    // Проверка за всеки файл дали вече е споделен
-                    bool alreadyShared = await _dbContext.SharedFiles
-                        .AnyAsync(sf => sf.FileId == fileId && sf.ReceiverId == receiverId);
-
-                    if (!alreadyShared)
+                    // Използваме сървиса, за да не дублираме логика
+                    try
                     {
-                        var share = new SharedFile
-                        {
-                            FileId = fileId,
-                            SenderId = senderId,
-                            ReceiverId = receiverId,
-                            SharedOn = DateTime.UtcNow
-                        };
-                        _dbContext.SharedFiles.Add(share);
+                        await fileService.ShareFileAsync(fileId, senderId, receiverId);
+                    }
+                    catch
+                    {
+                        // Ако един файл не се сподели (напр. вече е споделен), продължаваме със следващия
+                        continue;
                     }
                 }
-                await _dbContext.SaveChangesAsync();
                 return Ok();
             }
             catch
