@@ -1,6 +1,5 @@
 ﻿using LuxDrive.Data.Configurations;
 using LuxDrive.Data.Models;
-using LuxDrive.Data.Models.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -32,17 +31,7 @@ namespace LuxDrive.Data
             builder.ApplyConfiguration(new UserFriendConfiguration());
 
 
-            builder.Entity<FriendRequest>()
-                .HasOne(x => x.Sender)
-                .WithMany()
-                .HasForeignKey(x => x.SenderId)
-                .OnDelete(DeleteBehavior.Restrict);
-
-            builder.Entity<FriendRequest>()
-                .HasOne(x => x.Receiver)
-                .WithMany()
-                .HasForeignKey(x => x.ReceiverId)
-                .OnDelete(DeleteBehavior.Restrict);
+            
         }
     }
 }
