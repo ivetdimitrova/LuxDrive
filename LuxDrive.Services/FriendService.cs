@@ -58,7 +58,6 @@ namespace LuxDrive.Services
             await _context.SaveChangesAsync();
         }
 
-        // --- ТОВА Е ЛИПСВАЩИЯТ МЕТОД, КОЙТО ОПРАВЯ ГРЕШКАТА ---
         public async Task RejectRequestAsync(int requestId)
         {
             var request = await _context.FriendRequests
@@ -70,7 +69,6 @@ namespace LuxDrive.Services
                 await _context.SaveChangesAsync();
             }
         }
-        // ------------------------------------------------------
 
         // НОВ МЕТОД: Взима списъка с покани
         public async Task<IEnumerable<object>> GetPendingRequestsAsync(Guid userId)
