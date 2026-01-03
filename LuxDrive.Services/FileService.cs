@@ -1,9 +1,9 @@
-﻿using Amazon.Runtime.Internal.Endpoints.StandardLibrary;
-using LuxDrive.Data;
+﻿using LuxDrive.Data;
 using LuxDrive.Data.Models;
 using LuxDrive.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using FileEntity = LuxDrive.Data.Models.File;
 
 namespace LuxDrive.Services
 {
@@ -18,16 +18,12 @@ namespace LuxDrive.Services
 
         public async Task<Guid?> CreateFileAsync(string userId, IFormFile file)
         {
-            bool isValidUserId = Guid.TryParse(userId, out Guid userIdGuid);
-
-            if (!isValidUserId)
+            if (!Guid.TryParse(userId, out Guid userIdGuid))
             {
                 return null;
             }
 
-            Guid fileId = Guid.NewGuid();
-
-            var newFile = new LuxDrive.Data.Models.File
+            var newFile = new FileEntity
             {
                 Id = Guid.NewGuid(),
                 Name = Path.GetFileNameWithoutExtension(file.FileName),
@@ -38,6 +34,7 @@ namespace LuxDrive.Services
                 UserId = userIdGuid
             };
 
+
             await _dbContext.Files.AddAsync(newFile);
             await _dbContext.SaveChangesAsync();
 
@@ -46,7 +43,6 @@ namespace LuxDrive.Services
 
         public async Task<string?> GetFileExtensionAsync(Guid? fileId)
         {
-
             return await _dbContext.Files
                 .AsNoTracking()
                 .Where(f => f.Id == fileId)
@@ -65,18 +61,41 @@ namespace LuxDrive.Services
             }
 
             file.StorageUrl = url;
-
             _dbContext.Update(file);
 
-            int modified = await _dbContext.SaveChangesAsync();
-            if (modified == 1)
+            return await _dbContext.SaveChangesAsync() == 1;
+        }
+
+        // СПОДЕЛЯНЕ НА ФАЙЛ
+        public async Task ShareFileAsync(Guid fileId, Guid senderId, Guid receiverId)
+        {
+            // 1. Проверка дали са приятели
+            bool areFriends = await _dbContext.UserFriends
+                .AnyAsync(x => x.UserId == senderId && x.FriendId == receiverId);
+
+            if (!areFriends)
             {
-                return true;
+                // Ако НЕ са приятели, хвърляме грешка и спираме дотук
+                throw new InvalidOperationException("Users are not friends.");
             }
-            else
-            { 
-                return false; 
-            }
+
+            // 2. Проверка дали файлът вече не е споделен (за да не се дублира)
+            bool alreadyShared = await _dbContext.SharedFiles
+                .AnyAsync(x => x.FileId == fileId && x.ReceiverId == receiverId);
+
+            if (alreadyShared) return; // Ако вече е споделен, просто излизаме
+
+            // 3. Създаване на записа
+            var sharedFile = new SharedFile
+            {
+                FileId = fileId,
+                SenderId = senderId,
+                ReceiverId = receiverId,
+                SharedOn = DateTime.UtcNow
+            };
+
+            _dbContext.SharedFiles.Add(sharedFile);
+            await _dbContext.SaveChangesAsync();
         }
     }
 }
