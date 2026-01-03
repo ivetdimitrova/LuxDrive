@@ -16,15 +16,15 @@
     <aside class="lux-sidebar">
         <nav class="lux-nav">
             <h5>Навигация</h5>
-            <a href="@Url.Action("Index", "Home")" class="@(ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")"><i class="fas fa-th-large"></i> Всички файлове</a>
+            <a href="@Url.Action("Index", "Home")" class="@(ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")" data-filter="all" onclick="filterFiles(event)"><i class="fas fa-th-large"></i> Всички файлове</a>
             <a href="#" onclick="openFriendsModal()"><i class="fas fa-users"></i> Приятели</a>
             <a href="@Url.Action("SharedWithMe", "File")" class="@(ViewContext.RouteData.Values["Action"].ToString() == "SharedWithMe" ? "active" : "")"><i class="fas fa-share-square"></i> Споделени с мен</a>
             <hr style="border-color:#333; margin: 10px 0;">
-            <a href="#"><i class="fas fa-file-alt"></i> Документи</a>
-            <a href="#"><i class="fas fa-image"></i> Снимки</a>
-            <a href="#"><i class="fas fa-music"></i> Музика</a>
-            <a href="#"><i class="fas fa-video"></i> Видеа</a>
-            <a href="#"><i class="fas fa-file-archive"></i> Архиви</a>
+            <a href="#" data-filter="document" onclick="filterFiles(event)"><i class="fas fa-file-alt"></i> Документи</a>
+            <a href="#" data-filter="image" onclick="filterFiles(event)"><i class="fas fa-image"></i> Снимки</a>
+            <a href="#" data-filter="music" onclick="filterFiles(event)"><i class="fas fa-music"></i> Музика</a>
+            <a href="#" data-filter="video" onclick="filterFiles(event)"><i class="fas fa-video"></i> Видеа</a>
+            <a href="#" data-filter="archive" onclick="filterFiles(event)"><i class="fas fa-file-archive"></i> Архиви</a>
         </nav>
     </aside>
 
@@ -63,7 +63,21 @@
             <div class="lux-grid">
                 @foreach (var file in Model)
                 {
-                    <div class="lux-card">
+                    string ext = file.Extension?.ToLower() ?? "";
+                    string fileType = "other";
+
+                    if (ext.Contains("jpg") || ext.Contains("jpeg") || ext.Contains("png") || ext.Contains("gif") || ext.Contains("webp"))
+                        fileType = "image";
+                    else if (ext.Contains("pdf") || ext.Contains("doc") || ext.Contains("docx") || ext.Contains("xls") || ext.Contains("xlsx") || ext.Contains("txt"))
+                        fileType = "document";
+                    else if (ext.Contains("mp3") || ext.Contains("wav") || ext.Contains("ogg"))
+                        fileType = "music";
+                    else if (ext.Contains("mp4") || ext.Contains("avi") || ext.Contains("mov") || ext.Contains("mkv"))
+                        fileType = "video";
+                    else if (ext.Contains("zip") || ext.Contains("rar") || ext.Contains("7z"))
+                        fileType = "archive";
+
+                    <div class="lux-card" data-type="@fileType">
                         @if (ViewContext.RouteData.Values["Action"].ToString() != "SharedWithMe")
                         {
                             <input type="checkbox" class="file-checkbox" value="@file.Id" onchange="toggleSelection(this)" />
@@ -71,7 +85,7 @@
 
                         <div class="card-preview">
                             @{
-                                string ext = file.Extension?.ToLower() ?? "";
+                               
                                 bool isImage = ext.Contains("jpg") || ext.Contains("jpeg") || ext.Contains("png") || ext.Contains("gif") || ext.Contains("webp");
                                 string iconClass = "fas fa-file"; string iconColor = "#95a5a6";
                                 if (ext.Contains("pdf")) { iconClass = "fas fa-file-pdf"; iconColor = "#e74c3c"; }
@@ -167,6 +181,26 @@
 
 <script src="~/js/luxdrive-scripts.js"></script>
 <script>
+
+        function filterFiles(e) {
+        e.preventDefault();
+
+        const type = e.currentTarget.dataset.filter;
+
+        // active стил
+        document.querySelectorAll('.lux-nav a').forEach(a => a.classList.remove('active'));
+        e.currentTarget.classList.add('active');
+
+        document.querySelectorAll('.lux-card').forEach(card => {
+            if (type === 'all' || card.dataset.type === type) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+
     // --- Rename Logic ---
     function promptRename(id, oldName) {
         let newName = prompt("Въведете ново име:", oldName);
