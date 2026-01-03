@@ -1,5 +1,5 @@
 ﻿/* =========================================
-   1. ОСНОВНИ НАСТРОЙКИ (LAYOUT)
+   1. ОСНОВНИ НАСТРОЙКИ (LAYOUT) & SIDEBAR
    ========================================= */
 body {
     background-color: #050505;
@@ -17,9 +17,6 @@ body {
     margin-top: 0;
 }
 
-/* =========================================
-   2. СТРАНИЧНА ЛЕНТА (SIDEBAR)
-   ========================================= */
 .lux-sidebar {
     width: 250px;
     background: linear-gradient(180deg, #121212 0%, #0a0a0a 100%);
@@ -70,7 +67,7 @@ body {
     }
 
 /* =========================================
-   3. ОСНОВНО СЪДЪРЖАНИЕ (MAIN)
+   2. ОСНОВНО СЪДЪРЖАНИЕ (MAIN)
    ========================================= */
 .lux-main {
     flex-grow: 1;
@@ -130,7 +127,7 @@ body {
 }
 
 /* =========================================
-   4. КАРТИ И МРЕЖА (GRID SYSTEM)
+   3. КАРТИ И МРЕЖА (GRID SYSTEM)
    ========================================= */
 .lux-grid {
     display: grid;
@@ -148,7 +145,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 240px; /* Увеличих малко височината заради снимките */
+    height: 240px;
 }
 
     .lux-card:hover {
@@ -158,33 +155,31 @@ body {
         background-color: #1a1a1a;
     }
 
-/* Преглед на файла (Променено за снимки) */
+/* Преглед на файла */
 .card-preview {
     width: 100%;
-    height: 140px; /* По-високо поле за снимка */
+    height: 140px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 15px;
     background-color: #0a0a0a;
     border-radius: 10px;
-    overflow: hidden; /* Важно: за да не излиза снимката от заоблените ъгли */
+    overflow: hidden;
     position: relative;
 }
 
-/* Стил за самата снимка */
 .file-thumb {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Реже снимката да запълни всичко */
+    object-fit: cover;
     transition: transform 0.5s;
 }
 
 .lux-card:hover .file-thumb {
-    transform: scale(1.1); /* Ефект на приближаване */
+    transform: scale(1.1);
 }
 
-/* Икона (ако не е снимка) */
 .file-icon {
     font-size: 50px;
     color: #555;
@@ -217,7 +212,7 @@ body {
     top: 10px;
     right: 10px;
     color: #d4af37;
-    background: rgba(0,0,0,0.5); /* Лек фон за по-добра четимост върху снимка */
+    background: rgba(0,0,0,0.5);
     border-radius: 50%;
     width: 30px;
     height: 30px;
@@ -292,7 +287,7 @@ body {
     }
 
 /* =========================================
-   5. МОДАЛНИ ПРОЗОРЦИ (MODALS) - НОВО
+   4. МОДАЛНИ ПРОЗОРЦИ (MODALS)
    ========================================= */
 .lux-modal {
     display: none;
@@ -345,7 +340,7 @@ body {
     }
 
 /* =========================================
-   6. ФОРМИ И БУТОНИ В МОДАЛИ
+   5. ФОРМИ И БУТОНИ В МОДАЛИ
    ========================================= */
 .lux-input, .lux-select {
     width: 100%;
@@ -357,7 +352,7 @@ body {
     border-radius: 6px;
     outline: none;
     transition: 0.3s;
-    box-sizing: border-box; /* Важно за padding */
+    box-sizing: border-box;
 }
 
     .lux-input:focus {
@@ -416,7 +411,7 @@ body {
     }
 
 /* =========================================
-   7. СТИЛОВЕ ЗА ПРИЯТЕЛИ
+   6. СТИЛОВЕ ЗА ПРИЯТЕЛИ
    ========================================= */
 .friend-card {
     display: flex;
@@ -466,7 +461,6 @@ body {
     font-size: 12px;
 }
 
-/* Бутони за действие с приятели */
 .btn-remove-friend {
     background: transparent;
     border: none;
@@ -506,11 +500,10 @@ body {
     border-radius: 10px;
     border: 1px solid #444;
 }
-/* =========================================
-   8. МАСОВ ИЗБОР (CHECKBOXES & BULK ACTIONS)
-   ========================================= */
 
-/* Квадратче за избор върху картата */
+/* =========================================
+   7. МАСОВ ИЗБОР (CHECKBOXES & BULK ACTIONS)
+   ========================================= */
 .file-checkbox {
     position: absolute;
     top: 10px;
@@ -519,18 +512,16 @@ body {
     height: 20px;
     z-index: 5;
     cursor: pointer;
-    accent-color: #d4af37; /* Златен цвят на отметката */
-    opacity: 0; /* Скрит по подразбиране */
+    accent-color: #d4af37;
+    opacity: 0;
     transition: opacity 0.2s;
 }
 
-    /* Показваме квадратчето, когато мишката е върху картата ИЛИ ако е отметнато */
     .lux-card:hover .file-checkbox,
     .file-checkbox:checked {
         opacity: 1;
     }
 
-/* Лента за масови действия (долу) */
 .bulk-actions-bar {
     position: fixed;
     bottom: 20px;
@@ -540,7 +531,7 @@ body {
     border: 1px solid #d4af37;
     padding: 15px 30px;
     border-radius: 50px;
-    display: none; /* Скрита, докато не избереш файл */
+    display: none;
     align-items: center;
     gap: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.8);
