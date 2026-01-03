@@ -21,7 +21,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
 {
     options.SignIn.RequireConfirmedAccount = false;
     options.SignIn.RequireConfirmedPhoneNumber = false;
-    options.SignIn.RequireConfirmedAccount = false;
 
     options.Password.RequireDigit = false;
     options.Password.RequireNonAlphanumeric = false;
@@ -31,8 +30,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
 })
 .AddEntityFrameworkStores<LuxDriveDbContext>();
 
+// ?? SERVICES
 builder.Services.AddScoped<SpacesService>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IFriendService, FriendService>(); // ? ????????
 
 builder.Services.AddControllersWithViews();
 
@@ -59,6 +60,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.MapRazorPages();
 
 app.Run();

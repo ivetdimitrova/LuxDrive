@@ -1,6 +1,8 @@
-﻿/* ОСНОВНИ НАСТРОЙКИ */
+﻿/* =========================================
+   1. ОСНОВНИ НАСТРОЙКИ (LAYOUT)
+   ========================================= */
 body {
-    background-color: #050505; /* Дълбоко черно */
+    background-color: #050505;
     color: #e0e0e0;
     font-family: 'Montserrat', sans-serif;
     margin: 0;
@@ -8,15 +10,16 @@ body {
     overflow-x: hidden;
 }
 
-/* Container: Flexbox за Sidebar + Content */
 .lux-wrapper {
-    display: flex; /* Връщаме Flexbox */
+    display: flex;
     min-height: 85vh;
     width: 100%;
     margin-top: 0;
 }
 
-/* --- СТРАНИЧНА ЛЕНТА (НАВИГАЦИЯ) --- */
+/* =========================================
+   2. СТРАНИЧНА ЛЕНТА (SIDEBAR)
+   ========================================= */
 .lux-sidebar {
     width: 250px;
     background: linear-gradient(180deg, #121212 0%, #0a0a0a 100%);
@@ -31,11 +34,10 @@ body {
     box-shadow: 5px 0 20px rgba(0,0,0,0.5);
 }
 
-/* Заглавие "Навигация" */
 .lux-nav h5 {
     color: #d4af37;
     text-transform: uppercase;
-    font-size: 16px; 
+    font-size: 16px;
     font-weight: 700;
     margin-bottom: 20px;
     letter-spacing: 1.5px;
@@ -43,7 +45,6 @@ body {
     margin-top: 0;
 }
 
-/* Линк от навигацията */
 .lux-nav a {
     display: flex;
     align-items: center;
@@ -68,16 +69,17 @@ body {
         transform: translateX(5px);
     }
 
-/* --- ОСНОВНО СЪДЪРЖАНИЕ --- */
+/* =========================================
+   3. ОСНОВНО СЪДЪРЖАНИЕ (MAIN)
+   ========================================= */
 .lux-main {
     flex-grow: 1;
     padding: 20px 40px;
     background-color: #050505;
 }
 
-/* --- БЛОК ЗА ЗАГЛАВИЕ И КАЧВАНЕ --- */
 .upload-section {
-    display: block; /* Заглавието и бутонът се показват един под друг */
+    display: block;
     margin-bottom: 30px;
     padding-bottom: 20px;
     border-bottom: 1px solid #222;
@@ -86,7 +88,7 @@ body {
 .page-title {
     font-size: 28px;
     font-weight: 300;
-    margin: 0 0 20px 0; /* Отстъп под заглавието */
+    margin: 0 0 20px 0;
 }
 
     .page-title span {
@@ -94,7 +96,7 @@ body {
         font-weight: 700;
     }
 
-/* Бутон за Качване */
+/* Бутон за Качване (Големия) */
 .btn-upload-gold {
     background: linear-gradient(135deg, #d4af37, #aa8c2c);
     color: #000;
@@ -118,7 +120,6 @@ body {
         box-shadow: 0 6px 20px rgba(212, 175, 55, 0.5);
     }
 
-/*  ГРЕШКИ  */
 .alert-error {
     background: rgba(255, 77, 77, 0.1);
     border-left: 4px solid #ff4d4d;
@@ -128,7 +129,9 @@ body {
     border-radius: 4px;
 }
 
-/*  МРЕЖА С ФАЙЛОВЕ (GRID)  */
+/* =========================================
+   4. КАРТИ И МРЕЖА (GRID SYSTEM)
+   ========================================= */
 .lux-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -145,7 +148,7 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    height: 200px;
+    height: 240px; /* Увеличих малко височината заради снимките */
 }
 
     .lux-card:hover {
@@ -155,21 +158,38 @@ body {
         background-color: #1a1a1a;
     }
 
-/* Иконка/Преглед на файла */
+/* Преглед на файла (Променено за снимки) */
 .card-preview {
     width: 100%;
-    height: 110px;
+    height: 140px; /* По-високо поле за снимка */
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 15px;
     background-color: #0a0a0a;
     border-radius: 10px;
-    font-size: 40px;
+    overflow: hidden; /* Важно: за да не излиза снимката от заоблените ъгли */
+    position: relative;
+}
+
+/* Стил за самата снимка */
+.file-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Реже снимката да запълни всичко */
+    transition: transform 0.5s;
+}
+
+.lux-card:hover .file-thumb {
+    transform: scale(1.1); /* Ефект на приближаване */
+}
+
+/* Икона (ако не е снимка) */
+.file-icon {
+    font-size: 50px;
     color: #555;
 }
 
-/* Детайли за файла */
 .card-info {
     width: 100%;
     text-align: center;
@@ -197,12 +217,19 @@ body {
     top: 10px;
     right: 10px;
     color: #d4af37;
-    background: none;
+    background: rgba(0,0,0,0.5); /* Лек фон за по-добра четимост върху снимка */
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
     border: none;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     opacity: 0;
     transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 5;
 }
 
 .lux-card:hover .card-menu-btn {
@@ -252,7 +279,6 @@ body {
             color: #fff;
         }
 
-/* Съобщение "Няма файлове" */
 .empty-state {
     text-align: center;
     margin-top: 80px;
@@ -263,4 +289,296 @@ body {
         font-size: 60px;
         margin-bottom: 20px;
         color: #222;
+    }
+
+/* =========================================
+   5. МОДАЛНИ ПРОЗОРЦИ (MODALS) - НОВО
+   ========================================= */
+.lux-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+}
+
+.lux-modal-content {
+    background-color: #1a1a1a;
+    margin: 8% auto;
+    padding: 25px;
+    border: 1px solid #d4af37;
+    width: 450px;
+    border-radius: 12px;
+    color: white;
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.2);
+}
+
+.lux-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 15px;
+}
+
+    .lux-modal-header h3 {
+        margin: 0;
+        font-weight: 600;
+        color: #d4af37;
+    }
+
+.lux-close {
+    color: #aaa;
+    font-size: 28px;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+    .lux-close:hover {
+        color: #fff;
+        transform: rotate(90deg);
+    }
+
+/* =========================================
+   6. ФОРМИ И БУТОНИ В МОДАЛИ
+   ========================================= */
+.lux-input, .lux-select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    background: #2a2a2a;
+    border: 1px solid #444;
+    color: white;
+    border-radius: 6px;
+    outline: none;
+    transition: 0.3s;
+    box-sizing: border-box; /* Важно за padding */
+}
+
+    .lux-input:focus {
+        border-color: #d4af37;
+        box-shadow: 0 0 5px rgba(212, 175, 55, 0.3);
+    }
+
+.lux-btn-primary {
+    background: linear-gradient(45deg, #d4af37, #f1c40f);
+    color: #000;
+    padding: 12px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+    font-weight: bold;
+    border-radius: 6px;
+    transition: 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+    .lux-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(212, 175, 55, 0.4);
+    }
+
+/* Табове (Tabs) */
+.tab-container {
+    display: flex;
+    margin-bottom: 20px;
+    background: #222;
+    border-radius: 6px;
+    padding: 4px;
+}
+
+.tab-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: 0.3s;
+    font-weight: 600;
+}
+
+    .tab-btn:hover {
+        color: #fff;
+        background: #333;
+    }
+
+    .tab-btn.active {
+        color: #000;
+        background: #d4af37;
+    }
+
+/* =========================================
+   7. СТИЛОВЕ ЗА ПРИЯТЕЛИ
+   ========================================= */
+.friend-card {
+    display: flex;
+    align-items: center;
+    background: #252525;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid #333;
+    transition: 0.3s;
+}
+
+    .friend-card:hover {
+        border-color: #555;
+        background: #2a2a2a;
+        transform: translateX(5px);
+    }
+
+.friend-avatar {
+    width: 40px;
+    height: 40px;
+    background: #d4af37;
+    color: #000;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.friend-info {
+    flex: 1;
+}
+
+.friend-name {
+    font-weight: bold;
+    color: #fff;
+    font-size: 14px;
+    display: block;
+}
+
+.friend-email {
+    color: #888;
+    font-size: 12px;
+}
+
+/* Бутони за действие с приятели */
+.btn-remove-friend {
+    background: transparent;
+    border: none;
+    color: #e74c3c;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: 0.2s;
+    font-size: 16px;
+}
+
+    .btn-remove-friend:hover {
+        background: rgba(231, 76, 60, 0.1);
+        transform: scale(1.1);
+    }
+
+.btn-accept {
+    background: #2ecc71;
+    color: white;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+    .btn-accept:hover {
+        background: #27ae60;
+    }
+
+.status-badge {
+    font-size: 11px;
+    background: #333;
+    color: #aaa;
+    padding: 4px 8px;
+    border-radius: 10px;
+    border: 1px solid #444;
+}
+/* =========================================
+   8. МАСОВ ИЗБОР (CHECKBOXES & BULK ACTIONS)
+   ========================================= */
+
+/* Квадратче за избор върху картата */
+.file-checkbox {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 20px;
+    height: 20px;
+    z-index: 5;
+    cursor: pointer;
+    accent-color: #d4af37; /* Златен цвят на отметката */
+    opacity: 0; /* Скрит по подразбиране */
+    transition: opacity 0.2s;
+}
+
+    /* Показваме квадратчето, когато мишката е върху картата ИЛИ ако е отметнато */
+    .lux-card:hover .file-checkbox,
+    .file-checkbox:checked {
+        opacity: 1;
+    }
+
+/* Лента за масови действия (долу) */
+.bulk-actions-bar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #222;
+    border: 1px solid #d4af37;
+    padding: 15px 30px;
+    border-radius: 50px;
+    display: none; /* Скрита, докато не избереш файл */
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+    z-index: 2000;
+}
+
+.bulk-count {
+    color: #fff;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.btn-bulk {
+    background: transparent;
+    border: 1px solid #555;
+    color: #ddd;
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+    .btn-bulk:hover {
+        background: #333;
+        color: #fff;
+        border-color: #fff;
+    }
+
+    .btn-bulk.delete:hover {
+        border-color: #ff4d4d;
+        color: #ff4d4d;
+    }
+
+    .btn-bulk.share:hover {
+        border-color: #d4af37;
+        color: #d4af37;
     }
