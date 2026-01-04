@@ -3,6 +3,12 @@ using LuxDrive.Data.Models;
 using LuxDrive.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+
 using FileEntity = LuxDrive.Data.Models.File;
 
 namespace LuxDrive.Services
@@ -16,16 +22,16 @@ namespace LuxDrive.Services
             _dbContext = dbContext;
         }
 
-        public async Task<bool> ChangeFileNameAsync(Guid userId, Guid fileId, string newName)
+        public async Task<bool> ChangeFileNameAsync(string userId, Guid fileId, string newName)
         {
-            Data.Models.File? file = await _dbContext.Files
-                .FirstOrDefaultAsync(f => f.Id == fileId && f.UserId == userId);
+            if (!Guid.TryParse(userId, out Guid userGuid)) return false;
 
-            if (file == null)
-                return false;
+            var file = await _dbContext.Files
+                .FirstOrDefaultAsync(f => f.Id == fileId && f.UserId == userGuid);
+
+            if (file == null) return false;
 
             string clean = newName.Trim();
-
             if (!string.IsNullOrEmpty(file.Extension) &&
                 clean.EndsWith(file.Extension, StringComparison.OrdinalIgnoreCase))
             {
@@ -34,24 +40,16 @@ namespace LuxDrive.Services
             else
             {
                 var dotIndex = clean.LastIndexOf('.');
-                if (dotIndex > 0)
-                {
-                    clean = clean.Substring(0, dotIndex);
-                }
+                if (dotIndex > 0) clean = clean.Substring(0, dotIndex);
             }
 
             file.Name = clean;
-            int changes = await _dbContext.SaveChangesAsync();
-
-            return changes == 1;
+            return await _dbContext.SaveChangesAsync() == 1;
         }
 
         public async Task<Guid?> CreateFileAsync(string userId, IFormFile file)
         {
-            if (!Guid.TryParse(userId, out Guid userIdGuid))
-            {
-                return null;
-            }
+            if (!Guid.TryParse(userId, out Guid userGuid)) return null;
 
             var newFile = new FileEntity
             {
@@ -61,9 +59,8 @@ namespace LuxDrive.Services
                 Size = file.Length,
                 StorageUrl = "",
                 UploadAt = DateTime.UtcNow,
-                UserId = userIdGuid
+                UserId = userGuid
             };
-
 
             await _dbContext.Files.AddAsync(newFile);
             await _dbContext.SaveChangesAsync();
@@ -80,67 +77,89 @@ namespace LuxDrive.Services
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<Data.Models.File?> GetUserFileAsync(Guid fileId, Guid userId)
-            => await _dbContext.Files
-                .Where(f => f.Id == fileId && f.UserId == userId)
+        public async Task<FileEntity?> GetUserFileAsync(Guid fileId, string userId)
+        {
+            if (!Guid.TryParse(userId, out Guid userGuid)) return null;
+
+            return await _dbContext.Files
+                .Where(f => f.Id == fileId && f.UserId == userGuid)
                 .FirstOrDefaultAsync();
+        }
 
+        public async Task<IEnumerable<FileEntity>> GetUserFilesAsync(string userId)
+        {
+            if (!Guid.TryParse(userId, out Guid userGuid)) return new List<FileEntity>();
 
-        public async Task<IEnumerable<Data.Models.File>> GetUserFilesAsync(Guid userId)
-        => await _dbContext.Files
-            .AsNoTracking()
-            .Where(f => f.UserId == userId)
-            .ToListAsync();
+            return await _dbContext.Files
+                .AsNoTracking()
+                .Where(f => f.UserId == userGuid)
+                .ToListAsync();
+        }
 
-        public async Task<bool> RemoveFileAsync(Data.Models.File file)
+        public async Task<bool> RemoveFileAsync(FileEntity file)
         {
             _dbContext.Files.Remove(file);
-            int changesCount = await _dbContext.SaveChangesAsync();
-
-            return changesCount == 1;
+            return await _dbContext.SaveChangesAsync() > 0;
         }
 
         public async Task<bool> UpdateFileUrlAsync(Guid? fileId, string url)
         {
-            var file = await _dbContext.Files
-                .FirstOrDefaultAsync(f => f.Id == fileId);
-
-            if (file == null)
-            {
-                return false;
-            }
+            var file = await _dbContext.Files.FirstOrDefaultAsync(f => f.Id == fileId);
+            if (file == null) return false;
 
             file.StorageUrl = url;
             _dbContext.Update(file);
-
             return await _dbContext.SaveChangesAsync() == 1;
         }
 
-        public async Task ShareFileAsync(Guid fileId, Guid senderId, Guid receiverId)
+        public async Task ShareFileAsync(Guid fileId, string senderId, string receiverId)
         {
-            bool areFriends = await _dbContext.UserFriends
-                .AnyAsync(x => x.UserId == senderId && x.FriendId == receiverId);
-
-            if (!areFriends)
+            if (!Guid.TryParse(senderId, out Guid senderGuid) ||
+                !Guid.TryParse(receiverId, out Guid receiverGuid))
             {
-                throw new InvalidOperationException("Users are not friends.");
+                throw new ArgumentException("Невалидни ID-та.");
             }
 
-            bool alreadyShared = await _dbContext.SharedFiles
-                .AnyAsync(x => x.FileId == fileId && x.ReceiverId == receiverId);
+            bool areFriends = await _dbContext.UserFriends
+                .AnyAsync(x => x.UserId == senderGuid && x.FriendId == receiverGuid);
 
-            if (alreadyShared) return; 
+            if (!areFriends) throw new InvalidOperationException("Users are not friends.");
+
+            bool alreadyShared = await _dbContext.SharedFiles
+                .AnyAsync(x => x.FileId == fileId && x.ReceiverId == receiverGuid);
+
+            if (alreadyShared) return;
 
             var sharedFile = new SharedFile
             {
                 FileId = fileId,
-                SenderId = senderId,
-                ReceiverId = receiverId,
+                SenderId = senderGuid,     
+                ReceiverId = receiverGuid, 
                 SharedOn = DateTime.UtcNow
             };
 
             _dbContext.SharedFiles.Add(sharedFile);
             await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<FileEntity>> GetSharedWithMeFilesAsync(string userId)
+        {
+            if (!Guid.TryParse(userId, out Guid userGuid)) return new List<FileEntity>();
+
+            return await _dbContext.SharedFiles
+                .Where(sf => sf.ReceiverId == userGuid)
+                .Include(sf => sf.File)
+                .Include(sf => sf.Sender)
+                .Select(sf => new FileEntity
+                {
+                    Id = sf.File.Id,
+                    Name = sf.File.Name,
+                    Extension = sf.File.Extension,
+                    StorageUrl = sf.File.StorageUrl,
+                    UploadAt = sf.SharedOn,
+                    SenderName = sf.Sender.UserName
+                })
+                .ToListAsync();
         }
     }
 }
