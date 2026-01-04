@@ -5,37 +5,221 @@
     ViewData["Title"] = "Log in";
 }
 
-<div class="register-wrapper">
-    <div class="register-container">
+<style>
+    .lux-login-wrapper {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+    }
 
-        <h1>Log in</h1>
-        <p>Use a local account to log in.</p>
+        .lux-login-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(198, 166, 100, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+    .lux-card {
+        background: rgba(20, 20, 20, 0.6);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-top: 1px solid rgba(198, 166, 100, 0.3);
+        border-radius: 20px;
+        padding: 50px 40px;
+        width: 100%;
+        max-width: 450px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        position: relative;
+        z-index: 1;
+    }
+
+    .brand-logo {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: #fff;
+        letter-spacing: 1px;
+    }
+
+        .brand-logo span {
+            color: #c6a664;
+            text-shadow: 0 0 15px rgba(198, 166, 100, 0.4);
+        }
+
+    .subtitle {
+        text-align: center;
+        color: #888;
+        margin-bottom: 35px;
+        font-size: 0.95rem;
+    }
+
+    .form-floating {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+        .form-floating input.form-control {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #fff !important;
+            border-radius: 10px;
+            height: 55px;
+        }
+
+            .form-floating input.form-control:focus {
+                background-color: rgba(0, 0, 0, 0.6) !important;
+                border-color: #c6a664 !important;
+                box-shadow: 0 0 10px rgba(198, 166, 100, 0.2) !important;
+                color: #fff !important;
+            }
+
+        .form-floating label {
+            color: #888 !important;
+            padding-left: 15px;
+        }
+
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: #c6a664 !important;
+            opacity: 0.9;
+            transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+        }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 30px #111 inset !important;
+        -webkit-text-fill-color: white !important;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
+    .btn-lux {
+        width: 100%;
+        padding: 14px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #000;
+        background: linear-gradient(135deg, #aa771c 0%, #fcf6ba 50%, #aa771c 100%);
+        background-size: 200% auto;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: 0.4s;
+        box-shadow: 0 5px 15px rgba(198, 166, 100, 0.3);
+        margin-top: 10px;
+    }
+
+        .btn-lux:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(198, 166, 100, 0.5);
+        }
+
+    .form-options {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+    }
+
+    .form-check-input {
+        background-color: #333;
+        border-color: #555;
+        cursor: pointer;
+    }
+
+        .form-check-input:checked {
+            background-color: #c6a664;
+            border-color: #c6a664;
+        }
+
+    .form-check-label {
+        color: #ccc;
+        cursor: pointer;
+        margin-left: 5px;
+    }
+
+    .forgot-link {
+        color: #888;
+        text-decoration: none;
+        transition: 0.3s;
+    }
+
+        .forgot-link:hover {
+            color: #c6a664;
+        }
+
+    .auth-footer {
+        text-align: center;
+        margin-top: 30px;
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+        .auth-footer a {
+            color: #c6a664;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+            .auth-footer a:hover {
+                color: #fff;
+            }
+</style>
+
+<div class="lux-login-wrapper">
+    <div class="lux-card">
+
+        <div class="brand-logo"><span class="glow">Lux</span>Drive</div>
+        <p class="subtitle">Welcome back. Please log in.</p>
 
         <form id="account" method="post">
-
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
-            <input asp-for="Input.Email" placeholder="Email" />
-            <span asp-validation-for="Input.Email" class="text-danger"></span>
-
-            <input asp-for="Input.Password" type="password" placeholder="Password" />
-            <span asp-validation-for="Input.Password" class="text-danger"></span>
-
-            <div style="margin: 10px 0; display:flex; align-items:center; gap:8px;">
-                <input asp-for="Input.RememberMe" style="width:15px; height:15px; margin:0;" />
-                <label asp-for="Input.RememberMe" style="margin:0; line-height:15px;">Remember me?</label>
+            <div class="form-floating">
+                <input asp-for="Input.Email" class="form-control" autocomplete="username" placeholder="name@example.com" />
+                <label asp-for="Input.Email">Email Address</label>
+                <span asp-validation-for="Input.Email" class="text-danger" style="font-size:0.8rem; color:#ff5c5c; margin-left:5px;"></span>
             </div>
 
-            <button id="login-submit" type="submit" class="register-btn">Log in</button>
-
-            <div style="margin-top: 20px;">
-                <p><a asp-page="./ForgotPassword">Forgot your password?</a></p>
-                <p><a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register as a new user</a></p>
-                <p><a asp-page="./ResendEmailConfirmation">Resend email confirmation</a></p>
+            <div class="form-floating">
+                <input asp-for="Input.Password" class="form-control" autocomplete="current-password" placeholder="password" />
+                <label asp-for="Input.Password">Password</label>
+                <span asp-validation-for="Input.Password" class="text-danger" style="font-size:0.8rem; color:#ff5c5c; margin-left:5px;"></span>
             </div>
 
+            <div class="form-options">
+                <div class="form-check">
+                    <input class="form-check-input" asp-for="Input.RememberMe" />
+                    <label class="form-check-label" asp-for="Input.RememberMe">Remember me</label>
+                </div>
+                <a id="forgot-password" asp-page="./ForgotPassword" class="forgot-link">Forgot Password?</a>
+            </div>
+
+            <button id="login-submit" type="submit" class="btn-lux">Log In</button>
+
+            <div class="auth-footer">
+                <p class="mb-2">Don't have an account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Sign Up</a></p>
+                <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" style="font-size:0.8rem; opacity:0.7;">Resend email confirmation</a>
+            </div>
         </form>
-
     </div>
 </div>
 
