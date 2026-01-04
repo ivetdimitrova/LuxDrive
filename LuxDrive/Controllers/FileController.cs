@@ -1,4 +1,5 @@
 ﻿using LuxDrive.Data;
+using FileEntity = LuxDrive.Data.Models.File;
 using LuxDrive.Services;
 using LuxDrive.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -27,9 +28,7 @@ namespace LuxDrive.Controllers
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
 
-            IEnumerable<Data.Models.File> files = await this.fileService
-                 .GetUserFilesAsync(Guid.Parse(userIdStr));
-
+            IEnumerable<FileEntity> files = await this.fileService.GetUserFilesAsync(userIdStr);
             return View(files);
         }
 
@@ -38,28 +37,20 @@ namespace LuxDrive.Controllers
         {
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
-            var userId = Guid.Parse(userIdStr);
 
-            var sharedFiles = await _dbContext.SharedFiles
-                .Where(sf => sf.ReceiverId == userId)
-                .Include(sf => sf.File)
-                .Select(sf => sf.File)
-                .OrderByDescending(f => f.UploadAt)
-                .ToListAsync();
-
+            IEnumerable<FileEntity> sharedFiles = await this.fileService.GetSharedWithMeFilesAsync(userIdStr);
             return View("Index", sharedFiles);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Share(Guid fileId, Guid receiverId)
+        public async Task<IActionResult> Share(Guid fileId, string receiverId)
         {
-            var userIdStr = GetUserId();
+            var userIdStr = GetUserId(); 
             if (userIdStr == null) return Unauthorized();
-            var senderId = Guid.Parse(userIdStr);
 
             try
             {
-                await fileService.ShareFileAsync(fileId, senderId, receiverId);
+                await fileService.ShareFileAsync(fileId, userIdStr, receiverId);
                 return Ok();
             }
             catch (Exception ex)
@@ -85,23 +76,17 @@ namespace LuxDrive.Controllers
             {
                 if (file == null || file.Length == 0) continue;
 
-              
                 Guid? fileId = await this.fileService.CreateFileAsync(userIdStr, file);
                 if (fileId == null) continue;
 
-               
                 string? extension = await this.fileService.GetFileExtensionAsync(fileId);
                 if (extension == null) continue;
 
-                var userId = Guid.Parse(userIdStr);
-
-                
-                var key = $"{userId}/{fileId}{extension}";
+                var key = $"{userIdStr}/{fileId}{extension}";
 
                 using var stream = file.OpenReadStream();
                 var url = await _spacesService.UploadAsync(stream, key, file.ContentType);
 
-               
                 await this.fileService.UpdateFileUrlAsync(fileId, url);
             }
 
@@ -121,17 +106,13 @@ namespace LuxDrive.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            bool isRenamed = await this.fileService.ChangeFileNameAsync(Guid.Parse(userIdStr), fileId, newName);
+            bool isRenamed = await this.fileService.ChangeFileNameAsync(userIdStr, fileId, newName);
 
-            if (!isRenamed)
-            {
-                return NotFound();
-            }
+            if (!isRenamed) return NotFound();
 
             return RedirectToAction(nameof(Index));
         }
 
-       
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
@@ -139,9 +120,7 @@ namespace LuxDrive.Controllers
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
 
-            var userId = Guid.Parse(userIdStr);
-
-            var file = await fileService.GetUserFileAsync(id, userId);
+            FileEntity? file = await fileService.GetUserFileAsync(id, userIdStr);
             if (file == null) return NotFound();
 
             try
@@ -155,10 +134,7 @@ namespace LuxDrive.Controllers
 
                 bool isDeleted = await fileService.RemoveFileAsync(file);
 
-                if (!isDeleted)
-                {
-                    return NotFound();
-                }
+                if (!isDeleted) return NotFound();
 
                 return RedirectToAction(nameof(Index));
             }
@@ -173,11 +149,12 @@ namespace LuxDrive.Controllers
         {
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
-            var userId = Guid.Parse(userIdStr);
+
+            if (!Guid.TryParse(userIdStr, out Guid userGuid)) return Unauthorized();
 
             foreach (var id in ids)
             {
-                var file = await _dbContext.Files.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userId);
+                var file = await _dbContext.Files.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userGuid);
                 if (file != null)
                 {
                     try
@@ -198,11 +175,10 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ShareMultiple(Guid receiverId, [FromBody] List<Guid> fileIds)
+        public async Task<IActionResult> ShareMultiple(string receiverId, [FromBody] List<Guid> fileIds)
         {
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
-            var senderId = Guid.Parse(userIdStr);
 
             try
             {
@@ -210,7 +186,7 @@ namespace LuxDrive.Controllers
                 {
                     try
                     {
-                        await fileService.ShareFileAsync(fileId, senderId, receiverId);
+                        await fileService.ShareFileAsync(fileId, userIdStr, receiverId);
                     }
                     catch
                     {
