@@ -4,11 +4,8 @@
     ViewData["Title"] = "LuxDrive";
 }
 
-
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="~/css/fileIndex.css" />
 
 <div class="lux-wrapper">
@@ -85,7 +82,6 @@
 
                         <div class="card-preview">
                             @{
-                               
                                 bool isImage = ext.Contains("jpg") || ext.Contains("jpeg") || ext.Contains("png") || ext.Contains("gif") || ext.Contains("webp");
                                 string iconClass = "fas fa-file"; string iconColor = "#95a5a6";
                                 if (ext.Contains("pdf")) { iconClass = "fas fa-file-pdf"; iconColor = "#e74c3c"; }
@@ -104,7 +100,16 @@
                         </div>
                         <div class="card-info">
                             <span class="file-name" title="@file.Name">@file.Name</span>
-                            <div class="file-meta">@(file.Extension ?? "") • @file.UploadAt.ToString("dd.MM")</div>
+                            <div class="file-meta">
+                                @(file.Extension ?? "") • @file.UploadAt.ToString("dd.MM")
+
+                                @if (!string.IsNullOrEmpty(file.SenderName))
+                                {
+                                    <div style="color: #d4af37; font-size: 11px; margin-top: 5px; font-weight: 600;">
+                                        <i class="fas fa-user-share"></i> От: @file.SenderName
+                                    </div>
+                                }
+                            </div>
                         </div>
 
                         <button class="card-menu-btn" onclick="toggleMenu(this)"><i class="fas fa-ellipsis-h"></i></button>
@@ -181,13 +186,10 @@
 
 <script src="~/js/luxdrive-scripts.js"></script>
 <script>
-
-        function filterFiles(e) {
+    function filterFiles(e) {
         e.preventDefault();
-
         const type = e.currentTarget.dataset.filter;
 
-        // active стил
         document.querySelectorAll('.lux-nav a').forEach(a => a.classList.remove('active'));
         e.currentTarget.classList.add('active');
 
@@ -200,8 +202,6 @@
         });
     }
 
-
-    // --- Rename Logic ---
     function promptRename(id, oldName) {
         let newName = prompt("Въведете ново име:", oldName);
         if (newName != null && newName !== "") {
@@ -211,7 +211,6 @@
         }
     }
 
-    // --- Share Logic ---
     let isBulkShare = false;
 
     function openShareModal(fileId) {
@@ -223,7 +222,7 @@
     }
 
     function openBulkShare() {
-        if(selectedFileIds.size === 0) return;
+        if (selectedFileIds.size === 0) return;
         isBulkShare = true;
         document.getElementById("shareModal").style.display = "block";
         loadFriendsForDropdown();
@@ -231,7 +230,7 @@
 
     async function submitShare() {
         const receiverId = document.getElementById('friendSelect').value;
-        if(!receiverId) return alert("Изберете приятел!");
+        if (!receiverId) return alert("Изберете приятел!");
 
         if (isBulkShare) {
             const ids = Array.from(selectedFileIds);
@@ -241,19 +240,18 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(ids)
                 });
-                if(response.ok) { alert("Файловете са изпратени!"); closeShareModal(); clearSelection(); }
+                if (response.ok) { alert("Файловете са изпратени!"); closeShareModal(); clearSelection(); }
                 else alert("Грешка при споделяне.");
-            } catch(e) { console.error(e); }
+            } catch (e) { console.error(e); }
         } else {
             const fileId = document.getElementById('fileIdToShare').value;
             try {
                 const response = await fetch(`/file/share?fileId=${fileId}&receiverId=${receiverId}`, { method: 'POST' });
-                if(response.ok) { alert("Файлът е изпратен!"); closeShareModal(); } else { alert("Грешка."); }
+                if (response.ok) { alert("Файлът е изпратен!"); closeShareModal(); } else { alert("Грешка."); }
             } catch (e) { console.error(e); }
         }
     }
 
-    // --- BULK SELECTION LOGIC ---
     const selectedFileIds = new Set();
     const bulkBar = document.getElementById('bulkActionsBar');
     const bulkCount = document.getElementById('bulkCount');
@@ -283,7 +281,7 @@
     }
 
     async function deleteSelectedFiles() {
-        if(!confirm(`Сигурни ли сте, че искате да изтриете ${selectedFileIds.size} файла?`)) return;
+        if (!confirm(`Сигурни ли сте, че искате да изтриете ${selectedFileIds.size} файла?`)) return;
         const ids = Array.from(selectedFileIds);
         try {
             const response = await fetch('/file/DeleteMultiple', {
@@ -291,24 +289,27 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(ids)
             });
-            if(response.ok) location.reload();
+            if (response.ok) location.reload();
             else alert("Възникна грешка при изтриването.");
-        } catch(e) { console.error(e); }
+        } catch (e) { console.error(e); }
     }
 
-    // --- Friends UI ---
     function openFriendsModal() { document.getElementById("friendsModal").style.display = "block"; switchTab('friends'); }
     function closeFriendsModal() { document.getElementById("friendsModal").style.display = "none"; }
     function closeShareModal() { document.getElementById("shareModal").style.display = "none"; }
-    window.onclick = function(e) { if(e.target == document.getElementById("friendsModal")) closeFriendsModal(); if(e.target == document.getElementById("shareModal")) closeShareModal(); }
+
+    window.onclick = function (e) {
+        if (e.target == document.getElementById("friendsModal")) closeFriendsModal();
+        if (e.target == document.getElementById("shareModal")) closeShareModal();
+    }
 
     function switchTab(tabName) {
         document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('tab-' + tabName).style.display = 'block';
-        if(tabName === 'friends') { document.querySelectorAll('.tab-btn')[0].classList.add('active'); loadMyFriends(); }
-        if(tabName === 'add') { document.querySelectorAll('.tab-btn')[1].classList.add('active'); loadSentRequests(); }
-        if(tabName === 'pending') { document.querySelectorAll('.tab-btn')[2].classList.add('active'); loadPendingRequests(); }
+        if (tabName === 'friends') { document.querySelectorAll('.tab-btn')[0].classList.add('active'); loadMyFriends(); }
+        if (tabName === 'add') { document.querySelectorAll('.tab-btn')[1].classList.add('active'); loadSentRequests(); }
+        if (tabName === 'pending') { document.querySelectorAll('.tab-btn')[2].classList.add('active'); loadPendingRequests(); }
     }
 
     function getAvatar(name) {
@@ -323,14 +324,14 @@
             const response = await fetch('/api/friends/list');
             const friends = await response.json();
             container.innerHTML = '';
-            if(friends.length === 0) {
+            if (friends.length === 0) {
                 container.innerHTML = `<div style="text-align:center; color:#666; margin-top:40px;"><i class="fas fa-user-friends" style="font-size:40px; margin-bottom:15px; opacity:0.5;"></i><p>Все още нямате приятели.</p><button onclick="switchTab('add')" style="background:transparent; color:#d4af37; border:none; cursor:pointer; text-decoration:underline;">Добави някого сега</button></div>`;
                 return;
             }
             friends.forEach(f => {
                 container.innerHTML += `<div class="friend-card">${getAvatar(f.username)}<div class="friend-info"><span class="friend-name">${f.username}</span><span class="friend-email">${f.email}</span></div><button class="btn-remove-friend" onclick="removeFriend('${f.id}', '${f.username}')" title="Премахни"><i class="fas fa-trash-alt"></i></button></div>`;
             });
-        } catch(e) { container.innerHTML = '<p style="color:red; text-align:center;">Грешка.</p>'; }
+        } catch (e) { container.innerHTML = '<p style="color:red; text-align:center;">Грешка.</p>'; }
     }
 
     async function loadSentRequests() {
@@ -340,19 +341,19 @@
             const response = await fetch('/api/friends/sent');
             const requests = await response.json();
             container.innerHTML = '';
-            if(requests.length === 0) { container.innerHTML = '<small style="color:#555;">Нямате чакащи изпратени покани.</small>'; return; }
+            if (requests.length === 0) { container.innerHTML = '<small style="color:#555;">Нямате чакащи изпратени покани.</small>'; return; }
             requests.forEach(r => {
                 container.innerHTML += `<div class="friend-card" style="padding:8px; background:#222;">${getAvatar(r.receiverName)}<div class="friend-info"><span class="friend-name" style="font-size:13px;">${r.receiverName}</span><span class="friend-email" style="font-size:11px;">${r.receiverEmail}</span></div><span class="status-badge"><i class="fas fa-clock"></i> Чака</span></div>`;
             });
-        } catch(e) { container.innerHTML = '<small>Грешка</small>'; }
+        } catch (e) { container.innerHTML = '<small>Грешка</small>'; }
     }
 
     async function removeFriend(id, name) {
-        if(!confirm(`Сигурни ли сте, че искате да премахнете ${name} от приятели?`)) return;
+        if (!confirm(`Сигурни ли сте, че искате да премахнете ${name} от приятели?`)) return;
         try {
             const response = await fetch(`/api/friends/remove?friendId=${id}`, { method: 'POST' });
-            if(response.ok) loadMyFriends(); else alert("Възникна грешка.");
-        } catch(e) { console.error(e); }
+            if (response.ok) loadMyFriends(); else alert("Възникна грешка.");
+        } catch (e) { console.error(e); }
     }
 
     async function loadPendingRequests() {
@@ -364,7 +365,7 @@
             d.forEach(q => {
                 c.innerHTML += `<div class="friend-card">${getAvatar(q.senderName)}<div class="friend-info"><span class="friend-name">${q.senderName}</span><span class="friend-email">${q.senderEmail}</span></div><button class="btn-accept" onclick="acceptRequestById(${q.id})"><i class="fas fa-check"></i> Приеми</button></div>`;
             });
-        } catch(e){}
+        } catch (e) { }
     }
 
     async function loadFriendsForDropdown() {
@@ -375,20 +376,24 @@
             const d = await r.json();
             s.innerHTML = d.length ? '' : '<option value="">Нямате приятели</option>';
             d.forEach(f => { let o = document.createElement("option"); o.value = f.id; o.text = f.username; s.appendChild(o); });
-        } catch(e){ s.innerHTML = '<option>Грешка</option>'; }
+        } catch (e) { s.innerHTML = '<option>Грешка</option>'; }
     }
 
     async function sendFriendRequestByEmail() {
         const email = document.getElementById('friendEmailInput').value;
-        if(!email) return alert("Въведете email");
+        if (!email) return alert("Въведете email");
         try {
             const s = await fetch(`/api/friends/search?email=${encodeURIComponent(email)}`);
-            if(!s.ok) return alert("Няма такъв потребител");
+            if (!s.ok) return alert("Няма такъв потребител");
             const u = await s.json();
             const r = await fetch(`/api/friends/request?receiverId=${u.id}`, { method: 'POST' });
-            if(r.ok) { alert("Покана изпратена!"); document.getElementById('friendEmailInput').value=''; loadSentRequests(); }
+            if (r.ok) { alert("Покана изпратена!"); document.getElementById('friendEmailInput').value = ''; loadSentRequests(); }
             else alert(await r.text());
-        } catch(e){}
+        } catch (e) { }
     }
-    async function acceptRequestById(id) { await fetch(`/api/friends/accept?requestId=${id}`, { method: 'POST' }); loadPendingRequests(); }
+
+    async function acceptRequestById(id) {
+        await fetch(`/api/friends/accept?requestId=${id}`, { method: 'POST' });
+        loadPendingRequests();
+    }
 </script>
