@@ -1,4 +1,6 @@
-﻿namespace LuxDrive.Data.Models
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace LuxDrive.Data.Models
 {
     public class File
     {
@@ -11,5 +13,7 @@
 
         public Guid UserId { get; set; }
         public virtual ApplicationUser User { get; set; } = null!;
+        [NotMapped]
+        public string? SenderName { get; set; }
     }
 }
