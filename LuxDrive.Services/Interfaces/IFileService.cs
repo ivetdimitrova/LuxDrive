@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LuxDrive.Services.Interfaces
 {
@@ -7,13 +10,16 @@ namespace LuxDrive.Services.Interfaces
         Task<Guid?> CreateFileAsync(string userId, IFormFile file);
         Task<string?> GetFileExtensionAsync(Guid? fileId);
         Task<bool> UpdateFileUrlAsync(Guid? fileId, string url);
-        Task ShareFileAsync(Guid fileId, Guid senderId, Guid receiverId);
-        Task<IEnumerable<Data.Models.File>> GetUserFilesAsync(Guid userId);
 
-        Task<bool> ChangeFileNameAsync(Guid userId,Guid fileId,string newName);
+        Task ShareFileAsync(Guid fileId, string senderId, string receiverId);
 
-        Task<Data.Models.File?> GetUserFileAsync(Guid fileId, Guid userId);
+        Task<IEnumerable<LuxDrive.Data.Models.File>> GetUserFilesAsync(string userId);
+        Task<IEnumerable<LuxDrive.Data.Models.File>> GetSharedWithMeFilesAsync(string userId);
 
-        Task<bool> RemoveFileAsync(Data.Models.File file);
+        Task<bool> ChangeFileNameAsync(string userId, Guid fileId, string newName);
+
+        Task<LuxDrive.Data.Models.File?> GetUserFileAsync(Guid fileId, string userId);
+
+        Task<bool> RemoveFileAsync(LuxDrive.Data.Models.File file);
     }
 }
