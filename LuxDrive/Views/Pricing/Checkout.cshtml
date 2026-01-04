@@ -1,26 +1,207 @@
 ﻿@{
     ViewData["Title"] = "Checkout";
-    var plan = ViewBag.Plan?.ToString() ?? "unknown";
+
+    var plan = ViewBag.Plan?.ToString() ?? "Basic";
+
+    string price = "4.99";
+    if (plan.ToLower().Contains("pro")) { price = "14.99"; }
+    else if (plan.ToLower().Contains("enter")) { price = "Custom"; }
 }
 
-<div class="checkout-wrapper">
-    <div class="checkout-container">
+<style>
+    .lux-payment-wrapper {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
+        padding: 20px;
+        position: relative;
+        overflow: hidden;
+    }
 
-        <h1>Payment for @plan plan</h1>
-        <p>Enter your card details below to complete your purchase.</p>
+        .lux-payment-wrapper::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(198, 166, 100, 0.15) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+    .lux-card {
+        background: rgba(20, 20, 20, 0.6);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-top: 1px solid rgba(198, 166, 100, 0.3);
+        border-radius: 20px;
+        padding: 50px 40px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        position: relative;
+        z-index: 1;
+        animation: fadeUp 0.8s ease-out;
+    }
+
+    @@keyframes fadeUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+
+    .checkout-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+
+        .checkout-header h2 {
+            color: #fff;
+            font-weight: 700;
+            text-transform: capitalize;
+        }
+
+        .checkout-header p {
+            color: #888;
+        }
+
+    .price-display {
+        color: #c6a664;
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin-top: 10px;
+        display: block;
+    }
+
+    .form-floating {
+        position: relative;
+        margin-bottom: 20px;
+    }
+
+        .form-floating input.form-control {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            color: #fff !important;
+            border-radius: 10px;
+            height: 55px;
+        }
+
+            .form-floating input.form-control:focus {
+                background-color: rgba(0, 0, 0, 0.6) !important;
+                border-color: #c6a664 !important;
+                box-shadow: 0 0 10px rgba(198, 166, 100, 0.2) !important;
+                color: #fff !important;
+            }
+
+        .form-floating label {
+            color: #888 !important;
+            padding-left: 15px;
+        }
+
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label {
+            color: #c6a664 !important;
+            opacity: 0.9;
+            transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+        }
+
+    .row-gaps {
+        display: flex;
+        gap: 15px;
+    }
+
+    .col-half {
+        flex: 1;
+    }
+
+    .btn-lux {
+        width: 100%;
+        padding: 14px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #000;
+        background: linear-gradient(135deg, #aa771c 0%, #fcf6ba 50%, #aa771c 100%);
+        background-size: 200% auto;
+        border: none;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: 0.4s;
+        box-shadow: 0 5px 15px rgba(198, 166, 100, 0.3);
+        margin-top: 10px;
+    }
+
+        .btn-lux:hover {
+            background-position: right center;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(198, 166, 100, 0.5);
+        }
+
+    .secure-badge {
+        text-align: center;
+        margin-top: 20px;
+        color: #666;
+        font-size: 0.8rem;
+    }
+</style>
+
+<div class="lux-payment-wrapper">
+    <div class="lux-card">
+
+        <div class="checkout-header">
+            <h2>@plan Plan</h2>
+            <p>Secure Credit Card Payment</p>
+            <span class="price-display">€@price</span>
+        </div>
 
         <form method="post" action="/Payment/Process">
 
-            <label>Card Number:</label>
-            <input type="text" name="CardNumber" required />
+            <div class="form-floating">
+                <input type="text" class="form-control" id="cardName" name="CardName" placeholder="Name on Card" required>
+                <label for="cardName">Name on Card</label>
+            </div>
 
-            <label>Expiration Date:</label>
-            <input type="text" name="Expiry" required />
+            <div class="form-floating">
+                <input type="text" class="form-control" id="cardNumber" name="CardNumber" placeholder="0000 0000 0000 0000" required>
+                <label for="cardNumber">Card Number</label>
+            </div>
 
-            <label>CVC:</label>
-            <input type="text" name="CVC" required />
+            <div class="row-gaps">
+                <div class="col-half">
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="expiry" name="Expiry" placeholder="MM/YY" required>
+                        <label for="expiry">Expiry (MM/YY)</label>
+                    </div>
+                </div>
+                <div class="col-half">
+                    <div class="form-floating">
+                        <input type="password" class="form-control" id="cvc" name="CVC" placeholder="123" required>
+                        <label for="cvc">CVC / CVV</label>
+                    </div>
+                </div>
+            </div>
 
-            <button type="submit" class="checkout-btn">Pay Now</button>
+            <button type="submit" class="btn-lux">Pay Now</button>
+
+            <div class="secure-badge">
+                <i class="fas fa-lock" style="color:#c6a664;"></i>
+                Encrypted & Secure Transaction
+            </div>
 
         </form>
 
