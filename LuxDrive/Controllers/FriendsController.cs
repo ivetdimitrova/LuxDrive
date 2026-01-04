@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using System;
+using System.Threading.Tasks;
 
 namespace LuxDrive.Controllers
 {
@@ -11,7 +13,7 @@ namespace LuxDrive.Controllers
     public class FriendsController : ControllerBase
     {
         private readonly IFriendService _friendService;
-        private readonly IFileService _fileService; 
+        private readonly IFileService _fileService;
 
         public FriendsController(IFriendService friendService, IFileService fileService)
         {
@@ -78,7 +80,7 @@ namespace LuxDrive.Controllers
         {
             try
             {
-                await _fileService.ShareFileAsync(fileId, CurrentUserId, receiverId);
+                await _fileService.ShareFileAsync(fileId, CurrentUserId.ToString(), receiverId.ToString());
                 return Ok();
             }
             catch (Exception ex)
@@ -86,6 +88,7 @@ namespace LuxDrive.Controllers
                 return BadRequest("Грешка при споделяне: " + ex.Message);
             }
         }
+
         [HttpPost("remove")]
         public async Task<IActionResult> RemoveFriend(Guid friendId)
         {
@@ -99,6 +102,7 @@ namespace LuxDrive.Controllers
                 return BadRequest("Грешка при премахване: " + ex.Message);
             }
         }
+
         [HttpGet("sent")]
         public async Task<IActionResult> GetSentRequests()
         {
