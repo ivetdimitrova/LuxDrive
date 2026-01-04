@@ -17,7 +17,6 @@ namespace LuxDrive.Data
         }
 
         public virtual DbSet<FileEntity> Files { get; set; } = null!;
-
         public DbSet<FriendRequest> FriendRequests { get; set; } = null!;
         public DbSet<UserFriend> UserFriends { get; set; } = null!;
         public DbSet<SharedFile> SharedFiles { get; set; } = null!;
@@ -30,8 +29,8 @@ namespace LuxDrive.Data
             builder.ApplyConfiguration(new FileConfiguration());
             builder.ApplyConfiguration(new UserFriendConfiguration());
 
-
-            
+            builder.ApplyConfiguration(new FriendRequestConfiguration());
+            builder.ApplyConfiguration(new SharedFileConfiguration());
         }
     }
 }
