@@ -66,7 +66,7 @@ function bulkDownload() {
                 if (url) {
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = ''; 
+                    a.download = '';
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
@@ -82,9 +82,25 @@ function bulkShare() { if (!selection.size) return; isBulk = true; document.getE
 function closeShare() { document.getElementById('shareModal').style.display = 'none'; }
 
 async function loadShareList() {
-    const sel = document.getElementById('shareSelect'); sel.innerHTML = '<option>Loading...</option>';
-    const r = await fetch('/api/friends/list'); const d = await r.json();
-    sel.innerHTML = d.map(f => `<option value="${f.id}">${f.username}</option>`).join('');
+    const sel = document.getElementById('shareSelect');
+    sel.innerHTML = '<option>Loading...</option>';
+
+    try {
+        const r = await fetch('/api/friends/list');
+        const d = await r.json();
+
+        sel.innerHTML = d.map(f => {
+            const displayName = (f.firstName && f.lastName)
+                ? `${f.firstName} ${f.lastName}`
+                : f.username;
+
+            return `<option value="${f.id}">${displayName}</option>`;
+        }).join('');
+
+    } catch (e) {
+        console.error("Error loading share list:", e);
+        sel.innerHTML = '<option>Error loading friends</option>';
+    }
 }
 
 async function confirmShare() {
@@ -123,7 +139,22 @@ async function loadConnections() {
             return;
         }
 
-        c.innerHTML = d.map(f => `<div class="connection-card"><div class="user-avatar">${f.username[0]}<div class="status-dot"></div></div><div class="user-details"><span class="user-name">${f.username}</span><span class="user-email">${f.email}</span></div><div class="card-tools"><button class="tool-btn del" onclick="removeFriend('${f.id}')"><i class="fas fa-user-minus"></i></button></div></div>`).join('');
+        c.innerHTML = d.map(f => {
+            const displayName = (f.firstName && f.lastName) ? `${f.firstName} ${f.lastName}` : f.username;
+
+            return `<div class="connection-card">
+                <div class="user-avatar">${f.username[0]}<div class="status-dot"></div></div>
+                <div class="user-details">
+                    <span class="user-name">${displayName}</span>
+                    <span class="user-email">${f.email}</span>
+                </div>
+                <div class="card-tools">
+                    <button class="tool-btn del" onclick="removeFriend('${f.id}')">
+                        <i class="fas fa-user-minus"></i>
+                    </button>
+                </div>
+            </div>`;
+        }).join('');
     } catch (e) { c.innerHTML = 'Error.'; }
 }
 
@@ -141,15 +172,19 @@ async function loadReqs() {
         return;
     }
 
-    c.innerHTML = d.map(q => `
+    c.innerHTML = d.map(q => {
+        const displayName = (q.firstName && q.lastName) ? `${q.firstName} ${q.lastName}` : q.senderName;
+
+        return `
         <div class="req-card">
             <div class="user-avatar" style="width:35px; height:35px; font-size:0.9rem;">${q.senderName[0]}</div>
-            <div style="margin-left:10px; color:#fff;">${q.senderName}</div>
+            <div style="margin-left:10px; color:#fff;">${displayName}</div>
             <div class="req-actions">
                 <button class="btn-yes" onclick="accept('${q.id}')">Accept</button>
                 <button class="btn-no" onclick="reject('${q.id}')">Remove</button>
             </div>
-        </div>`).join('');
+        </div>`;
+    }).join('');
 }
 
 async function loadSent() {
@@ -157,7 +192,14 @@ async function loadSent() {
     const r = await fetch('/api/friends/sent');
     const d = await r.json();
 
-    c.innerHTML = d.length ? d.map(r => `<div style="padding:10px; border-bottom:1px solid #222; display:flex; justify-content:space-between;"><span style="color:#aaa">${r.receiverName}</span><span style="color:var(--gold); font-size:0.8rem;">Pending</span></div>`).join('') :
+    c.innerHTML = d.length ? d.map(r => {
+        const displayName = (r.firstName && r.lastName) ? `${r.firstName} ${r.lastName}` : r.receiverName;
+
+        return `<div style="padding:10px; border-bottom:1px solid #222; display:flex; justify-content:space-between;">
+            <span style="color:#aaa">${displayName}</span>
+            <span style="color:var(--gold); font-size:0.8rem;">Pending</span>
+        </div>`;
+    }).join('') :
         `<div style="text-align:center; padding:20px; color:#555;">
         <i class="fas fa-paper-plane" style="font-size:1.5rem; margin-bottom:10px; opacity:0.4; display:block;"></i>
         <span style="font-size: 0.85rem;">There are no pending acceptance requests submitted.</span>
