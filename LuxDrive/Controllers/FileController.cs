@@ -94,23 +94,21 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Rename(Guid fileId, string newName)
+        public async Task<IActionResult> Rename(Guid id, string newName) 
         {
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
 
             if (string.IsNullOrWhiteSpace(newName))
             {
-                TempData["UploadError"] = "Името не може да е празно.";
-                return RedirectToAction(nameof(Index));
+                return BadRequest("Името не може да е празно.");
             }
 
-            bool isRenamed = await this.fileService.ChangeFileNameAsync(userIdStr, fileId, newName);
+            bool isRenamed = await this.fileService.ChangeFileNameAsync(userIdStr, id, newName);
 
             if (!isRenamed) return NotFound();
 
-            return RedirectToAction(nameof(Index));
+            return Ok();
         }
 
         [HttpPost]
@@ -200,5 +198,6 @@ namespace LuxDrive.Controllers
                 return BadRequest("Грешка при споделяне.");
             }
         }
+
     }
 }
