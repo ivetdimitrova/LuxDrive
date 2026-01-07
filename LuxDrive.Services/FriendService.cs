@@ -59,13 +59,16 @@ namespace LuxDrive.Services
 
         public async Task RejectRequestAsync(int requestId)
         {
-            var request = await _context.FriendRequests
-                .FirstOrDefaultAsync(x => x.Id == requestId);
+            var request = await _context.FriendRequests.FindAsync(requestId);
 
-            if (request != null && request.Status == FriendRequestStatus.Pending)
+            if (request != null)
             {
-                request.Status = FriendRequestStatus.Rejected;
+                _context.FriendRequests.Remove(request);
                 await _context.SaveChangesAsync();
+            }
+            else
+            {
+                throw new Exception("Заявката не е намерена.");
             }
         }
 
