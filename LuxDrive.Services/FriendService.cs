@@ -26,7 +26,7 @@ namespace LuxDrive.Services
             bool exists = await _context.FriendRequests
                 .AnyAsync(x => x.SenderId == senderId && x.ReceiverId == receiverId && x.Status == FriendRequestStatus.Pending);
 
-            if (exists) return; 
+            if (exists) return;
 
             var request = new FriendRequest
             {
@@ -75,13 +75,15 @@ namespace LuxDrive.Services
         public async Task<IEnumerable<object>> GetPendingRequestsAsync(Guid userId)
         {
             return await _context.FriendRequests
-                .Include(r => r.Sender) 
+                .Include(r => r.Sender)
                 .Where(r => r.ReceiverId == userId && r.Status == FriendRequestStatus.Pending)
                 .Select(r => new
                 {
-                    Id = r.Id,                    
-                    SenderName = r.Sender.UserName, 
-                    SenderEmail = r.Sender.Email,   
+                    Id = r.Id,
+                    SenderName = r.Sender.UserName,
+                    SenderEmail = r.Sender.Email,
+                    FirstName = r.Sender.FirstName,
+                    LastName = r.Sender.LastName,
                     SentOn = r.CreatedOn
                 })
                 .ToListAsync();
@@ -101,10 +103,13 @@ namespace LuxDrive.Services
                 {
                     Id = uf.FriendId,
                     Username = uf.Friend.UserName,
-                    Email = uf.Friend.Email
+                    Email = uf.Friend.Email,
+                    FirstName = uf.Friend.FirstName,
+                    LastName = uf.Friend.LastName
                 })
                 .ToListAsync();
         }
+
         public async Task RemoveFriendAsync(Guid userId, Guid friendId)
         {
             var friendship1 = await _context.UserFriends
@@ -118,16 +123,19 @@ namespace LuxDrive.Services
 
             await _context.SaveChangesAsync();
         }
+
         public async Task<IEnumerable<object>> GetSentPendingRequestsAsync(Guid userId)
         {
             return await _context.FriendRequests
-                .Include(r => r.Receiver) 
+                .Include(r => r.Receiver)
                 .Where(r => r.SenderId == userId && r.Status == FriendRequestStatus.Pending)
                 .Select(r => new
                 {
                     Id = r.Id,
                     ReceiverName = r.Receiver.UserName,
                     ReceiverEmail = r.Receiver.Email,
+                    FirstName = r.Receiver.FirstName,
+                    LastName = r.Receiver.LastName,
                     SentOn = r.CreatedOn
                 })
                 .ToListAsync();
