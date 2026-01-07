@@ -3,6 +3,14 @@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
+@{
+    var user = await UserManager.GetUserAsync(User);
+
+    var displayName = user != null && !string.IsNullOrEmpty(user.FirstName)
+        ? $"{user.FirstName} {user.LastName}"
+        : User.Identity?.Name;
+}
+
 <ul class="navbar-nav" style="display:flex;align-items:center;list-style:none;margin:0;padding:0;gap:20px;">
     @if (SignInManager.IsSignedIn(User))
     {
@@ -11,7 +19,7 @@
                asp-area="Identity"
                asp-page="/Account/Manage/Index"
                style="text-decoration:none;">
-                Hello @User.Identity?.Name!
+                Hello @displayName!
             </a>
         </li>
 
