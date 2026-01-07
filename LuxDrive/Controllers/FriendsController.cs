@@ -109,5 +109,18 @@ namespace LuxDrive.Controllers
             var requests = await _friendService.GetSentPendingRequestsAsync(CurrentUserId);
             return Ok(requests);
         }
+        [HttpPost("reject")]
+        public async Task<IActionResult> Reject(int requestId)
+        {
+            try
+            {
+                await _friendService.RejectRequestAsync(requestId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
