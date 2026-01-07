@@ -5,6 +5,7 @@ using LuxDrive.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace LuxDrive.Controllers
 {
@@ -14,6 +15,8 @@ namespace LuxDrive.Controllers
         private readonly LuxDriveDbContext _dbContext;
         private readonly SpacesService _spacesService;
         private readonly IFileService fileService;
+
+        private const long MaxStorageBytes = 10L * 1024 * 1024 * 1024;
 
         public FileController(LuxDriveDbContext dbContext, SpacesService spacesService, IFileService fileService)
         {
@@ -29,6 +32,9 @@ namespace LuxDrive.Controllers
             if (userIdStr == null) return Unauthorized();
 
             IEnumerable<FileEntity> files = await this.fileService.GetUserFilesAsync(userIdStr);
+
+            CalculateStorageUsage(files);
+
             return View(files);
         }
 
@@ -39,24 +45,11 @@ namespace LuxDrive.Controllers
             if (userIdStr == null) return Unauthorized();
 
             IEnumerable<FileEntity> sharedFiles = await this.fileService.GetSharedWithMeFilesAsync(userIdStr);
+
+            var userFiles = await this.fileService.GetUserFilesAsync(userIdStr);
+            CalculateStorageUsage(userFiles);
+
             return View("Index", sharedFiles);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Share(Guid fileId, string receiverId)
-        {
-            var userIdStr = GetUserId(); 
-            if (userIdStr == null) return Unauthorized();
-
-            try
-            {
-                await fileService.ShareFileAsync(fileId, userIdStr, receiverId);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest("Грешка при споделяне: " + ex.Message);
-            }
         }
 
         [HttpPost]
@@ -69,6 +62,16 @@ namespace LuxDrive.Controllers
             if (files == null || files.Count == 0)
             {
                 TempData["UploadError"] = "Избери поне един файл.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var userFiles = await this.fileService.GetUserFilesAsync(userIdStr);
+            long currentUsedBytes = userFiles.Sum(f => f.Size);
+            long newFilesBytes = files.Sum(f => f.Length);
+
+            if (currentUsedBytes + newFilesBytes > MaxStorageBytes)
+            {
+                TempData["UploadError"] = $"Нямате достатъчно място! Опитвате се да качите {FormatBytes(newFilesBytes)}, а разполагате с {FormatBytes(MaxStorageBytes - currentUsedBytes)}.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -94,7 +97,7 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Rename(Guid id, string newName) 
+        public async Task<IActionResult> Rename(Guid id, string newName)
         {
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
@@ -199,5 +202,23 @@ namespace LuxDrive.Controllers
             }
         }
 
+        private void CalculateStorageUsage(IEnumerable<FileEntity> files)
+        {
+            long totalUsedBytes = files.Sum(f => f.Size);
+            double percent = ((double)totalUsedBytes / MaxStorageBytes) * 100;
+
+            if (percent > 100) percent = 100;
+
+            ViewBag.StoragePercent = (int)percent;
+            ViewBag.StorageText = $"{FormatBytes(totalUsedBytes)} / 10 GB";
+        }
+
+        private string FormatBytes(long bytes)
+        {
+            double mb = (bytes / 1024.0) / 1024.0;
+            if (mb < 1024) return $"{mb:F1} MB";
+            double gb = mb / 1024.0;
+            return $"{gb:F2} GB";
+        }
     }
 }
