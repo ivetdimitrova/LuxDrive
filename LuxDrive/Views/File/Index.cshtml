@@ -14,11 +14,9 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="~/css/fileIndex.css" />
 
 <div class="app-wrapper">
-
     <div class="particles-container">
         <div class="particles-1"></div>
         <div class="particles-2"></div>
@@ -28,15 +26,12 @@
     <aside class="sidebar">
         <div class="nav-section" style="margin-top: 20px;">
             <div class="nav-title">Menu</div>
-
             <a href="@Url.Action("Index", "Home")" class="nav-item @(currentAction == "Index" ? "active" : "")">
                 <i class="fas fa-house"></i> All Files
             </a>
-
             <a href="@Url.Action("SharedWithMe", "File")" class="nav-item @(currentAction == "SharedWithMe" ? "active" : "")">
                 <i class="fas fa-share-nodes"></i> Shared
             </a>
-
             <a href="#" class="nav-item" onclick="openHub()"><i class="fas fa-user-group"></i> Friends</a>
         </div>
 
@@ -49,14 +44,21 @@
         </div>
 
         <div class="storage-box">
-            <div class="storage-header"><span>Storage</span><span style="color:var(--gold)">45%</span></div>
-            <div class="progress-track"><div class="progress-bar"></div></div>
+            <div class="storage-header">
+                <span>Storage</span>
+                <span style="color:var(--gold)">@ViewBag.StoragePercent%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-bar" style="width: @ViewBag.StoragePercent%"></div>
+            </div>
+            <p style="font-size: 11px; color: #666; margin-top: 5px; text-align: center; margin-bottom: 10px;">
+                @ViewBag.StorageText
+            </p>
             <a href="/Pricing" class="upgrade-link">Upgrade Plan</a>
         </div>
     </aside>
 
     <div class="content">
-
         <div class="top-header">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
@@ -70,6 +72,13 @@
                 <input type="file" id="file-upload" name="files" multiple style="display:none;" onchange="this.form.submit()" />
             </form>
         </div>
+
+        @if (TempData["UploadError"] != null)
+        {
+            <div style="background: rgba(255, 77, 77, 0.1); border-left: 4px solid #ff4d4d; color: #ff4d4d; padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 0.9rem;">
+                <i class="fas fa-exclamation-circle"></i> @TempData["UploadError"]
+            </div>
+        }
 
         <div class="stats-grid">
             <div class="stat-card"><div class="stat-info"><h5>All Files</h5><span>@totalFiles</span></div><div class="stat-icon"><i class="fas fa-hard-drive"></i></div></div>
@@ -148,7 +157,6 @@
 
         <div id="bulkBar" class="bulk-bar">
             <span id="bulkCount" style="color:#fff; font-weight:700;">0 Selected</span>
-
             <button onclick="bulkDownload()" style="background:none; border:none; color:#ccc; cursor:pointer;"><i class="fas fa-download"></i> Download</button>
             <button onclick="bulkShare()" style="background:none; border:none; color:#ccc; cursor:pointer;"><i class="fas fa-share"></i> Share</button>
 
@@ -199,6 +207,9 @@
     </div>
 </div>
 
-<form id="delForm" asp-controller="File" asp-action="Delete" method="post" style="display:none;">@Html.AntiForgeryToken() <input type="hidden" name="id" id="delId"></form>
+<form id="delForm" asp-controller="File" asp-action="Delete" method="post" style="display:none;">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" id="delId">
+</form>
 
 <script src="~/js/luxdrive-scripts.js"></script>
