@@ -5,7 +5,6 @@
 
 @{
     var user = await UserManager.GetUserAsync(User);
-
     var displayName = user != null && !string.IsNullOrEmpty(user.FirstName)
         ? $"{user.FirstName} {user.LastName}"
         : User.Identity?.Name;
@@ -15,21 +14,15 @@
     @if (SignInManager.IsSignedIn(User))
     {
         <li class="nav-item">
-            <a class="nav-link text-gold"
-               asp-area="Identity"
-               asp-page="/Account/Manage/Index"
-               style="text-decoration:none;">
+            <a class="nav-link text-gold" asp-area="Identity" asp-page="/Account/Manage/Index">
                 Hello @displayName!
             </a>
         </li>
-
         <li class="nav-item">
             <form asp-area="Identity" asp-page="/Account/Logout"
                   asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })"
-                  style="margin:0;">
-                <button type="submit"
-                        class="nav-link text-gold"
-                        style="background:none;border:none;padding:0;cursor:pointer;text-decoration:none;">
+                  method="post" style="margin:0;">
+                <button type="submit" class="nav-link text-gold" style="background:none;border:none;padding:0;cursor:pointer;">
                     Logout
                 </button>
             </form>
@@ -38,21 +31,10 @@
     else
     {
         <li class="nav-item">
-            <a class="nav-link text-gold"
-               asp-area="Identity"
-               asp-page="/Account/Register"
-               style="text-decoration:none;">
-                Register
-            </a>
+            <a class="nav-link text-gold" asp-area="Identity" asp-page="/Account/Register">Register</a>
         </li>
-
         <li class="nav-item">
-            <a class="nav-link text-gold"
-               asp-area="Identity"
-               asp-page="/Account/Login"
-               style="text-decoration:none;">
-                Login
-            </a>
+            <a class="nav-link text-gold" asp-area="Identity" asp-page="/Account/Login">Login</a>
         </li>
     }
 </ul>
