@@ -2,55 +2,106 @@
     ViewData["Title"] = "Pricing - LuxDrive";
 }
 
-<section class="hero">
+@section Styles {
+    <link rel="stylesheet" href="~/css/pricing.css" asp-append-version="true" />
+}
+
+<section class="hero" id="hero-section">
+    <div class="hero-bg"></div>
+    <div class="spotlight"></div>
+    <canvas id="particles-canvas"></canvas>
+
+    <img src="/images/gold-cloud.png" class="hero-cloud cloud-1" data-speed="0.05" data-depth="0.2" />
+    <img src="/images/gold-cloud.png" class="hero-cloud cloud-2" data-speed="-0.06" data-depth="0.3" />
+    <img src="/images/gold-cloud.png" class="hero-cloud cloud-3" data-speed="0.04" data-depth="0.5" />
+    <img src="/images/gold-cloud.png" class="hero-cloud cloud-5" data-speed="0.01" data-depth="0.1" />
+
     <div class="hero-text">
-        <h1><span class="gold">LuxDrive</span> Pricing</h1>
-        <p>Choose the plan that fits your digital lifestyle — from personal use to enterprise scale.</p>
+        <h1>Select Your <span class="gold-shimmer">Plan</span></h1>
+        <p>Unlock the full potential of LuxDrive. Simple pricing, no hidden fees.</p>
     </div>
 </section>
 
-<section class="features" style="padding-top:60px;">
+<section class="features">
 
-    <div class="feature show">
-        <h2>💼 Basic Plan</h2>
-        <p>50 GB of secure storage, basic file sharing, and 24/7 support.</p>
-        <p style="color:#c6a664; font-size:1.2rem; margin-top:10px;">€4.99 / month</p>
-        @if (User.Identity.IsAuthenticated)
+    <div class="feature" style="transition-delay: 0s;">
+        <div>
+            <h2>🎁 Free Plan</h2>
+            <p>10 GB secure cloud storage. Perfect for getting started.</p>
+            <div class="price-tag">
+                €0.00 <span>/ free</span>
+            </div>
+        </div>
+
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            <a href="/Payment/Checkout?plan=basic" class="btn" style="margin-top:20px;">Get Started</a>
+            <button class="btn-glow" style="background: rgba(255,255,255,0.05); color: #888; border-color: #333; cursor: default;">Current Plan</button>
         }
         else
         {
-            <a href="/Account/Login?returnUrl=/Payment/Checkout?plan=basic" class="btn" style="margin-top:20px;">Get Started</a>
+            <a asp-area="Identity" asp-page="/Account/Register" class="btn-glow">Sign Up Free</a>
         }
     </div>
 
-    <div class="feature show">
-        <h2>🚀 Pro Plan</h2>
-        <p>2 TB of cloud storage, priority support, and advanced sync features.</p>
-        <p style="color:#c6a664; font-size:1.2rem; margin-top:10px;">€14.99 / month</p>
-        @if (User.Identity.IsAuthenticated)
+    <div class="feature" style="transition-delay: 0.2s;">
+        <div>
+            <h2>💼 Basic Plan</h2>
+            <p>Perfect for personal backup. 50 GB secure storage & 24/7 support.</p>
+            <div class="price-tag">
+                €4.99 <span>/ mo</span>
+            </div>
+        </div>
+
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            <a href="/Payment/Checkout?plan=pro" class="btn" style="margin-top:20px;">Upgrade Now</a>
+            <a asp-controller="Pricing" asp-action="Checkout" asp-route-plan="basic" class="btn-glow">Get Started</a>
         }
         else
         {
-            <a href="/Account/Login?returnUrl=/Payment/Checkout?plan=pro" class="btn" style="margin-top:20px;">Upgrade Now</a>
+            <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="/Pricing/Checkout?plan=basic" class="btn-glow">Get Started</a>
         }
     </div>
 
-    <div class="feature show">
-        <h2>🏢 Enterprise Plan</h2>
-        <p>Unlimited storage, dedicated account manager, and full enterprise integrations.</p>
-        <p style="color:#c6a664; font-size:1.2rem; margin-top:10px;">Custom Pricing</p>
-        @if (User.Identity.IsAuthenticated)
+    <div class="feature" style="transition-delay: 0.4s; border-color: rgba(198, 166, 100, 0.3);">
+        <div>
+            <h2>🚀 Pro Plan</h2>
+            <p>For power users. 2 TB cloud storage, priority support & advanced sync.</p>
+            <div class="price-tag">
+                €14.99 <span>/ mo</span>
+            </div>
+        </div>
+
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
         {
-            <a href="/Payment/ContactSales" class="btn" style="margin-top:20px;">Contact Sales</a>
+            <a asp-controller="Pricing" asp-action="Checkout" asp-route-plan="pro" class="btn-glow">Upgrade Now</a>
         }
         else
         {
-            <a href="/Account/Login?returnUrl=/Payment/ContactSales" class="btn" style="margin-top:20px;">Contact Sales</a>
+            <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="/Pricing/Checkout?plan=pro" class="btn-glow">Upgrade Now</a>
+        }
+    </div>
+
+    <div class="feature" style="transition-delay: 0.6s;">
+        <div>
+            <h2>🏢 Enterprise</h2>
+            <p>Unlimited storage, dedicated manager & full API access.</p>
+            <div class="price-tag">
+                Custom
+            </div>
+        </div>
+
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            <a asp-controller="Pricing" asp-action="ContactSales" class="btn-glow">Contact Sales</a>
+        }
+        else
+        {
+            <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="/Pricing/ContactSales" class="btn-glow">Contact Sales</a>
         }
     </div>
 
 </section>
+
+@section Scripts {
+    <script src="~/js/pricing.js" asp-append-version="true"></script>
+}
