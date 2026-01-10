@@ -7,18 +7,18 @@
                 observer.unobserve(entry.target);
             }
         });
-    }, {
-        threshold: 0.15
-    });
+    }, { threshold: 0.15 });
 
     document.querySelectorAll('.feature').forEach(f => observer.observe(f));
 
     const hero = document.querySelector('.hero');
-    hero.addEventListener('mousemove', (e) => {
-        const rect = hero.getBoundingClientRect();
-        hero.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
-        hero.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
-    });
+    if (hero) {
+        hero.addEventListener('mousemove', (e) => {
+            const rect = hero.getBoundingClientRect();
+            hero.style.setProperty('--mouse-x', `${e.clientX - rect.left}px`);
+            hero.style.setProperty('--mouse-y', `${e.clientY - rect.top}px`);
+        });
+    }
 
     const canvas = document.getElementById('particles-canvas');
     if (canvas) {
