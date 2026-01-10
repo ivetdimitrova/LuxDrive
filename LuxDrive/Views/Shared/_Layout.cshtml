@@ -10,39 +10,51 @@
 
     @await RenderSectionAsync("Styles", required: false)
 </head>
-<body style="background-color:#000; margin:0; padding:0;">
-    <div class="container-fluid p-0 m-0">
-        <header class="header" style="padding:15px 30px; display:flex; justify-content:space-between; align-items:center; background-color:#000; border-bottom: 1px solid rgba(198, 166, 100, 0.2);">
-            <div class="logo" style="color:#fff; font-size:26px; font-weight:bold; font-family: 'Montserrat', sans-serif;">
-                <span style="color:#c6a664; text-shadow: 0 0 10px rgba(198, 166, 100, 0.5);">Lux</span>Drive
+<body>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div id="success-alert" class="lux-alert">
+            <div class="alert-icon">✨</div>
+            <div class="alert-content">
+                <h4>Success</h4>
+                <p>@TempData["SuccessMessage"]</p>
+            </div>
+        </div>
+    }
+
+    <div class="container-fluid p-0 m-0 layout-wrapper">
+        <header class="lux-header">
+            <div class="lux-logo">
+                <span class="highlight">Lux</span>Drive
             </div>
 
-            <nav class="nav" style="display:flex; align-items:center; gap:20px;">
+            <nav class="lux-nav">
                 @if (User.Identity != null && User.Identity.IsAuthenticated)
                 {
-                    <a class="nav-link" style="color:#c6a664; text-decoration:none;" asp-controller="File" asp-action="Index">Home</a>
+                    <a class="lux-nav-link" asp-controller="File" asp-action="Index">Home</a>
                 }
                 else
                 {
-                    <a class="nav-link" style="color:#c6a664; text-decoration:none;" asp-controller="Home" asp-action="Index">Home</a>
+                    <a class="lux-nav-link" asp-controller="Home" asp-action="Index">Home</a>
                 }
 
-                <a class="nav-link" style="color:#c6a664; text-decoration:none;" asp-controller="Features" asp-action="Index">Features</a>
-                <a class="nav-link" style="color:#c6a664; text-decoration:none;" asp-controller="Pricing" asp-action="Index">Pricing</a>
+                <a class="lux-nav-link" asp-controller="Features" asp-action="Index">Features</a>
+                <a class="lux-nav-link" asp-controller="Pricing" asp-action="Index">Pricing</a>
 
                 <partial name="_LoginPartial" />
             </nav>
         </header>
 
-        <main role="main">
+        <main role="main" class="lux-main">
             @RenderBody()
         </main>
 
-        <footer class="lux-footer text-center p-4" style="background-color:#080808; color:#c6a664; border-top: 1px solid rgba(198, 166, 100, 0.1); margin-top: 50px;">
-            <p style="margin:0;">
-                © 2026 <span style="font-weight:bold;">LuxDrive</span> — All rights reserved |
-                <a href="#" style="color:#c6a664; text-decoration:none; margin: 0 10px;">Privacy Policy</a> |
-                <a href="#" style="color:#c6a664; text-decoration:none; margin: 0 10px;">Terms of Use</a>
+        <footer class="lux-footer text-center">
+            <p>
+                © 2026 <strong>LuxDrive</strong> — All rights reserved |
+                <a href="#">Privacy Policy</a> |
+                <a href="#">Terms of Use</a>
             </p>
         </footer>
     </div>
