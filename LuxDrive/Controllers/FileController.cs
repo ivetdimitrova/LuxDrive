@@ -16,13 +16,29 @@ namespace LuxDrive.Controllers
         private readonly SpacesService _spacesService;
         private readonly IFileService fileService;
 
-        private const long MaxStorageBytes = 10L * 1024 * 1024 * 1024;
-
         public FileController(LuxDriveDbContext dbContext, SpacesService spacesService, IFileService fileService)
         {
             _dbContext = dbContext;
             _spacesService = spacesService;
             this.fileService = fileService;
+        }
+
+        private string GetUserKey(string baseKey)
+        {
+            if (User.Identity == null || !User.Identity.IsAuthenticated) return baseKey;
+            string safeUserName = User.Identity.Name.Replace("@", "_").Replace(".", "_");
+            return $"{baseKey}_{safeUserName}";
+        }
+
+        private long GetMaxBytesForPlan(string plan)
+        {
+            return plan switch
+            {
+                "Basic" => 50L * 1024 * 1024 * 1024,      
+                "Pro" => 2048L * 1024 * 1024 * 1024,     
+                "Enterprise" => 100000L * 1024 * 1024 * 1024, 
+                _ => 10L * 1024 * 1024 * 1024            
+            };
         }
 
         [HttpGet]
@@ -33,7 +49,10 @@ namespace LuxDrive.Controllers
 
             IEnumerable<FileEntity> files = await this.fileService.GetUserFilesAsync(userIdStr);
 
-            CalculateStorageUsage(files);
+            string planKey = GetUserKey("CurrentPlan");
+            string currentPlan = Request.Cookies[planKey] ?? "Free";
+
+            CalculateStorageUsage(files, currentPlan);
 
             return View(files);
         }
@@ -47,7 +66,11 @@ namespace LuxDrive.Controllers
             IEnumerable<FileEntity> sharedFiles = await this.fileService.GetSharedWithMeFilesAsync(userIdStr);
 
             var userFiles = await this.fileService.GetUserFilesAsync(userIdStr);
-            CalculateStorageUsage(userFiles);
+
+            string planKey = GetUserKey("CurrentPlan");
+            string currentPlan = Request.Cookies[planKey] ?? "Free";
+
+            CalculateStorageUsage(userFiles, currentPlan);
 
             return View("Index", sharedFiles);
         }
@@ -61,17 +84,21 @@ namespace LuxDrive.Controllers
 
             if (files == null || files.Count == 0)
             {
-                TempData["UploadError"] = "Избери поне един файл.";
+                TempData["UploadError"] = "Select at least one file.";
                 return RedirectToAction(nameof(Index));
             }
+
+            string planKey = GetUserKey("CurrentPlan");
+            string currentPlan = Request.Cookies[planKey] ?? "Free";
+            long maxStorageBytes = GetMaxBytesForPlan(currentPlan);
 
             var userFiles = await this.fileService.GetUserFilesAsync(userIdStr);
             long currentUsedBytes = userFiles.Sum(f => f.Size);
             long newFilesBytes = files.Sum(f => f.Length);
 
-            if (currentUsedBytes + newFilesBytes > MaxStorageBytes)
+            if (currentUsedBytes + newFilesBytes > maxStorageBytes)
             {
-                TempData["UploadError"] = $"Нямате достатъчно място! Опитвате се да качите {FormatBytes(newFilesBytes)}, а разполагате с {FormatBytes(MaxStorageBytes - currentUsedBytes)}.";
+                TempData["UploadError"] = $"Not enough space! You are trying to upload {FormatBytes(newFilesBytes)}, but you have {FormatBytes(maxStorageBytes - currentUsedBytes)} left on your {currentPlan} plan.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -104,7 +131,7 @@ namespace LuxDrive.Controllers
 
             if (string.IsNullOrWhiteSpace(newName))
             {
-                return BadRequest("Името не може да е празно.");
+                return BadRequest("Name cannot be empty.");
             }
 
             bool isRenamed = await this.fileService.ChangeFileNameAsync(userIdStr, id, newName);
@@ -198,27 +225,45 @@ namespace LuxDrive.Controllers
             }
             catch
             {
-                return BadRequest("Грешка при споделяне.");
+                return BadRequest("Error sharing files.");
             }
         }
 
-        private void CalculateStorageUsage(IEnumerable<FileEntity> files)
+        private void CalculateStorageUsage(IEnumerable<FileEntity> files, string planName)
         {
             long totalUsedBytes = files.Sum(f => f.Size);
-            double percent = ((double)totalUsedBytes / MaxStorageBytes) * 100;
+            long maxBytes = GetMaxBytesForPlan(planName); 
 
-            if (percent > 100) percent = 100;
+            double percent = 0;
+            if (planName == "Enterprise")
+            {
+                percent = totalUsedBytes > 0 ? 1 : 0; 
+            }
+            else
+            {
+                percent = ((double)totalUsedBytes / maxBytes) * 100;
+                if (percent > 100) percent = 100;
+            }
+
+            string totalLabel = FormatBytes(maxBytes);
+            if (planName == "Enterprise") totalLabel = "Unlimited";
+
+            string usedLabel = FormatBytes(totalUsedBytes);
 
             ViewBag.StoragePercent = (int)percent;
-            ViewBag.StorageText = $"{FormatBytes(totalUsedBytes)} / 10 GB";
+            ViewBag.StorageText = $"{usedLabel} / {totalLabel}";
         }
 
         private string FormatBytes(long bytes)
         {
+            if (bytes >= 1024L * 1024 * 1024 * 1024)
+                return $"{(bytes / 1024.0 / 1024.0 / 1024.0 / 1024.0):F2} TB";
+
+            if (bytes >= 1024 * 1024 * 1024) 
+                return $"{(bytes / 1024.0 / 1024.0 / 1024.0):F2} GB";
+
             double mb = (bytes / 1024.0) / 1024.0;
-            if (mb < 1024) return $"{mb:F1} MB";
-            double gb = mb / 1024.0;
-            return $"{gb:F2} GB";
+            return $"{mb:F1} MB";
         }
     }
 }
