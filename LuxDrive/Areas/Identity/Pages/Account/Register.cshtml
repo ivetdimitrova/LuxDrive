@@ -4,176 +4,7 @@
     ViewData["Title"] = "Join LuxDrive";
 }
 
-<style>
-    .lux-register-wrapper {
-        min-height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
-        padding: 20px;
-        position: relative;
-        overflow: hidden;
-    }
-
-        .lux-register-wrapper::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 600px;
-            height: 600px;
-            background: radial-gradient(circle, rgba(198, 166, 100, 0.15) 0%, transparent 70%);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-    .lux-card {
-        background: rgba(20, 20, 20, 0.6); 
-        backdrop-filter: blur(15px); 
-        -webkit-backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-top: 1px solid rgba(198, 166, 100, 0.3); 
-        border-radius: 20px;
-        padding: 50px 40px;
-        width: 100%;
-        max-width: 500px;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        position: relative;
-        z-index: 1;
-        animation: fadeUp 0.8s ease-out;
-    }
-
-    @@keyframes fadeUp {
-        from
-
-    {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-
-    }
-
-    .brand-logo {
-        text-align: center;
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 10px;
-        color: #fff;
-        letter-spacing: 1px;
-    }
-
-        .brand-logo span {
-            color: #c6a664;
-            text-shadow: 0 0 15px rgba(198, 166, 100, 0.4);
-        }
-
-    .subtitle {
-        text-align: center;
-        color: #888;
-        margin-bottom: 35px;
-        font-size: 0.95rem;
-    }
-
-    .form-floating {
-        position: relative;
-        margin-bottom: 20px;
-    }
-
-        .form-floating input {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #fff !important;
-            border-radius: 10px;
-            height: 55px;
-            padding: 10px 15px;
-            width: 100%;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-            .form-floating input:focus {
-                background: rgba(0, 0, 0, 0.5);
-                border-color: #c6a664;
-                box-shadow: 0 0 10px rgba(198, 166, 100, 0.2);
-                outline: none;
-            }
-
-        .form-floating label {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 100%;
-            padding: 1rem 0.75rem;
-            pointer-events: none;
-            border: 1px solid transparent;
-            transform-origin: 0 0;
-            transition: opacity .1s ease-in-out,transform .1s ease-in-out;
-            color: #888;
-        }
-
-        .form-floating > .form-control:focus ~ label,
-        .form-floating > .form-control:not(:placeholder-shown) ~ label {
-            opacity: .65;
-            transform: scale(.85) translateY(-0.5rem) translateX(0.15rem);
-            color: #c6a664;
-        }
-
-    .btn-lux {
-        width: 100%;
-        padding: 14px;
-        font-size: 1.1rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: #000;
-        background: linear-gradient(135deg, #aa771c 0%, #fcf6ba 50%, #aa771c 100%);
-        background-size: 200% auto;
-        border: none;
-        border-radius: 50px; 
-        cursor: pointer;
-        transition: 0.4s;
-        box-shadow: 0 5px 15px rgba(198, 166, 100, 0.3);
-        margin-top: 10px;
-    }
-
-        .btn-lux:hover {
-            background-position: right center; 
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(198, 166, 100, 0.5);
-        }
-
-    .auth-footer {
-        text-align: center;
-        margin-top: 25px;
-        color: #666;
-        font-size: 0.9rem;
-    }
-
-        .auth-footer a {
-            color: #c6a664;
-            text-decoration: none;
-            font-weight: 600;
-            transition: 0.3s;
-        }
-
-            .auth-footer a:hover {
-                color: #fff;
-                text-shadow: 0 0 10px #c6a664;
-            }
-
-    .text-danger {
-        font-size: 0.8rem;
-        margin-left: 5px;
-        color: #ff5c5c;
-    }
-</style>
+<link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
 
 <div class="lux-register-wrapper">
     <div class="lux-card">
@@ -181,20 +12,22 @@
         <div class="brand-logo"><span class="glow">Lux</span>Drive</div>
         <p class="subtitle">Create your premium account today.</p>
 
-        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+        <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" asp-area="Identity" asp-page="/Account/Register">
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
             <div class="row g-3">
                 <div class="col-md-6">
                     <div class="form-floating">
-                        <input asp-for="Input.FirstName" class="form-control" placeholder="First Name" />
+                        <input asp-for="Input.FirstName" class="form-control" placeholder="First Name"
+                               oninput="this.value = this.value.replace(/[^a-zA-Zа-яА-Я\s\-]/g, '')" />
                         <label asp-for="Input.FirstName">First Name</label>
                     </div>
                     <span asp-validation-for="Input.FirstName" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
                     <div class="form-floating">
-                        <input asp-for="Input.LastName" class="form-control" placeholder="Last Name" />
+                        <input asp-for="Input.LastName" class="form-control" placeholder="Last Name"
+                               oninput="this.value = this.value.replace(/[^a-zA-Zа-яА-Я\s\-]/g, '')" />
                         <label asp-for="Input.LastName">Last Name</label>
                     </div>
                     <span asp-validation-for="Input.LastName" class="text-danger"></span>
