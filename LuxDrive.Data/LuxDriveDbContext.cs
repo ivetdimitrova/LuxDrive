@@ -32,5 +32,6 @@ namespace LuxDrive.Data
             builder.ApplyConfiguration(new FriendRequestConfiguration());
             builder.ApplyConfiguration(new SharedFileConfiguration());
         }
+        public DbSet<PaymentCard> PaymentCards { get; set; }
     }
 }
