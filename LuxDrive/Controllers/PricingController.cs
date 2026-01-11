@@ -1,10 +1,25 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using LuxDrive.Data;
+using LuxDrive.Data.Models;
+using System.Text.RegularExpressions;
+using System.Globalization;
 
 namespace LuxDrive.Controllers
 {
     public class PricingController : Controller
     {
+        private readonly LuxDriveDbContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public PricingController(LuxDriveDbContext context, UserManager<ApplicationUser> userManager)
+        {
+            _context = context;
+            _userManager = userManager;
+        }
+
         private int GetPlanRank(string plan)
         {
             return plan switch
@@ -19,30 +34,62 @@ namespace LuxDrive.Controllers
         private string GetUserKey(string baseKey)
         {
             if (User.Identity == null || !User.Identity.IsAuthenticated) return baseKey;
-
-            string safeUserName = User.Identity.Name
-                                      .Replace("@", "_")
-                                      .Replace(".", "_");
-
+            string safeUserName = User.Identity.Name.Replace("@", "_").Replace(".", "_");
             return $"{baseKey}_{safeUserName}";
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             string currentPlan = "None";
+            string expiryDateStr = "";
             bool hasCard = false;
 
             if (User.Identity != null && User.Identity.IsAuthenticated)
             {
-                string planKey = GetUserKey("CurrentPlan");
-                string cardKey = GetUserKey("HasCard");
+                var user = await _userManager.GetUserAsync(User);
+                if (user != null)
+                {
+                    hasCard = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id.ToString());
 
-                currentPlan = Request.Cookies[planKey] ?? "None";
-                hasCard = Request.Cookies[cardKey] == "true";
+                    string planKey = GetUserKey("CurrentPlan");
+                    string expiryKey = GetUserKey("PlanExpiry");
+
+                    currentPlan = Request.Cookies[planKey] ?? "None";
+                    string storedDate = Request.Cookies[expiryKey];
+
+                    if (currentPlan != "None" && !string.IsNullOrEmpty(storedDate))
+                    {
+                        if (DateTime.TryParse(storedDate, out DateTime expiryDate))
+                        {
+                            if (DateTime.Now > expiryDate)
+                            {
+                                if (hasCard)
+                                {
+                                    expiryDate = DateTime.Now.AddMonths(1);
+                                    CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(400) };
+                                    Response.Cookies.Append(expiryKey, expiryDate.ToString(), option);
+                                    expiryDateStr = expiryDate.ToString("dd.MM.yyyy");
+                                }
+                                else
+                                {
+                                    currentPlan = "None";
+                                    Response.Cookies.Delete(planKey);
+                                    Response.Cookies.Delete(expiryKey);
+                                    expiryDateStr = "";
+                                }
+                            }
+                            else
+                            {
+                                expiryDateStr = expiryDate.ToString("dd.MM.yyyy");
+                            }
+                        }
+                    }
+                }
             }
 
             ViewBag.CurrentPlan = currentPlan;
             ViewBag.HasCard = hasCard;
+            ViewBag.ExpiryDate = expiryDateStr;
 
             return View();
         }
@@ -60,55 +107,110 @@ namespace LuxDrive.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Process(string cardNumber, string expiry, string cvc, string cardName, string plan)
         {
+            if (string.IsNullOrEmpty(cardName) || !Regex.IsMatch(cardName, @"^[a-zA-Zа-яА-Я\s\-]+$"))
+            {
+                TempData["ErrorMessage"] = "Card name must contain only letters.";
+                return RedirectToAction("Checkout", new { plan = plan });
+            }
+
             if (string.IsNullOrEmpty(cardNumber) || cardNumber.Replace(" ", "").Length < 15)
             {
                 TempData["ErrorMessage"] = "Invalid card number.";
                 return RedirectToAction("Checkout", new { plan = plan });
             }
 
+            if (!string.IsNullOrEmpty(expiry) && expiry.Contains("/"))
+            {
+                var parts = expiry.Split('/');
+                if (int.TryParse(parts[0], out int month))
+                {
+                    if (month < 1 || month > 12)
+                    {
+                        TempData["ErrorMessage"] = "Invalid month! Please enter 01 to 12.";
+                        return RedirectToAction("Checkout", new { plan = plan });
+                    }
+                }
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid expiry date format.";
+                return RedirectToAction("Checkout", new { plan = plan });
+            }
+
+            if (string.IsNullOrEmpty(cvc) || cvc.Length < 3)
+            {
+                TempData["ErrorMessage"] = "CVC must be at least 3 digits.";
+                return RedirectToAction("Checkout", new { plan = plan });
+            }
+
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return RedirectToAction("Login", "Account");
+
             await Task.Delay(2000);
 
-            string planKey = GetUserKey("CurrentPlan");
-            string cardKey = GetUserKey("HasCard");
+            try
+            {
+                string cleanNumber = cardNumber.Replace(" ", "").Trim();
+                string last4 = cleanNumber.Length >= 4 ? cleanNumber.Substring(cleanNumber.Length - 4) : cleanNumber;
 
-            CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(30) };
+                string cardType = "unknown";
+                if (cleanNumber.StartsWith("4")) cardType = "visa";
+                else if (cleanNumber.StartsWith("5")) cardType = "mastercard";
+                else if (cleanNumber.StartsWith("3")) cardType = "amex";
+
+                bool exists = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id.ToString() && c.CardLast4 == last4);
+
+                if (!exists)
+                {
+                    var newCard = new PaymentCard
+                    {
+                        UserId = user.Id.ToString(),
+                        CardLast4 = last4,
+                        CardType = cardType
+                    };
+                    _context.PaymentCards.Add(newCard);
+                    await _context.SaveChangesAsync();
+                }
+            }
+            catch (Exception) { }
+
+            string planKey = GetUserKey("CurrentPlan");
+            string expiryKey = GetUserKey("PlanExpiry");
+
+            DateTime validUntil = DateTime.Now.AddMonths(1);
+            CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(400) };
 
             Response.Cookies.Append(planKey, plan, option);
-            Response.Cookies.Append(cardKey, "true", option);
+            Response.Cookies.Append(expiryKey, validUntil.ToString(), option);
 
-            TempData["SuccessMessage"] = $"Successfully activated {plan} plan!";
+            TempData["SuccessMessage"] = $"Successfully activated {plan} plan! Valid until {validUntil:dd.MM.yyyy}.";
             return RedirectToAction("Index");
         }
 
         [Authorize]
         public async Task<IActionResult> QuickPurchase(string plan)
         {
-            string cardKey = GetUserKey("HasCard");
-            string planKey = GetUserKey("CurrentPlan");
+            var user = await _userManager.GetUserAsync(User);
+            bool hasCardInDb = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id.ToString());
 
-            if (Request.Cookies[cardKey] != "true")
+            if (!hasCardInDb)
             {
+                TempData["ErrorMessage"] = "No saved card found. Please add a card.";
                 return RedirectToAction("Checkout", new { plan = plan });
             }
 
-            string oldPlan = Request.Cookies[planKey] ?? "None";
-            int oldRank = GetPlanRank(oldPlan);
-            int newRank = GetPlanRank(plan);
+            string planKey = GetUserKey("CurrentPlan");
+            string expiryKey = GetUserKey("PlanExpiry");
 
             await Task.Delay(1500);
 
-            CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(30) };
+            DateTime validUntil = DateTime.Now.AddMonths(1);
+            CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(400) };
+
             Response.Cookies.Append(planKey, plan, option);
+            Response.Cookies.Append(expiryKey, validUntil.ToString(), option);
 
-            if (newRank < oldRank)
-            {
-                TempData["SuccessMessage"] = $"Successfully switched to {plan} plan.";
-            }
-            else
-            {
-                TempData["SuccessMessage"] = $"Successfully upgraded to {plan} plan!";
-            }
-
+            TempData["SuccessMessage"] = $"Successfully upgraded to {plan} plan!";
             return RedirectToAction("Index");
         }
 
@@ -116,8 +218,10 @@ namespace LuxDrive.Controllers
         public IActionResult Downgrade()
         {
             string planKey = GetUserKey("CurrentPlan");
+            string expiryKey = GetUserKey("PlanExpiry");
 
             Response.Cookies.Delete(planKey);
+            Response.Cookies.Delete(expiryKey);
 
             TempData["SuccessMessage"] = "Successfully switched back to the Free plan.";
             return RedirectToAction("Index");
