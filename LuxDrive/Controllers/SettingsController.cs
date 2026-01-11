@@ -232,28 +232,39 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAccount()
         {
-            TempData["ActiveTab"] = "danger";
             var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login", "Account");
+            if (user == null) return NotFound();
 
-            try
+            var sharedFiles = _context.SharedFiles.Where(sf => sf.SenderId == user.Id || sf.ReceiverId == user.Id);
+            _context.SharedFiles.RemoveRange(sharedFiles);
+
+            var friendships = _context.UserFriends.Where(f => f.UserId == user.Id || f.FriendId == user.Id);
+            _context.UserFriends.RemoveRange(friendships);
+
+            var friendRequests = _context.FriendRequests.Where(fr => fr.SenderId == user.Id || fr.ReceiverId == user.Id);
+            _context.FriendRequests.RemoveRange(friendRequests);
+
+            var userFiles = _context.Files.Where(f => f.UserId == user.Id);
+            _context.Files.RemoveRange(userFiles);
+
+            var userCards = _context.PaymentCards.Where(c => c.UserId == user.Id.ToString());
+            _context.PaymentCards.RemoveRange(userCards);
+
+            await _context.SaveChangesAsync();
+
+            var result = await _userManager.DeleteAsync(user);
+
+            if (result.Succeeded)
             {
-                var cards = _context.PaymentCards.Where(c => c.UserId == user.Id.ToString());
-                _context.PaymentCards.RemoveRange(cards);
-                var userFiles = _context.Files.Where(f => f.UserId == user.Id);
-                _context.Files.RemoveRange(userFiles);
-                await _context.SaveChangesAsync();
-                await _userManager.DeleteAsync(user);
                 await _signInManager.SignOutAsync();
                 return RedirectToAction("Index", "Home");
             }
-            catch (Exception ex)
-            {
-                TempData["Error"] = "Error: " + ex.Message;
-                return RedirectToAction("Index");
-            }
+
+            TempData["ErrorMessage"] = "Грешка при изтриване на профила.";
+            return RedirectToAction("Index");
         }
     }
 }
