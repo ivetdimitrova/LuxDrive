@@ -1,0 +1,162 @@
+﻿@model LuxDrive.Models.UserSettingsViewModel
+@{
+    ViewData["Title"] = "Account Settings";
+    var activeTab = TempData["ActiveTab"] as string ?? "profile";
+}
+
+<link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
+
+@if (TempData["Success"] != null || TempData["Error"] != null)
+{
+    <div id="force-toast-container">
+        @if (TempData["Success"] != null)
+        {
+            <div class="force-toast success"><i class="fas fa-check"></i> @TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="force-toast error"><i class="fas fa-times"></i> @TempData["Error"]</div>
+        }
+    </div>
+}
+
+<div class="settings-container" data-active-tab="@activeTab">
+    <div class="settings-header">
+        <h1>Account <span class="gold-text">Settings</span></h1>
+        <p>Manage your profile, security, and cards information.</p>
+    </div>
+
+    <div class="settings-layout">
+        <div class="settings-sidebar">
+            <button id="btn-profile" class="tab-btn active" onclick="openTab(event, 'profile')"><i class="fas fa-user"></i> Profile</button>
+            <button id="btn-security" class="tab-btn" onclick="openTab(event, 'security')"><i class="fas fa-lock"></i> Security</button>
+            <button id="btn-billing" class="tab-btn" onclick="openTab(event, 'billing')"><i class="fas fa-credit-card"></i> Cards</button>
+            <button id="btn-danger" class="tab-btn danger" onclick="openTab(event, 'danger')"><i class="fas fa-trash-alt"></i> Delete Account</button>
+        </div>
+
+        <div class="settings-content">
+
+            <div id="profile" class="tab-content">
+                <h2>Profile Information</h2>
+                <form asp-action="UpdateProfile" method="post">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input asp-for="Username" class="lux-input" disabled />
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>First Name</label>
+                            <input asp-for="FirstName" id="firstNameInput" class="lux-input" />
+                            <span asp-validation-for="FirstName" style="color:#ff4d4d; display:block; margin-top:5px;"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>Last Name</label>
+                            <input asp-for="LastName" id="lastNameInput" class="lux-input" />
+                            <span asp-validation-for="LastName" style="color:#ff4d4d; display:block; margin-top:5px;"></span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Email Address</label>
+                        <input asp-for="Email" class="lux-input" type="email" />
+                        <span asp-validation-for="Email" style="color:#ff4d4d; display:block; margin-top:5px;"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input asp-for="PhoneNumber" id="phoneInput" class="lux-input" type="tel" />
+                        <span asp-validation-for="PhoneNumber" style="color:#ff4d4d; display:block; margin-top:5px;"></span>
+                    </div>
+                    <button type="submit" class="btn-gold">Save Changes</button>
+                </form>
+            </div>
+
+            <div id="security" class="tab-content" style="display:none;">
+                <h2>Change Password</h2>
+                <form asp-action="ChangePassword" method="post">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input asp-for="CurrentPassword" class="lux-input" required />
+                        <span asp-validation-for="CurrentPassword" style="color:#ff4d4d;"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input asp-for="NewPassword" class="lux-input" required />
+                        <span asp-validation-for="NewPassword" style="color:#ff4d4d;"></span>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input asp-for="ConfirmNewPassword" class="lux-input" required />
+                        <span asp-validation-for="ConfirmNewPassword" style="color:#ff4d4d;"></span>
+                    </div>
+                    <button type="submit" class="btn-gold">Update Password</button>
+                </form>
+            </div>
+
+            <div id="billing" class="tab-content" style="display:none;">
+                <h2>Saved Cards</h2>
+                <div class="cards-list">
+                    @if (Model.SavedCards != null && Model.SavedCards.Any())
+                    {
+                        foreach (var card in Model.SavedCards)
+                        {
+                            <div class="card-item">
+                                <div class="card-info">
+                                    <i class="fab fa-cc-@card.CardType.ToLower()" style="font-size:1.5rem; margin-right:10px;"></i>
+                                    <span>**** **** **** @card.CardLast4</span>
+                                </div>
+                                <form asp-action="RemoveCard" method="post" style="margin:0;">
+                                    <input type="hidden" name="cardId" value="@card.Id" />
+                                    <button type="submit" class="btn-remove">Remove</button>
+                                </form>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p style="color:#666;">No cards saved yet.</p>
+                    }
+                </div>
+                <hr style="border-color:rgba(255,255,255,0.1); margin: 30px 0;" />
+                <h3>Add New Card</h3>
+                <form asp-action="AddCard" method="post">
+                    <div class="form-group">
+                        <label>Card Number</label>
+                        <input asp-for="NewCardNumber" id="cardNumber" class="lux-input" placeholder="0000 0000 0000 0000" maxlength="19" required />
+                        <span asp-validation-for="NewCardNumber" style="color:#ff4d4d;"></span>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Expiry (MM/YY)</label>
+                            <input asp-for="NewCardExpiry" id="cardExpiry" class="lux-input" placeholder="MM/YY" maxlength="5" />
+                            <span asp-validation-for="NewCardExpiry" style="color:#ff4d4d;"></span>
+                        </div>
+                        <div class="form-group">
+                            <label>CVC</label>
+                            <input asp-for="NewCardCvc" id="cardCvc" class="lux-input" placeholder="123" maxlength="3" />
+                            <span asp-validation-for="NewCardCvc" style="color:#ff4d4d;"></span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-outline-gold">+ Add Card</button>
+                </form>
+            </div>
+
+            <div id="danger" class="tab-content" style="display:none;">
+                <h2 class="text-danger">Delete Account</h2>
+                <p>Deleting your account is permanent. All your data will be wiped immediately.</p>
+
+                <div style="margin-top: 20px;">
+                    <form asp-action="DeleteAccount" method="post" onsubmit="return confirm('WARNING: Are you sure you want to delete your account? This cannot be undone!');">
+                        <button type="submit" class="btn-danger-glow">DELETE ACCOUNT</button>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/settings.js" asp-append-version="true"></script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
