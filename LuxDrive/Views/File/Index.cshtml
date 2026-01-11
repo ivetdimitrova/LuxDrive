@@ -15,6 +15,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="~/css/fileIndex.css" asp-append-version="true" />
+
 <div class="app-wrapper">
     <div class="particles-container">
         <div class="particles-1"></div>
@@ -32,6 +33,10 @@
                 <i class="fas fa-share-nodes"></i> Shared
             </a>
             <a href="#" class="nav-item" onclick="openHub()"><i class="fas fa-user-group"></i> Friends</a>
+
+            <a asp-controller="Settings" asp-action="Index" class="nav-item">
+                <i class="fas fa-cog"></i> Settings
+            </a>
         </div>
 
         <div class="nav-section">
@@ -211,4 +216,4 @@
     <input type="hidden" name="id" id="delId">
 </form>
 
-<script src="~/js/luxdrive-scripts.js"></script>
+<script src="~/js/file.jss"></script>
