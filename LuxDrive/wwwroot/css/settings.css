@@ -1,0 +1,242 @@
+﻿body {
+    background-color: #050505;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.settings-container {
+    max-width: 1100px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+.settings-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.gold-text {
+    color: #d4af37;
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+
+.settings-layout {
+    display: flex;
+    gap: 30px;
+}
+
+.settings-sidebar {
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.tab-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #888;
+    padding: 15px 20px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 1rem;
+    border-radius: 8px;
+    transition: 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+    .tab-btn:hover, .tab-btn.active {
+        background: rgba(212, 175, 55, 0.1);
+        border-color: #d4af37;
+        color: #d4af37;
+    }
+
+    .tab-btn.danger:hover, .tab-btn.danger.active {
+        background: rgba(255, 0, 0, 0.1);
+        border-color: #ff4d4d;
+        color: #ff4d4d;
+    }
+
+.settings-content {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 40px;
+    min-height: 500px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 20px;
+}
+
+    .form-row .form-group {
+        flex: 1;
+    }
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    color: #ccc;
+    font-size: 0.9rem;
+}
+
+.lux-input {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid #333;
+    border-radius: 6px;
+    color: #fff;
+    outline: none;
+    transition: 0.3s;
+    box-sizing: border-box; 
+}
+
+    .lux-input:focus {
+        border-color: #d4af37;
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+    }
+
+    .lux-input:disabled {
+        background: rgba(255,255,255,0.05);
+        color: #666;
+        cursor: not-allowed;
+    }
+
+.btn-gold {
+    background: linear-gradient(135deg, #b88a44, #e6c86e);
+    color: #000;
+    border: none;
+    padding: 12px 30px;
+    font-weight: 700;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+    .btn-gold:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
+    }
+
+.btn-outline-gold {
+    background: transparent;
+    border: 1px solid #d4af37;
+    color: #d4af37;
+    padding: 10px 25px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+    .btn-outline-gold:hover {
+        background: rgba(212, 175, 55, 0.1);
+    }
+
+.card-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.btn-remove {
+    background: transparent;
+    border: none;
+    color: #ff4d4d;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+    .btn-remove:hover {
+        text-decoration: underline;
+    }
+
+.btn-danger-glow {
+    background: #ff4d4d;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+    .btn-danger-glow:hover {
+        box-shadow: 0 0 20px rgba(255, 77, 77, 0.4);
+    }
+
+@media (max-width: 768px) {
+    .settings-layout {
+        flex-direction: column;
+    }
+
+    .settings-sidebar {
+        width: 100%;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+}
+
+#force-toast-container {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999999999 !important;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none; 
+}
+
+.force-toast {
+    pointer-events: auto;
+    min-width: 320px;
+    padding: 15px 25px;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    border-radius: 50px;
+    text-align: center;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.8);
+    border: 2px solid white;
+    animation: dropDown 0.5s ease-out;
+}
+
+    .force-toast.success {
+        background-color: #28a745; 
+    }
+
+    .force-toast.error {
+        background-color: #dc3545; 
+    }
+
+@keyframes dropDown {
+    from {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
