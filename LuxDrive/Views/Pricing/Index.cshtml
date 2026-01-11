@@ -4,8 +4,8 @@
     bool isLoggedIn = User.Identity != null && User.Identity.IsAuthenticated;
 
     var currentPlan = isLoggedIn ? ViewBag.CurrentPlan as string : null;
-
     bool hasCard = ViewBag.HasCard is bool val && val;
+    var expiryDate = ViewBag.ExpiryDate as string;
 }
 
 @section Styles {
@@ -21,9 +21,27 @@
     <img src="/images/gold-cloud.png" class="hero-cloud cloud-2" data-speed="-0.06" data-depth="0.3" />
     <img src="/images/gold-cloud.png" class="hero-cloud cloud-5" data-speed="0.01" data-depth="0.1" />
     <img src="/images/gold-cloud.png" class="hero-cloud cloud-3" data-speed="0.04" data-depth="0.5" />
+
     <div class="hero-text">
         <h1>Select Your <span class="gold-shimmer">Plan</span></h1>
         <p>Unlock the full potential of LuxDrive. Simple pricing, no hidden fees.</p>
+
+        @if (isLoggedIn && currentPlan != "None" && !string.IsNullOrEmpty(currentPlan))
+        {
+            <div class="lux-status-card">
+                <span class="status-label">@currentPlan Plan Active</span>
+                <div class="status-value">
+                    @if (hasCard)
+                    {
+                        <span>Auto-renews on: @expiryDate</span>
+                    }
+                    else
+                    {
+                        <span style="color: #ff5c5c;">Expiring: @expiryDate</span>
+                    }
+                </div>
+            </div>
+        }
     </div>
 </section>
 
