@@ -116,55 +116,55 @@ namespace LuxDrive.Areas.Identity.Pages.Account
             if (ModelState.IsValid)
             {
 
-                //var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-                //if (result.Succeeded)
-                //{
-                //    _logger.LogInformation("User logged in.");
+                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+                if (result.Succeeded)
+                {
+                    _logger.LogInformation("User logged in.");
+                    return RedirectToAction("Index", "File");
+                }
+                if (result.RequiresTwoFactor)
+                {
+                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
+                }
+                if (result.IsLockedOut)
+                {
+                    _logger.LogWarning("User account locked out.");
+                    return RedirectToPage("./Lockout");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                    return Page();
+                }
+
+                //    var user = await _userManager.FindByEmailAsync(Input.Email);
+                //    if (user == null)
+                //    {
+                //        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                //        return Page();
+                //    }
+
+                //    bool isValidPassword = await _userManager.CheckPasswordAsync(user, Input.Password);
+                //    if (!isValidPassword)
+                //    {
+                //        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                //        return Page();
+                //    }
+
+                //    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                //    var link = Url.Page(
+                //                "/Account/ConfirmLogin",
+                //                 pageHandler: null,
+                //                 values: new { userId = user.Id, token },
+                //                protocol: Request.Scheme);
+
+                //    await _emailSender.SendEmailAsync(user.Email, "Confirm your login",
+                //$"Click <a href='{link}'>here</a> to confirm login.");
+
+                //    ViewData["Message"] = "Check your email for the login confirmation link.";
+
                 //    return RedirectToAction("Index", "File");
-                //}
-                //if (result.RequiresTwoFactor)
-                //{
-                //    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                //}
-                //if (result.IsLockedOut)
-                //{
-                //    _logger.LogWarning("User account locked out.");
-                //    return RedirectToPage("./Lockout");
-                //}
-                //else
-                //{
-                //    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                //    return Page();
-                //}
-
-                var user = await _userManager.FindByEmailAsync(Input.Email);
-                if (user == null)
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Page();
-                }
-
-                bool isValidPassword = await _userManager.CheckPasswordAsync(user, Input.Password);
-                if (!isValidPassword)
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Page();
-                }
-
-                var token = await _userManager.GenerateUserTokenAsync(user, "Default", "login");
-
-                var link = Url.Page(
-                            "/Account/ConfirmLogin",
-                             pageHandler: null,
-                             values: new { userId = user.Id, token },
-                            protocol: Request.Scheme);
-
-                await _emailSender.SendEmailAsync(user.Email, "Confirm your login",
-            $"Click <a href='{link}'>here</a> to confirm login.");
-
-                ViewData["Message"] = "Check your email for the login confirmation link.";
-
-                return RedirectToAction("Index", "File");
             }
 
 

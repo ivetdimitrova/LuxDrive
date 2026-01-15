@@ -29,7 +29,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
     options.Password.RequireLowercase = false;
     options.Password.RequireUppercase = false;
 })
-.AddEntityFrameworkStores<LuxDriveDbContext>();
+.AddEntityFrameworkStores<LuxDriveDbContext>()
+.AddDefaultTokenProviders(); 
 
 builder.Services.AddScoped<SpacesService>();
 builder.Services.AddScoped<IEmailSender, EmailSender>();
