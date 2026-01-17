@@ -34,10 +34,10 @@ namespace LuxDrive.Controllers
         {
             return plan switch
             {
-                "Basic" => 50L * 1024 * 1024 * 1024,      
-                "Pro" => 2048L * 1024 * 1024 * 1024,     
-                "Enterprise" => 100000L * 1024 * 1024 * 1024, 
-                _ => 10L * 1024 * 1024 * 1024            
+                "Basic" => 50L * 1024 * 1024 * 1024,
+                "Pro" => 2048L * 1024 * 1024 * 1024,
+                "Enterprise" => 100000L * 1024 * 1024 * 1024,
+                _ => 10L * 1024 * 1024 * 1024
             };
         }
 
@@ -47,14 +47,15 @@ namespace LuxDrive.Controllers
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
 
-            IEnumerable<FileEntity> files = await this.fileService.GetUserFilesAsync(userIdStr);
+            var allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
+            var activeFiles = allUserFiles.Where(f => !f.IsDeleted).ToList();
 
             string planKey = GetUserKey("CurrentPlan");
             string currentPlan = Request.Cookies[planKey] ?? "Free";
 
-            CalculateStorageUsage(files, currentPlan);
+            CalculateStorageUsage(allUserFiles, currentPlan);
 
-            return View(files);
+            return View(activeFiles);
         }
 
         [HttpGet]
@@ -64,7 +65,6 @@ namespace LuxDrive.Controllers
             if (userIdStr == null) return Unauthorized();
 
             IEnumerable<FileEntity> sharedFiles = await this.fileService.GetSharedWithMeFilesAsync(userIdStr);
-
             var userFiles = await this.fileService.GetUserFilesAsync(userIdStr);
 
             string planKey = GetUserKey("CurrentPlan");
@@ -73,6 +73,25 @@ namespace LuxDrive.Controllers
             CalculateStorageUsage(userFiles, currentPlan);
 
             return View("Index", sharedFiles);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Trash()
+        {
+            var userIdStr = GetUserId();
+            if (userIdStr == null) return Unauthorized();
+
+            var trashedFiles = await _dbContext.Files
+                .Where(f => f.UserId.ToString() == userIdStr && f.IsDeleted)
+                .OrderByDescending(f => f.DeletedOn)
+                .ToListAsync();
+
+            var allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
+            string planKey = GetUserKey("CurrentPlan");
+            string currentPlan = Request.Cookies[planKey] ?? "Free";
+            CalculateStorageUsage(allUserFiles, currentPlan);
+
+            return View(trashedFiles);
         }
 
         [HttpPost]
@@ -148,28 +167,65 @@ namespace LuxDrive.Controllers
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
 
-            FileEntity? file = await fileService.GetUserFileAsync(id, userIdStr);
+            var file = await _dbContext.Files
+                .FirstOrDefaultAsync(f => f.Id == id && f.UserId.ToString() == userIdStr);
+
             if (file == null) return NotFound();
 
-            try
+            file.IsDeleted = true;
+            file.DeletedOn = DateTime.UtcNow;
+
+            await _dbContext.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Restore(Guid id)
+        {
+            var userIdStr = GetUserId();
+            if (userIdStr == null) return Unauthorized();
+
+            var file = await _dbContext.Files
+                .FirstOrDefaultAsync(f => f.Id == id && f.UserId.ToString() == userIdStr);
+
+            if (file != null)
             {
-                if (!string.IsNullOrEmpty(file.StorageUrl))
+                file.IsDeleted = false;
+                file.DeletedOn = null;
+                await _dbContext.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Trash));
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PermanentDelete(Guid id)
+        {
+            var userIdStr = GetUserId();
+            if (userIdStr == null) return Unauthorized();
+
+            var file = await _dbContext.Files
+                .FirstOrDefaultAsync(f => f.Id == id && f.UserId.ToString() == userIdStr);
+
+            if (file != null)
+            {
+                try
                 {
-                    var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/";
-                    var key = file.StorageUrl.Replace(endpoint, string.Empty);
-                    await _spacesService.DeleteAsync(key);
+                    if (!string.IsNullOrEmpty(file.StorageUrl))
+                    {
+                        var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/";
+                        var key = file.StorageUrl.Replace(endpoint, string.Empty);
+                        await _spacesService.DeleteAsync(key);
+                    }
                 }
+                catch {  }
 
-                bool isDeleted = await fileService.RemoveFileAsync(file);
-
-                if (!isDeleted) return NotFound();
-
-                return RedirectToAction(nameof(Index));
+                _dbContext.Files.Remove(file);
+                await _dbContext.SaveChangesAsync();
             }
-            catch
-            {
-                return NotFound();
-            }
+
+            return RedirectToAction(nameof(Trash));
         }
 
         [HttpPost]
@@ -177,7 +233,6 @@ namespace LuxDrive.Controllers
         {
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
-
             if (!Guid.TryParse(userIdStr, out Guid userGuid)) return Unauthorized();
 
             foreach (var id in ids)
@@ -185,17 +240,8 @@ namespace LuxDrive.Controllers
                 var file = await _dbContext.Files.FirstOrDefaultAsync(f => f.Id == id && f.UserId == userGuid);
                 if (file != null)
                 {
-                    try
-                    {
-                        if (!string.IsNullOrEmpty(file.StorageUrl))
-                        {
-                            var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/";
-                            var key = file.StorageUrl.Replace(endpoint, string.Empty);
-                            await _spacesService.DeleteAsync(key);
-                        }
-                    }
-                    catch { }
-                    _dbContext.Files.Remove(file);
+                    file.IsDeleted = true;
+                    file.DeletedOn = DateTime.UtcNow;
                 }
             }
             await _dbContext.SaveChangesAsync();
@@ -216,28 +262,22 @@ namespace LuxDrive.Controllers
                     {
                         await fileService.ShareFileAsync(fileId, userIdStr, receiverId);
                     }
-                    catch
-                    {
-                        continue;
-                    }
+                    catch { continue; }
                 }
                 return Ok();
             }
-            catch
-            {
-                return BadRequest("Error sharing files.");
-            }
+            catch { return BadRequest("Error sharing files."); }
         }
 
         private void CalculateStorageUsage(IEnumerable<FileEntity> files, string planName)
         {
             long totalUsedBytes = files.Sum(f => f.Size);
-            long maxBytes = GetMaxBytesForPlan(planName); 
+            long maxBytes = GetMaxBytesForPlan(planName);
 
             double percent = 0;
             if (planName == "Enterprise")
             {
-                percent = totalUsedBytes > 0 ? 1 : 0; 
+                percent = totalUsedBytes > 0 ? 1 : 0;
             }
             else
             {
@@ -253,17 +293,87 @@ namespace LuxDrive.Controllers
             ViewBag.StoragePercent = (int)percent;
             ViewBag.StorageText = $"{usedLabel} / {totalLabel}";
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EmptyTrash()
+        {
+            var userIdStr = GetUserId();
+            if (userIdStr == null) return Unauthorized();
+
+            var trashedFiles = await _dbContext.Files
+                .Where(f => f.UserId.ToString() == userIdStr && f.IsDeleted)
+                .ToListAsync();
+
+            foreach (var file in trashedFiles)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(file.StorageUrl))
+                    {
+                        var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/";
+                        var key = file.StorageUrl.Replace(endpoint, string.Empty);
+                        await _spacesService.DeleteAsync(key);
+                    }
+                }
+                catch {  }
+
+                _dbContext.Files.Remove(file);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Trash emptied successfully!";
+            return RedirectToAction(nameof(Trash));
+        }
 
         private string FormatBytes(long bytes)
         {
             if (bytes >= 1024L * 1024 * 1024 * 1024)
                 return $"{(bytes / 1024.0 / 1024.0 / 1024.0 / 1024.0):F2} TB";
 
-            if (bytes >= 1024 * 1024 * 1024) 
+            if (bytes >= 1024 * 1024 * 1024)
                 return $"{(bytes / 1024.0 / 1024.0 / 1024.0):F2} GB";
 
             double mb = (bytes / 1024.0) / 1024.0;
             return $"{mb:F1} MB";
+        }
+        [HttpPost]
+        public async Task<IActionResult> RestoreMultiple([FromBody] List<Guid> ids)
+        {
+            var userId = GetUserId();
+            var files = await _dbContext.Files
+                .Where(f => ids.Contains(f.Id) && f.UserId.ToString() == userId)
+                .ToListAsync();
+
+            foreach (var file in files)
+            {
+                file.IsDeleted = false;
+                file.DeletedOn = null;
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteMultiplePermanent([FromBody] List<Guid> ids)
+        {
+            var userId = GetUserId();
+            var files = await _dbContext.Files
+                .Where(f => ids.Contains(f.Id) && f.UserId.ToString() == userId)
+                .ToListAsync();
+
+            foreach (var file in files)
+            {
+                if (!string.IsNullOrEmpty(file.StorageUrl))
+                {
+                    var key = file.StorageUrl.Replace("https://luxdrive.ams3.digitaloceanspaces.com/", "");
+                    await _spacesService.DeleteAsync(key);
+                }
+                _dbContext.Files.Remove(file);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return Ok();
         }
     }
 }
