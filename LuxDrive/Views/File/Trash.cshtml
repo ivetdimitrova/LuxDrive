@@ -1,0 +1,106 @@
+﻿@model IEnumerable<LuxDrive.Data.Models.File>
+
+@{
+    ViewData["Title"] = "LuxDrive | Trash Bin";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="~/css/fileIndex.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/css/trash.css" asp-append-version="true" />
+
+<div class="app-wrapper">
+    <div class="particles-container">
+        <div class="particles-1"></div><div class="particles-2"></div><div class="particles-3"></div>
+    </div>
+
+    <aside class="sidebar">
+        <div class="nav-section" style="margin-top: 30px;">
+            <a href="@Url.Action("Index", "File")" class="nav-item">
+                <i class="fas fa-chevron-left"></i> Go Back
+            </a>
+            <a href="@Url.Action("Trash", "File")" class="nav-item active">
+                <i class="fas fa-trash-can"></i> Trash Bin
+            </a>
+        </div>
+
+        <div class="trash-info-box">
+            <h4 style="color: var(--gold); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Auto-Cleanup</h4>
+            <p style="font-size: 11px; color: #888; line-height: 1.4; margin: 0;">
+                Files in the trash are permanently removed after <strong>30 days</strong>.
+            </p>
+        </div>
+    </aside>
+
+    <div class="content">
+        <div class="top-header" style="justify-content: space-between; align-items: center; min-height: 60px;">
+            <h2 style="margin:0; font-weight:800; letter-spacing:-1px; text-transform: uppercase;">
+                Trash <span style="color:var(--gold)">Bin</span>
+            </h2>
+
+            @if (Model != null && Model.Any())
+            {
+                <form asp-action="EmptyTrash" method="post" onsubmit="return confirm('Clear all files?');">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="purge-btn"><i class="fas fa-broom"></i> Empty Bin</button>
+                </form>
+            }
+        </div>
+
+        <div class="files-grid">
+            @if (Model != null && Model.Any())
+            {
+                foreach (var file in Model)
+                {
+                    string ext = file.Extension?.ToLower() ?? "";
+                    var daysLeft = file.DeletedOn.HasValue ? 30 - (DateTime.UtcNow - file.DeletedOn.Value).Days : 30;
+
+                    <div class="file-item in-trash" id="file-@file.Id">
+                        <div class="preview-box">
+                            <div class="check-circle" onclick="toggleSelect(this, '@file.Id')"></div>
+                            <i class="fas fa-file type-icon" style="color: var(--gold); opacity: 0.8;"></i>
+
+                            <div class="actions-overlay">
+                                <form action="/File/Restore/@file.Id" method="post" style="display:inline;">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="action-btn"><i class="fas fa-trash-arrow-up"></i></button>
+                                </form>
+                                <form action="/File/PermanentDelete/@file.Id" method="post" style="display:inline;" onsubmit="return confirm('Delete forever?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="action-btn"><i class="fas fa-xmark"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="file-info">
+                            <h3 title="@file.Name">@file.Name</h3>
+                            <p><span>@ext.ToUpper()</span> <span class="urgent-timer" style="margin-left:auto;">@Math.Max(0, daysLeft)d left</span></p>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div style="grid-column: 1 / -1; text-align: center; padding: 120px 20px;">
+                    <i class="fas fa-trash-can" style="font-size: 3rem; color: var(--gold); opacity: 0.1; margin-bottom: 20px;"></i>
+                    <h3 style="color: #444; font-weight: 500; letter-spacing: 1px;">Your trash bin is empty</h3>
+                </div>
+            }
+        </div>
+
+        <div id="bulkBar" class="bulk-bar" style="background: rgba(15,15,15,0.95); border: 1px solid rgba(198, 166, 100, 0.3); display:none; align-items:center; justify-content:space-between; padding: 15px 40px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); border-radius: 100px; min-width: 450px; z-index: 1000; backdrop-filter: blur(10px); box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
+            <span id="bulkCount" style="color:var(--gold); font-weight:700; font-size: 0.9rem;">0 SELECTED</span>
+
+            <div style="display: flex; gap: 35px; align-items: center;">
+                <button type="button" onclick="submitBulk('RestoreMultiple')" class="btn-bulk-restore">
+                    <i class="fas fa-undo"></i> Restore
+                </button>
+                <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1);"></div>
+                <button type="button" onclick="submitBulk('DeleteMultiplePermanent')" class="btn-bulk-delete">
+                    <i class="fas fa-trash-can"></i> Delete Forever
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/trash.js" asp-append-version="true"></script>
