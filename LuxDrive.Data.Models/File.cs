@@ -10,6 +10,8 @@ namespace LuxDrive.Data.Models
         public long Size { get; set; }
         public string StorageUrl { get; set;} = null!;
         public DateTime UploadAt { get; set; }
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedOn { get; set; }
 
         public Guid UserId { get; set; }
         public virtual ApplicationUser User { get; set; } = null!;
