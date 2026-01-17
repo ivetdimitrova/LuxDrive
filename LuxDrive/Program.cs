@@ -1,4 +1,4 @@
-using LuxDrive.Data;
+﻿using LuxDrive.Data;
 using LuxDrive.Data.Models;
 using LuxDrive.Services;
 using LuxDrive.Services.Interfaces;
@@ -37,6 +37,7 @@ builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IFriendService, FriendService>(); 
 
+builder.Services.AddHostedService<LuxDrive.Services.FileCleanupService>();
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
