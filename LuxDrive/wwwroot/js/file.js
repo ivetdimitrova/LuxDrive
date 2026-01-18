@@ -2,6 +2,10 @@
     filterFiles(null, 'all');
 });
 
+function viewAccount(id) {
+    window.location.href = '/Profile/Index?userId=' + id;
+}
+
 function filterFiles(e, type) {
     if (e) {
         document.querySelectorAll('.filter-btn, .nav-item').forEach(b => b.classList.remove('active'));
@@ -25,7 +29,7 @@ function filterFiles(e, type) {
     const emptyText = document.getElementById('empty-text');
 
     if (visibleCount === 0) {
-        emptyState.style.display = 'block';
+        if (emptyState) emptyState.style.display = 'block';
         if (emptyText) {
             switch (type) {
                 case 'image': emptyText.innerText = "No photos uploaded"; break;
@@ -57,17 +61,8 @@ function toggleSelect(el, id) {
         selection.delete(id);
     }
 
-    const bar = document.getElementById('bulkBar');
-    const countEl = document.getElementById('bulkCount');
-
-    if (selection.size > 0) {
-        bar.classList.add('active');
-        countEl.innerText = selection.size + " Selected";
-    } else {
-        bar.classList.remove('active');
-    }
+    updateSelectionUI();
 }
-
 function deleteFile(id) {
     if (confirm("Are you sure you want to delete this file?")) {
         document.getElementById('delId').value = id;
@@ -76,15 +71,25 @@ function deleteFile(id) {
 }
 
 async function bulkDelete() {
-    if (!confirm(`Delete ${selection.size} files?`)) return;
+    if (!confirm(`Move ${selection.size} files to Trash?`)) return;
+    const token = document.querySelector('#delForm input[name="__RequestVerificationToken"]').value;
     try {
         const response = await fetch('/file/DeleteMultiple', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'RequestVerificationToken': token
+            },
             body: JSON.stringify(Array.from(selection))
         });
-        if (response.ok) location.reload();
-    } catch (e) { console.error("Bulk delete failed", e); }
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert("Failed to move files to trash.");
+        }
+    } catch (e) {
+        console.error("Bulk delete failed", e);
+    }
 }
 
 function bulkDownload() {
@@ -104,7 +109,6 @@ function bulkDownload() {
 }
 
 let isBulk = false;
-
 function openShare(id) {
     isBulk = false;
     document.getElementById('shareId').value = id;
@@ -145,6 +149,9 @@ async function confirmShare() {
     const rid = document.getElementById('shareSelect').value;
     const shareIdInput = document.getElementById('shareId');
 
+    const tokenElement = document.querySelector('#delForm input[name="__RequestVerificationToken"]');
+    const token = tokenElement ? tokenElement.value : "";
+
     if (!rid || rid === "") {
         alert("Please select a friend first.");
         return;
@@ -152,35 +159,38 @@ async function confirmShare() {
 
     try {
         let response;
+        let headers = {
+            'RequestVerificationToken': token
+        };
+
         if (isBulk) {
-            response = await fetch(`/file/ShareMultiple?receiverId=${rid}`, {
+            headers['Content-Type'] = 'application/json';
+            response = await fetch(`/File/ShareMultiple?receiverId=${rid}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: headers,
                 body: JSON.stringify(Array.from(selection))
             });
         } else {
-            response = await fetch(`/file/share?fileId=${shareIdInput.value}&receiverId=${rid}`, { method: 'POST' });
+            response = await fetch(`/File/Share?fileId=${shareIdInput.value}&receiverId=${rid}`, {
+                method: 'POST',
+                headers: headers
+            });
         }
 
         if (response.ok) {
             alert("Shared successfully!");
             closeShare();
 
-            shareIdInput.value = "";
-            if (isBulk) {
-                selection.clear();
-                document.getElementById('bulkBar').classList.remove('active');
-                document.querySelectorAll('.check-circle').forEach(c => c.classList.remove('checked'));
-                isBulk = false;
-            }
+            if (isBulk || !isBulk) location.reload(); 
         } else {
-            alert("Error: Could not share file.");
+            console.error("Грешка при споделяне. Статус:", response.status);
+            alert(`Error: Could not share file. (Status: ${response.status})`);
         }
     } catch (e) {
+        console.error("Network error:", e);
         alert("Server error.");
     }
 }
-
 function openHub() {
     document.getElementById('socialHub').style.display = 'block';
     setTab('connections');
@@ -193,12 +203,12 @@ function closeHub() {
 function setTab(name) {
     const views = ['view-connections', 'view-add', 'view-requests'];
     views.forEach(v => document.getElementById(v).style.display = v.includes(name) ? 'block' : 'none');
-
     document.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
 
-    if (name === 'connections') { loadConnections(); document.querySelectorAll('.tab-link')[0].classList.add('active'); }
-    if (name === 'add') { loadSent(); document.querySelectorAll('.tab-link')[1].classList.add('active'); }
-    if (name === 'requests') { loadReqs(); document.querySelectorAll('.tab-link')[2].classList.add('active'); }
+    const tabs = document.querySelectorAll('.tab-link');
+    if (name === 'connections') { loadConnections(); tabs[0].classList.add('active'); }
+    if (name === 'add') { loadSent(); tabs[1].classList.add('active'); }
+    if (name === 'requests') { loadReqs(); tabs[2].classList.add('active'); }
 }
 
 async function loadConnections() {
@@ -211,13 +221,25 @@ async function loadConnections() {
             return;
         }
         c.innerHTML = d.map(f => `
-            <div class="connection-card">
-                <div class="user-avatar">${f.username[0]}</div>
-                <div class="user-details">
-                    <span class="user-name">${f.firstName ? f.firstName + ' ' + f.lastName : f.username}</span>
-                    <span class="user-email">${f.email}</span>
+            <div class="connection-card" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; border-bottom: 1px solid #222;">
+                <div style="display: flex; align-items: center;">
+                    <div class="user-avatar" style="width: 35px; height: 35px; background: var(--gold); color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px;">
+                        ${f.username[0].toUpperCase()}
+                    </div>
+                    <div class="user-details">
+                        <span class="user-name" style="display: block; font-size: 0.9rem;">${f.firstName ? f.firstName + ' ' + f.lastName : f.username}</span>
+                        <span class="user-email" style="font-size: 0.75rem; color: #666;">${f.email}</span>
+                    </div>
                 </div>
-                <button class="tool-btn del" onclick="removeFriend('${f.id}')"><i class="fas fa-user-minus"></i></button>
+                
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button onclick="viewAccount('${f.id}')" style="background: none; border: none; color: #4da6ff; cursor: pointer; font-size: 1.1rem; padding: 5px;">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="tool-btn del" onclick="removeFriend('${f.id}')" style="background: none; border: none; color: #ff5c5c; cursor: pointer; font-size: 1.1rem; padding: 5px;">
+                        <i class="fas fa-user-minus"></i>
+                    </button>
+                </div>
             </div>`).join('');
     } catch (e) { c.innerHTML = 'Error loading list.'; }
 }
@@ -246,7 +268,7 @@ async function loadReqs() {
     if (!d.length) { c.innerHTML = '<p style="text-align:center;color:#666;padding:20px;">No incoming requests.</p>'; return; }
     c.innerHTML = d.map(q => `
         <div class="req-card">
-            <div class="user-avatar">${q.senderName ? q.senderName[0] : '?'}</div>
+            <div class="user-avatar">${q.senderName ? q.senderName[0].toUpperCase() : '?'}</div>
             <div style="margin-left:10px;">${q.senderName}</div>
             <div class="req-actions">
                 <button class="btn-yes" onclick="accept('${q.id}')">Accept</button>
@@ -275,4 +297,40 @@ async function renameFile(id, currentName) {
         const response = await fetch(`/File/Rename?id=${id}&newName=${encodeURIComponent(newName)}`, { method: 'POST' });
         if (response.ok) location.reload();
     }
+}
+function updateSelectionUI() {
+    const tools = document.getElementById('selection-tools');
+    const countLabel = document.getElementById('selectedCount'); 
+    const bar = document.getElementById('bulkBar');              
+    const bulkCountEl = document.getElementById('bulkCount');   
+
+    if (selection.size > 0) {
+        if (tools) tools.style.display = 'block';
+        if (countLabel) countLabel.innerText = `${selection.size} items selected`;
+
+        if (bar) bar.classList.add('active');
+        if (bulkCountEl) bulkCountEl.innerText = `${selection.size} Selected`;
+    } else {
+        if (tools) tools.style.display = 'none';
+        if (bar) bar.classList.remove('active');
+    }
+}
+function selectAllFiles() {
+    const allCheckboxes = document.querySelectorAll('.check-circle');
+    allCheckboxes.forEach(cb => {
+        const fileId = cb.getAttribute('onclick').match(/'([^']+)'/)[1]; 
+        selection.add(fileId);
+        cb.classList.add('checked');
+        cb.closest('.file-item').classList.add('selected');
+    });
+    isBulk = true;
+    updateSelectionUI();
+}
+
+function deselectAllFiles() {
+    selection.clear();
+    document.querySelectorAll('.check-circle').forEach(cb => cb.classList.remove('checked'));
+    document.querySelectorAll('.file-item').forEach(item => item.classList.remove('selected'));
+    isBulk = false;
+    updateSelectionUI();
 }
