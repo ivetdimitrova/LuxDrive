@@ -117,7 +117,7 @@ namespace LuxDrive.Services
             if (!Guid.TryParse(senderId, out Guid senderGuid) ||
                 !Guid.TryParse(receiverId, out Guid receiverGuid))
             {
-                throw new ArgumentException("Невалидни ID-та.");
+                throw new ArgumentException("Invalid IDs.");
             }
 
             bool areFriends = await _dbContext.UserFriends

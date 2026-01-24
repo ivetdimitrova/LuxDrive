@@ -183,7 +183,7 @@ async function confirmShare() {
 
             if (isBulk || !isBulk) location.reload(); 
         } else {
-            console.error("Грешка при споделяне. Статус:", response.status);
+            console.error("Sharing error. Status:", response.status);
             alert(`Error: Could not share file. (Status: ${response.status})`);
         }
     } catch (e) {

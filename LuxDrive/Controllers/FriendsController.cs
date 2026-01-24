@@ -64,7 +64,7 @@ namespace LuxDrive.Controllers
         public async Task<IActionResult> SearchUser(string email)
         {
             var user = await _friendService.FindUserByEmailAsync(email);
-            if (user == null) return NotFound("Няма такъв потребител.");
+            if (user == null) return NotFound("No such user.");
             return Ok(new { id = user.Id, username = user.UserName, email = user.Email });
         }
 
@@ -85,7 +85,7 @@ namespace LuxDrive.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("Грешка при споделяне: " + ex.Message);
+                return BadRequest("Sharing error: " + ex.Message);
             }
         }
 
@@ -99,7 +99,7 @@ namespace LuxDrive.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("Грешка при премахване: " + ex.Message);
+                return BadRequest("Error removing: " + ex.Message);
             }
         }
 
