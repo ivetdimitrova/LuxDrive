@@ -39,7 +39,10 @@ namespace LuxDrive.Controllers
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                SavedCards = cards
+                SavedCards = cards,
+                ProfileImageUrl = string.IsNullOrEmpty(user.ProfileImagePath)
+                                  ? "/images/default-avatar.png"
+                                  : user.ProfileImagePath
             };
         }
 
@@ -53,7 +56,7 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateProfile(UserSettingsViewModel model)
+        public async Task<IActionResult> UpdateProfile(UserSettingsViewModel model, string RemovePhoto) 
         {
             TempData["ActiveTab"] = "profile";
             var user = await _userManager.GetUserAsync(User);
@@ -89,6 +92,45 @@ namespace LuxDrive.Controllers
                 return View("Index", await LoadViewModelAsync(user));
             }
 
+
+            if (RemovePhoto == "true")
+            {
+                if (!string.IsNullOrEmpty(user.ProfileImagePath))
+                {
+                    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.ProfileImagePath.TrimStart('/'));
+                    if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
+
+                    user.ProfileImagePath = null; 
+                }
+            }
+            else if (model.ProfileImage != null && model.ProfileImage.Length > 0)
+            {
+                if (model.ProfileImage.Length > 2 * 1024 * 1024)
+                {
+                    TempData["Error"] = "Image size must be less than 2MB.";
+                    return View("Index", await LoadViewModelAsync(user));
+                }
+
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/profiles");
+                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+
+                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProfileImage.FileName);
+                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                if (!string.IsNullOrEmpty(user.ProfileImagePath))
+                {
+                    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.ProfileImagePath.TrimStart('/'));
+                    if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
+                }
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ProfileImage.CopyToAsync(fileStream);
+                }
+
+                user.ProfileImagePath = "/uploads/profiles/" + uniqueFileName;
+            }
+
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
             user.PhoneNumber = model.PhoneNumber;
@@ -104,9 +146,32 @@ namespace LuxDrive.Controllers
                 user.UserName = model.Email;
             }
 
-            await _userManager.UpdateAsync(user);
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                TempData["Error"] = "Update failed: " + result.Errors.First().Description;
+                return View("Index", await LoadViewModelAsync(user));
+            }
+
             await _signInManager.RefreshSignInAsync(user);
             TempData["Success"] = "Profile updated successfully!";
+
+            return RedirectToAction("Index");
+        }
+        [HttpPost]
+        public async Task<IActionResult> RemoveProfilePicture()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user != null && !string.IsNullOrEmpty(user.ProfileImagePath))
+            {
+                var fullPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.ProfileImagePath.TrimStart('/'));
+                if (System.IO.File.Exists(fullPath)) System.IO.File.Delete(fullPath);
+
+                user.ProfileImagePath = string.Empty;
+
+                await _userManager.UpdateAsync(user);
+                TempData["Success"] = "Profile picture removed.";
+            }
             return RedirectToAction("Index");
         }
 
@@ -263,7 +328,7 @@ namespace LuxDrive.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            TempData["ErrorMessage"] = "Грешка при изтриване на профила.";
+            TempData["ErrorMessage"] = "Error deleting account.";
             return RedirectToAction("Index");
         }
     }
