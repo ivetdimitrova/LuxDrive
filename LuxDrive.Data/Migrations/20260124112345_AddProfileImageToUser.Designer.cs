@@ -4,6 +4,7 @@ using LuxDrive.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LuxDrive.Data.Migrations
 {
     [DbContext(typeof(LuxDriveDbContext))]
-    partial class LuxDriveDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260124112345_AddProfileImageToUser")]
+    partial class AddProfileImageToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -78,6 +81,7 @@ namespace LuxDrive.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("ProfileImagePath")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")

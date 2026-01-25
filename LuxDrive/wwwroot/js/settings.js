@@ -70,3 +70,56 @@ function openTab(evt, tabName) {
     document.getElementById(tabName).style.display = "block";
     evt.currentTarget.classList.add("active");
 }
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const preview = document.getElementById('profile-preview');
+            preview.style.opacity = '0';
+            setTimeout(() => {
+                preview.src = e.target.result;
+                preview.style.opacity = '1';
+                document.getElementById('RemovePhotoFlag').value = "false";
+            }, 200);
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+function removePhotoPreview() {
+    const preview = document.getElementById('profile-preview');
+    preview.style.opacity = '0';
+    setTimeout(() => {
+        preview.src = '/images/default-avatar.png'; 
+        preview.style.opacity = '1';
+
+        document.getElementById('ProfileImage').value = "";
+        document.getElementById('RemovePhotoFlag').value = "true";
+    }, 200);
+}
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const preview = document.getElementById('profile-preview');
+            preview.style.opacity = '0';
+            setTimeout(() => {
+                preview.src = e.target.result;
+                preview.style.opacity = '1';
+                document.getElementById('removePhotoFlag').value = "false";
+            }, 300);
+        }
+        reader.readAsDataURL(file);
+    }
+}
+
+function markForRemoval() {
+    const preview = document.getElementById('profile-preview');
+    preview.src = '/images/default-avatar.png';
+
+    document.getElementById('removePhotoFlag').value = "true";
+
+    document.getElementById('imageInput').value = "";
+}

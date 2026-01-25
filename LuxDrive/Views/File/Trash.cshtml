@@ -47,6 +47,27 @@
             }
         </div>
 
+        <div id="selection-tools" style="display: none; width: 100%; margin: 20px 0;">
+            <div class="selection-inner">
+                <div class="selection-info">
+                    <div class="selection-badge">
+                        <i class="fas fa-file-alt"></i>
+                        <span id="selectedCountDisplay">0 selected</span>
+                    </div>
+                </div>
+
+                <div class="selection-actions">
+                    <button class="sel-btn all" onclick="selectAllTrash()">
+                        <span>Select All</span>
+                    </button>
+                    <button class="sel-btn cancel" onclick="deselectAllTrash()">
+                        <i class="fas fa-times"></i>
+                        <span>Cancel</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <div class="files-grid">
             @if (Model != null && Model.Any())
             {

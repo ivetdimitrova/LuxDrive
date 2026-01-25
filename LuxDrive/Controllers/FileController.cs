@@ -268,6 +268,22 @@ namespace LuxDrive.Controllers
             }
             catch { return BadRequest("Error sharing files."); }
         }
+        [HttpPost]
+        public async Task<IActionResult> Share(Guid fileId, string receiverId)
+        {
+            var userIdStr = GetUserId();
+            if (userIdStr == null || string.IsNullOrEmpty(receiverId)) return BadRequest();
+
+            try
+            {
+                await fileService.ShareFileAsync(fileId, userIdStr, receiverId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error sharing file: " + ex.Message);
+            }
+        }
 
         private void CalculateStorageUsage(IEnumerable<FileEntity> files, string planName)
         {

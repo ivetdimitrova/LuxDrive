@@ -21,7 +21,7 @@ namespace LuxDrive.Services
 
         public async Task SendRequestAsync(Guid senderId, Guid receiverId)
         {
-            if (senderId == receiverId) throw new InvalidOperationException("Не може да пратите покана на себе си.");
+            if (senderId == receiverId) throw new InvalidOperationException("You cannot send an invitation to yourself..");
 
             bool exists = await _context.FriendRequests
                 .AnyAsync(x => x.SenderId == senderId && x.ReceiverId == receiverId && x.Status == FriendRequestStatus.Pending);
@@ -46,7 +46,7 @@ namespace LuxDrive.Services
                 .FirstOrDefaultAsync(x => x.Id == requestId);
 
             if (request == null || request.Status != FriendRequestStatus.Pending)
-                throw new InvalidOperationException("Поканата не е намерена или не е активна.");
+                throw new InvalidOperationException("Invitation not found or not active.");
 
             request.Status = FriendRequestStatus.Accepted;
 
@@ -68,7 +68,7 @@ namespace LuxDrive.Services
             }
             else
             {
-                throw new Exception("Заявката не е намерена.");
+                throw new Exception("Request not found.");
             }
         }
 

@@ -240,3 +240,62 @@ label {
         opacity: 1;
     }
 }
+.profile-upload-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin-bottom: 20px; 
+    width: 100%;
+}
+
+.profile-img-container {
+    position: relative;
+    margin-bottom: 12px; 
+}
+
+#profile-preview {
+    width: 100px; 
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #d4af37;
+    padding: 3px;
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.15);
+}
+
+.button-group-lux {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-lux-change {
+    background: linear-gradient(135deg, #b88a44 0%, #d4af37 100%);
+    color: #000;
+    border: none;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-lux-outline {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.7rem;
+    cursor: pointer;
+}
+
+.upload-info {
+    margin: 8px 0 0 0;
+    color: #555;
+    font-size: 0.65rem;
+}

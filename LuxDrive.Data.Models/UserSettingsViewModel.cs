@@ -1,10 +1,13 @@
 ﻿using LuxDrive.Data.Models;
+using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
 namespace LuxDrive.Models
 {
     public class UserSettingsViewModel
     {
+        public IFormFile ProfileImage { get; set; }
+        public string ProfileImageUrl { get; set; }
         public string Username { get; set; }
 
         [Display(Name = "First Name")]

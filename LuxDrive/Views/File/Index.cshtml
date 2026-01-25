@@ -37,6 +37,9 @@
             <a asp-controller="Settings" asp-action="Index" class="nav-item">
                 <i class="fas fa-cog"></i> Settings
             </a>
+            <a href="@Url.Action("Trash", "File")" class="nav-item">
+                <i class="fas fa-trash-can"></i> Trash Bin
+            </a>
         </div>
 
         <div class="nav-section">
@@ -99,7 +102,26 @@
             <button class="filter-btn" onclick="filterFiles(event, 'document')">Documents</button>
             <button class="filter-btn" onclick="filterFiles(event, 'archive')">Archives</button>
         </div>
+        <div id="selection-tools" style="display: none;">
+            <div class="selection-inner">
+                <div class="selection-info">
+                    <div class="selection-badge">
+                        <i class="fas fa-file-alt"></i>
+                        <span id="selectedCount">0 selected</span>
+                    </div>
+                </div>
 
+                <div class="selection-actions">
+                    <button class="sel-btn all" onclick="selectAllFiles()">
+                        <span>Select All</span>
+                    </button>
+                    <button class="sel-btn cancel" onclick="deselectAllFiles()">
+                        <i class="fas fa-times"></i>
+                        <span>Cancel</span>
+                    </button>
+                </div>
+            </div>
+        </div>
         <div class="files-grid">
             @if (Model != null && Model.Any())
             {
