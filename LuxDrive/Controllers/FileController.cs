@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using LuxDrive.ViewModels.File;
 
 namespace LuxDrive.Controllers
 {
@@ -47,7 +48,7 @@ namespace LuxDrive.Controllers
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
 
-            var allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
+            IEnumerable<IndexViewModel> allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
             var activeFiles = allUserFiles.Where(f => !f.IsDeleted).ToList();
 
             string planKey = GetUserKey("CurrentPlan");
@@ -285,7 +286,7 @@ namespace LuxDrive.Controllers
             }
         }
 
-        private void CalculateStorageUsage(IEnumerable<FileEntity> files, string planName)
+        private void CalculateStorageUsage(IEnumerable<IndexViewModel> files, string planName)
         {
             long totalUsedBytes = files.Sum(f => f.Size);
             long maxBytes = GetMaxBytesForPlan(planName);

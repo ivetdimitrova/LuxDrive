@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LuxDrive.Data\LuxDrive.Data.csproj" />
+    <ProjectReference Include="..\LuxDrive.ViewModels\LuxDrive.ViewModels.csproj" />
   </ItemGroup>
 
 </Project>
