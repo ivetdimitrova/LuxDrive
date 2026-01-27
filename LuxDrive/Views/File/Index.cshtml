@@ -1,15 +1,9 @@
-﻿@model IEnumerable<LuxDrive.Data.Models.File>
+﻿@using LuxDrive.ViewModels.File;
+@model IEnumerable<IndexViewModel>
 
 @{
     ViewData["Title"] = "LuxDrive Dashboard";
-
-    string currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
-
-    int totalFiles = Model?.Count() ?? 0;
-    int imgCount = Model?.Count(f => f.Extension.Contains("jpg") || f.Extension.Contains("png") || f.Extension.Contains("webp")) ?? 0;
-    int vidCount = Model?.Count(f => f.Extension.Contains("mp4") || f.Extension.Contains("avi") || f.Extension.Contains("mov")) ?? 0;
-    int docCount = Model?.Count(f => f.Extension.Contains("pdf") || f.Extension.Contains("doc") || f.Extension.Contains("txt")) ?? 0;
-    int arcCount = Model?.Count(f => f.Extension.Contains("zip") || f.Extension.Contains("rar") || f.Extension.Contains("7z")) ?? 0;
+    var currentAction = "Index";
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -17,225 +11,96 @@
 <link rel="stylesheet" href="~/css/fileIndex.css" asp-append-version="true" />
 
 <div class="app-wrapper">
-    <div class="particles-container">
-        <div class="particles-1"></div>
-        <div class="particles-2"></div>
-        <div class="particles-3"></div>
-    </div>
 
     <aside class="sidebar">
-        <div class="nav-section" style="margin-top: 20px;">
+        <div class="nav-section" style="margin-top:20px;">
             <div class="nav-title">Menu</div>
-            <a href="@Url.Action("Index", "Home")" class="nav-item @(currentAction == "Index" ? "active" : "")">
+
+            <a asp-controller="File" asp-action="Index" class="nav-item active">
                 <i class="fas fa-house"></i> All Files
             </a>
-            <a href="@Url.Action("SharedWithMe", "File")" class="nav-item @(currentAction == "SharedWithMe" ? "active" : "")">
+
+            <a asp-controller="File" asp-action="SharedWithMe" class="nav-item">
                 <i class="fas fa-share-nodes"></i> Shared
             </a>
-            <a href="#" class="nav-item" onclick="openHub()"><i class="fas fa-user-group"></i> Friends</a>
+
+            <a href="#" class="nav-item" onclick="openHub()">
+                <i class="fas fa-user-group"></i> Friends
+            </a>
 
             <a asp-controller="Settings" asp-action="Index" class="nav-item">
                 <i class="fas fa-cog"></i> Settings
             </a>
-            <a href="@Url.Action("Trash", "File")" class="nav-item">
+
+            <a asp-controller="File" asp-action="Trash" class="nav-item">
                 <i class="fas fa-trash-can"></i> Trash Bin
             </a>
         </div>
 
         <div class="nav-section">
             <div class="nav-title">Libraries</div>
-            <a href="#" class="nav-item" onclick="filterFiles(event, 'image')"><i class="fas fa-images"></i> Photos</a>
-            <a href="#" class="nav-item" onclick="filterFiles(event, 'video')"><i class="fas fa-video"></i> Videos</a>
-            <a href="#" class="nav-item" onclick="filterFiles(event, 'document')"><i class="fas fa-file-contract"></i> Documents</a>
-            <a href="#" class="nav-item" onclick="filterFiles(event, 'archive')"><i class="fas fa-box-archive"></i> Archives</a>
-        </div>
-
-        <div class="storage-box">
-            <div class="storage-header">
-                <span>Storage</span>
-                <span style="color:var(--gold)">@ViewBag.StoragePercent%</span>
-            </div>
-            <div class="progress-track">
-                <div class="progress-bar" style="width: @ViewBag.StoragePercent%"></div>
-            </div>
-            <p style="font-size: 11px; color: #666; margin-top: 5px; text-align: center; margin-bottom: 10px;">
-                @ViewBag.StorageText
-            </p>
-            <a href="/Pricing" class="upgrade-link">Upgrade Plan</a>
+            <a href="#" class="nav-item" onclick="filterFiles(event,'image')"><i class="fas fa-images"></i> Photos</a>
+            <a href="#" class="nav-item" onclick="filterFiles(event,'video')"><i class="fas fa-video"></i> Videos</a>
+            <a href="#" class="nav-item" onclick="filterFiles(event,'document')"><i class="fas fa-file-contract"></i> Documents</a>
+            <a href="#" class="nav-item" onclick="filterFiles(event,'archive')"><i class="fas fa-box-archive"></i> Archives</a>
         </div>
     </aside>
 
     <div class="content">
+
         <div class="top-header">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" placeholder="Search" onkeyup="searchFiles(this.value)">
             </div>
+
             <form asp-controller="File" asp-action="Upload" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <label for="file-upload" class="upload-btn">
                     <i class="fas fa-cloud-arrow-up"></i> Upload
                 </label>
-                <input type="file" id="file-upload" name="files" multiple style="display:none;" onchange="this.form.submit()" />
+                <input type="file" id="file-upload" name="files" multiple hidden onchange="this.form.submit()" />
             </form>
         </div>
 
-        @if (TempData["UploadError"] != null)
-        {
-            <div style="background: rgba(255, 77, 77, 0.1); border-left: 4px solid #ff4d4d; color: #ff4d4d; padding: 15px; margin-bottom: 20px; border-radius: 4px; font-size: 0.9rem;">
-                <i class="fas fa-exclamation-circle"></i> @TempData["UploadError"]
-            </div>
-        }
-
-        <div class="stats-grid">
-            <div class="stat-card"><div class="stat-info"><h5>All Files</h5><span>@totalFiles</span></div><div class="stat-icon"><i class="fas fa-hard-drive"></i></div></div>
-            <div class="stat-card"><div class="stat-info"><h5>Photos</h5><span>@imgCount</span></div><div class="stat-icon"><i class="fas fa-camera"></i></div></div>
-            <div class="stat-card"><div class="stat-info"><h5>Videos</h5><span>@vidCount</span></div><div class="stat-icon"><i class="fas fa-film"></i></div></div>
-            <div class="stat-card"><div class="stat-info"><h5>Documents</h5><span>@docCount</span></div><div class="stat-icon"><i class="fas fa-file-contract"></i></div></div>
-            <div class="stat-card"><div class="stat-info"><h5>Archives</h5><span>@arcCount</span></div><div class="stat-icon"><i class="fas fa-file-zipper"></i></div></div>
-        </div>
-
-        <div class="filter-menu">
-            <button class="filter-btn active" onclick="filterFiles(event, 'all')">All</button>
-            <button class="filter-btn" onclick="filterFiles(event, 'image')">Images</button>
-            <button class="filter-btn" onclick="filterFiles(event, 'video')">Videos</button>
-            <button class="filter-btn" onclick="filterFiles(event, 'document')">Documents</button>
-            <button class="filter-btn" onclick="filterFiles(event, 'archive')">Archives</button>
-        </div>
-        <div id="selection-tools" style="display: none;">
-            <div class="selection-inner">
-                <div class="selection-info">
-                    <div class="selection-badge">
-                        <i class="fas fa-file-alt"></i>
-                        <span id="selectedCount">0 selected</span>
-                    </div>
-                </div>
-
-                <div class="selection-actions">
-                    <button class="sel-btn all" onclick="selectAllFiles()">
-                        <span>Select All</span>
-                    </button>
-                    <button class="sel-btn cancel" onclick="deselectAllFiles()">
-                        <i class="fas fa-times"></i>
-                        <span>Cancel</span>
-                    </button>
-                </div>
-            </div>
-        </div>
         <div class="files-grid">
-            @if (Model != null && Model.Any())
+            @foreach (var file in Model)
             {
-                int delay = 0;
-                foreach (var file in Model)
-                {
-                    string ext = file.Extension?.ToLower() ?? "";
-                    string type = "other";
-                    string iconClass = "fas fa-file";
+                <div class="file-item"
+                     id="file-@file.Id"
+                     data-type="@file.Type"
+                     data-download-url="@file.StorageUrl">
 
-                    if (ext.Contains("jpg") || ext.Contains("png") || ext.Contains("webp")) { type = "image"; }
-                    else if (ext.Contains("mp4") || ext.Contains("avi")) { type = "video"; iconClass = "fas fa-play"; }
-                    else if (ext.Contains("pdf")) { type = "document"; iconClass = "fas fa-file-pdf"; }
-                    else if (ext.Contains("doc")) { type = "document"; iconClass = "fas fa-file-word"; }
-                    else if (ext.Contains("zip")) { type = "archive"; iconClass = "fas fa-box"; }
+                    <div class="preview-box">
+                        <div class="check-circle" onclick="toggleSelect(this,'@file.Id')"></div>
 
-                    string delayStyle = $"animation-delay: {delay * 0.05}s;";
-                    delay++;
-
-                    <div class="file-item" id="file-@file.Id" data-type="@type" data-download-url="@file.StorageUrl" style="@delayStyle">
-                        <div class="preview-box">
-                            <div class="check-circle" onclick="toggleSelect(this, '@file.Id')"></div>
-                            @if (type == "image")
-                            {
-                                <img src="@file.StorageUrl" alt="@file.Name">
-                            }
-                            else
-                            {
-                                <i class="@iconClass type-icon"></i>
-                            }
-                            <div class="actions-overlay">
-                                <button class="action-btn" onclick="window.open('@file.StorageUrl')" title="Download"><i class="fas fa-download"></i></button>
-                                <button class="action-btn" onclick="openShare('@file.Id')" title="Share"><i class="fas fa-share-alt"></i></button>
-
-                                @if (currentAction == "Index")
-                                {
-                                    <button class="action-btn" onclick="renameFile('@file.Id', '@file.Name')" title="Rename"><i class="fas fa-pen"></i></button>
-                                    <button class="action-btn" onclick="deleteFile('@file.Id')" title="Delete"><i class="fas fa-trash"></i></button>
-                                }
-                            </div>
-                        </div>
-                        <div class="file-info">
-                            <h3 title="@file.Name">@file.Name</h3>
-                            <p><span>@ext.ToUpper()</span> <span>@file.UploadAt.ToString("dd MMM")</span></p>
-                            @if (!string.IsNullOrEmpty(file.SenderName))
-                            {
-                                <p style="color:var(--gold); margin-top:5px;"><i class="fas fa-user-circle"></i> @file.SenderName</p>
-                            }
-                        </div>
+                        @if (file.Type == "image")
+                        {
+                            <img src="@file.StorageUrl" />
+                        }
+                        else
+                        {
+                            <i class="@file.Icon type-icon"></i>
+                        }
                     </div>
-                }
+
+                    <div class="file-info">
+                        <h3>@file.Name</h3>
+                        <p>@file.Extension • @file.UploadedAt.ToString("dd MMM")</p>
+                    </div>
+                </div>
             }
 
-            <div id="empty-state" style="grid-column:1/-1; text-align:center; padding:50px; color:#444; @(Model != null && Model.Any() ? "display:none;" : "display:block;")">
-                <i id="empty-icon" class="fas fa-folder-open" style="font-size:3rem; margin-bottom:15px; opacity:0.3"></i>
-                <p id="empty-text" style="font-size: 1.1rem;">No files uploaded</p>
+            <div id="empty-state" style="display:none; text-align:center; padding:40px;">
+                <i class="fas fa-folder-open" style="font-size:3rem; opacity:.3"></i>
+                <p id="empty-text">No files uploaded</p>
             </div>
         </div>
 
         <div id="bulkBar" class="bulk-bar">
-            <span id="bulkCount" style="color:#fff; font-weight:700;">0 Selected</span>
-            <button onclick="bulkDownload()" style="background:none; border:none; color:#ccc; cursor:pointer;"><i class="fas fa-download"></i> Download</button>
-            <button onclick="bulkShare()" style="background:none; border:none; color:#ccc; cursor:pointer;"><i class="fas fa-share"></i> Share</button>
-
-            @if (currentAction == "Index")
-            {
-                <button onclick="bulkDelete()" style="background:none; border:none; color:#ff5c5c; cursor:pointer;"><i class="fas fa-trash"></i> Delete</button>
-            }
+            <span id="bulkCount">0 Selected</span>
         </div>
     </div>
 </div>
 
-<div id="socialHub" class="modal-overlay">
-    <div class="social-hub">
-        <div class="hub-header">
-            <h2><i class="fas fa-users" style="color:var(--gold)"></i> Friends</h2>
-            <div class="close-hub" onclick="closeHub()"><i class="fas fa-times"></i></div>
-        </div>
-        <div class="hub-tabs">
-            <button class="tab-link active" onclick="setTab('connections')">My Friends</button>
-            <button class="tab-link" onclick="setTab('add')">Add New</button>
-            <button class="tab-link" onclick="setTab('requests')">Requests</button>
-        </div>
-        <div class="hub-content">
-            <div id="view-connections"><div id="connectionsList">Loading...</div></div>
-            <div id="view-add" style="display:none;">
-                <p style="color:#888; margin-bottom:15px;">Enter email to send an invite:</p>
-                <div class="invite-box"><input type="email" id="inviteEmail" placeholder="friend@example.com"><button onclick="sendInvite()">INVITE</button></div>
-                <h5 style="color:#666; margin-top:30px; text-transform:uppercase; font-size:0.75rem;">Sent Pending Requests</h5>
-                <div id="sentList"></div>
-            </div>
-            <div id="view-requests" style="display:none;"><div id="requestsList">No new requests.</div></div>
-        </div>
-    </div>
-</div>
-
-<div id="shareModal" class="modal-overlay">
-    <div class="social-hub" style="width:400px; margin-top:150px;">
-        <div class="hub-header">
-            <h2>Share File</h2>
-            <div class="close-hub" onclick="closeShare()"><i class="fas fa-times"></i></div>
-        </div>
-        <div class="hub-content" style="min-height:auto;">
-            <input type="hidden" id="shareId">
-            <p style="color:#888;">Select recipient:</p>
-            <select id="shareSelect" style="width:100%; padding:15px; background:#080808; border:1px solid #333; color:#fff; border-radius:10px; margin:10px 0 20px;"><option>Loading...</option></select>
-            <button class="upload-btn" style="width:100%; justify-content:center;" onclick="confirmShare()">Send Now</button>
-        </div>
-    </div>
-</div>
-
-<form id="delForm" asp-controller="File" asp-action="Delete" method="post" style="display:none;">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="id" id="delId">
-</form>
-
-<script src="~/js/file.js"></script>
+<script src="~/js/file-ui.js"></script>
