@@ -3,6 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
+using LuxDrive.ViewModels.File;
+
 namespace LuxDrive.Services.Interfaces
 {
     public interface IFileService
@@ -13,7 +15,7 @@ namespace LuxDrive.Services.Interfaces
 
         Task ShareFileAsync(Guid fileId, string senderId, string receiverId);
 
-        Task<IEnumerable<LuxDrive.Data.Models.File>> GetUserFilesAsync(string userId);
+        Task<IEnumerable<IndexViewModel>> GetUserFilesAsync(string userId);
         Task<IEnumerable<LuxDrive.Data.Models.File>> GetSharedWithMeFilesAsync(string userId);
 
         Task<bool> ChangeFileNameAsync(string userId, Guid fileId, string newName);
