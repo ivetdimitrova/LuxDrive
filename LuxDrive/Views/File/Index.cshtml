@@ -4,6 +4,12 @@
 @{
     ViewData["Title"] = "LuxDrive Dashboard";
     var currentAction = "Index";
+
+    int totalFiles = Model?.Count() ?? 0;
+    int imgCount = Model?.Count(f => f.Extension.Contains("jpg") || f.Extension.Contains("png") || f.Extension.Contains("webp")) ?? 0;
+    int vidCount = Model?.Count(f => f.Extension.Contains("mp4") || f.Extension.Contains("avi") || f.Extension.Contains("mov")) ?? 0;
+    int docCount = Model?.Count(f => f.Extension.Contains("pdf") || f.Extension.Contains("doc") || f.Extension.Contains("txt")) ?? 0;
+    int arcCount = Model?.Count(f => f.Extension.Contains("zip") || f.Extension.Contains("rar") || f.Extension.Contains("7z")) ?? 0;
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -44,6 +50,20 @@
             <a href="#" class="nav-item" onclick="filterFiles(event,'document')"><i class="fas fa-file-contract"></i> Documents</a>
             <a href="#" class="nav-item" onclick="filterFiles(event,'archive')"><i class="fas fa-box-archive"></i> Archives</a>
         </div>
+
+        <div class="storage-box">
+            <div class="storage-header">
+                <span>Storage</span>
+                <span style="color:var(--gold)">@ViewBag.StoragePercent%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-bar" style="width: @ViewBag.StoragePercent%"></div>
+            </div>
+            <p style="font-size: 11px; color: #666; margin-top: 5px; text-align: center; margin-bottom: 10px;">
+                @ViewBag.StorageText
+            </p>
+            <a href="/Pricing" class="upgrade-link">Upgrade Plan</a>
+        </div>
     </aside>
 
     <div class="content">
@@ -63,44 +83,84 @@
             </form>
         </div>
 
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-info"><h5>All Files</h5><span>@totalFiles</span></div><div class="stat-icon"><i class="fas fa-hard-drive"></i></div></div>
+            <div class="stat-card"><div class="stat-info"><h5>Photos</h5><span>@imgCount</span></div><div class="stat-icon"><i class="fas fa-camera"></i></div></div>
+            <div class="stat-card"><div class="stat-info"><h5>Videos</h5><span>@vidCount</span></div><div class="stat-icon"><i class="fas fa-film"></i></div></div>
+            <div class="stat-card"><div class="stat-info"><h5>Documents</h5><span>@docCount</span></div><div class="stat-icon"><i class="fas fa-file-contract"></i></div></div>
+            <div class="stat-card"><div class="stat-info"><h5>Archives</h5><span>@arcCount</span></div><div class="stat-icon"><i class="fas fa-file-zipper"></i></div></div>
+        </div>
+
         <div class="files-grid">
-            @foreach (var file in Model)
+            @if (Model != null && Model.Any())
             {
-                <div class="file-item"
-                     id="file-@file.Id"
-                     data-type="@file.Type"
-                     data-download-url="@file.StorageUrl">
+                @foreach (var file in Model)
+                {
+                    <div class="file-item"
+                         id="file-@file.Id"
+                         data-type="@file.Type"
+                         data-download-url="@file.StorageUrl">
 
-                    <div class="preview-box">
-                        <div class="check-circle" onclick="toggleSelect(this,'@file.Id')"></div>
+                        <div class="preview-box">
+                            <div class="check-circle" onclick="toggleSelect(this,'@file.Id')"></div>
 
-                        @if (file.Type == "image")
-                        {
-                            <img src="@file.StorageUrl" />
-                        }
-                        else
-                        {
-                            <i class="@file.Icon type-icon"></i>
-                        }
+                            @if (file.Type == "image")
+                            {
+                                <img src="@file.StorageUrl" />
+                            }
+                            else
+                            {
+                                <i class="@file.Icon type-icon"></i>
+                            }
+                        </div>
+
+                        <div class="actions-overlay">
+
+                            <form asp-controller="File" asp-action="Download" method="post" style="display:inline;">
+                                <input type="hidden" name="storageUrl" value="@file.StorageUrl" />
+                                <button type="submit" class="action-btn" title="Download">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                            </form>
+                            <form asp-controller="File" asp-action="Share" method="post" style="display:inline;">
+                                <input type="hidden" name="id" value="@file.Id" />
+
+                                <button type="submit" class="action-btn" title="Share">
+                                    <i class="fas fa-share-alt"></i>
+                                </button>
+                            </form>
+
+                            @if (currentAction == "Index")
+                            {
+                                <button class="action-btn" onclick="renameFile('@file.Id', '@file.Name')" title="Rename"><i class="fas fa-pen"></i></button>
+                                <button class="action-btn" onclick="deleteFile('@file.Id')" title="Delete"><i class="fas fa-trash"></i></button>
+                            }
+
+                        </div>
+                        <div class="file-info">
+                            <h3>@file.Name</h3>
+                            <p>@file.Extension • @file.UploadedAt.ToString("dd MMM")</p>
+                        </div>
                     </div>
-
-                    <div class="file-info">
-                        <h3>@file.Name</h3>
-                        <p>@file.Extension • @file.UploadedAt.ToString("dd MMM")</p>
-                    </div>
-                </div>
+                }
             }
+            else
+            {
+                <div id="empty-state" style="display:none; text-align:center; padding:40px;">
+                    <i class="fas fa-folder-open" style="font-size:3rem; opacity:.3"></i>
+                    <p id="empty-text">No files uploaded</p>
+                </div>
+           
 
-            <div id="empty-state" style="display:none; text-align:center; padding:40px;">
-                <i class="fas fa-folder-open" style="font-size:3rem; opacity:.3"></i>
-                <p id="empty-text">No files uploaded</p>
-            </div>
-        </div>
-
-        <div id="bulkBar" class="bulk-bar">
-            <span id="bulkCount">0 Selected</span>
-        </div>
+        }
     </div>
+
+
+
+    <div id="bulkBar" class="bulk-bar">
+        <span id="bulkCount">0 Selected</span>
+    </div>
+</div>
 </div>
 
 <script src="~/js/file-ui.js"></script>
