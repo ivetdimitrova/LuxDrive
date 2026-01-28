@@ -2,6 +2,7 @@
 using LuxDrive.Data.Models;
 using LuxDrive.Data.Models.Enums;
 using LuxDrive.Services.Interfaces;
+using LuxDrive.ViewModels.Friends;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -95,17 +96,18 @@ namespace LuxDrive.Services
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
-        public async Task<IEnumerable<object>> GetFriendsAsync(Guid userId)
+        public async Task<IEnumerable<FriendViewModel>> GetFriendsAsync(Guid userId)
         {
             return await _context.UserFriends
                 .Where(uf => uf.UserId == userId)
-                .Select(uf => new
+                .Include(uf => uf.Friend)
+                .AsNoTracking()
+                .Select(uf => new FriendViewModel
                 {
                     Id = uf.FriendId,
-                    Username = uf.Friend.UserName,
                     Email = uf.Friend.Email,
-                    FirstName = uf.Friend.FirstName,
-                    LastName = uf.Friend.LastName
+                    Name = $"{uf.Friend.FirstName} {uf.Friend.LastName}",
+                    
                 })
                 .ToListAsync();
         }

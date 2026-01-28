@@ -1,4 +1,5 @@
 ﻿using LuxDrive.Data.Models;
+using LuxDrive.ViewModels.Friends;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace LuxDrive.Services.Interfaces
         Task RejectRequestAsync(int requestId);
         Task<IEnumerable<object>> GetPendingRequestsAsync(Guid userId);
         Task<ApplicationUser?> FindUserByEmailAsync(string email);
-        Task<IEnumerable<object>> GetFriendsAsync(Guid userId);
+        Task<IEnumerable<FriendViewModel>> GetFriendsAsync(Guid userId);
         Task RemoveFriendAsync(Guid userId, Guid friendId);
         Task<IEnumerable<object>> GetSentPendingRequestsAsync(Guid userId);
     }
