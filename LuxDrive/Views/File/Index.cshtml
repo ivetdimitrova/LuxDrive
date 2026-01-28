@@ -3,7 +3,7 @@
 
 @{
     ViewData["Title"] = "LuxDrive Dashboard";
-    var currentAction = "Index";
+    var currentAction = ViewContext.RouteData.Values["action"].ToString();
 
     int totalFiles = Model?.Count() ?? 0;
     int imgCount = Model?.Count(f => f.Extension.Contains("jpg") || f.Extension.Contains("png") || f.Extension.Contains("webp")) ?? 0;
@@ -141,6 +141,11 @@
                             <h3>@file.Name</h3>
                             <p>@file.Extension • @file.UploadedAt.ToString("dd MMM")</p>
                         </div>
+
+                        @if (currentAction == "SharedWithMe")
+                        {
+                            <p style="color:var(--gold); margin-top:5px;"><i class="fas fa-user-circle"></i> @file.SenderName</p>
+                        }
                     </div>
                 }
             }
