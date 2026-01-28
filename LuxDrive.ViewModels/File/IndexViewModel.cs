@@ -16,6 +16,8 @@ namespace LuxDrive.ViewModels.File
         public string Extension { get; set; } = string.Empty;
         public bool IsDeleted { get; set; }
         public int Size { get; set; }
+
+        public string? SenderName { get; set; } 
         public DateTime UploadedAt { get; set; }
     }
 }
