@@ -83,3 +83,22 @@ function closeFriendsTab() {
     const sidebar = document.querySelector('.sidebar');
     if (sidebar) sidebar.style.display = 'flex';
 }
+
+    function openTab(tabName) {
+        const allTabs = document.querySelectorAll('.tab-content');
+        allTabs.forEach(t => {
+            t.style.display = 'none';
+        });
+
+        const targetTab = document.getElementById(tabName);
+
+        if (targetTab) {
+            targetTab.style.display = 'block';
+        } else {
+            console.error("Не е намерен елемент с ID: " + tabName);
+        }
+
+        document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
+        const activeBtn = document.querySelector(`button[onclick*="${tabName}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+    }
