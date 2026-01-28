@@ -65,8 +65,8 @@ namespace LuxDrive.Controllers
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
 
-            IEnumerable<FileEntity> sharedFiles = await this.fileService.GetSharedWithMeFilesAsync(userIdStr);
-            var userFiles = await this.fileService.GetUserFilesAsync(userIdStr);
+            IEnumerable<IndexViewModel> sharedFiles = await this.fileService.GetSharedWithMeFilesAsync(userIdStr);
+            IEnumerable<IndexViewModel> userFiles = await this.fileService.GetUserFilesAsync(userIdStr);
 
             string planKey = GetUserKey("CurrentPlan");
             string currentPlan = Request.Cookies[planKey] ?? "Free";
