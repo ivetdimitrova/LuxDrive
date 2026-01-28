@@ -1,8 +1,9 @@
 ﻿using LuxDrive.Services.Interfaces;
+using LuxDrive.ViewModels.Friends;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using System;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace LuxDrive.Controllers
@@ -10,7 +11,7 @@ namespace LuxDrive.Controllers
     [ApiController]
     [Route("api/friends")]
     [Authorize]
-    public class FriendsController : ControllerBase
+    public class FriendsController : BaseController
     {
         private readonly IFriendService _friendService;
         private readonly IFileService _fileService;
@@ -71,8 +72,9 @@ namespace LuxDrive.Controllers
         [HttpGet("list")]
         public async Task<IActionResult> GetFriends()
         {
-            var friends = await _friendService.GetFriendsAsync(CurrentUserId);
-            return Ok(friends);
+            IEnumerable<FriendViewModel> friends = await _friendService.GetFriendsAsync(CurrentUserId);
+
+            return PartialView("_FriendsModalPartial", friends);
         }
 
         [HttpPost("share")]
