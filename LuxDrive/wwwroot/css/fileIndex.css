@@ -522,12 +522,21 @@ body {
 
 .social-hub {
     background: #1e1e1e;
-    width: 450px;
+    width: 550px;
+    margin: 80px auto;
     border-radius: 15px;
     border-top: 3px solid #ffcc00;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     color: white;
     overflow: hidden;
+}
+
+.tab-content {
+    padding: 25px 30px;
+    border-bottom: 1px solid #222;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 .modal-header-custom {
     padding: 24px 24px 10px 24px;
