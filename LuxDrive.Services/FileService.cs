@@ -4,11 +4,6 @@ using LuxDrive.Services.Interfaces;
 using LuxDrive.ViewModels.File;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 using FileEntity = LuxDrive.Data.Models.File;
 
@@ -207,21 +202,22 @@ namespace LuxDrive.Services
             await _dbContext.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<FileEntity>> GetSharedWithMeFilesAsync(string userId)
+        public async Task<IEnumerable<IndexViewModel>> GetSharedWithMeFilesAsync(string userId)
         {
-            if (!Guid.TryParse(userId, out Guid userGuid)) return new List<FileEntity>();
+            if (!Guid.TryParse(userId, out Guid userGuid)) return new List<IndexViewModel>();
 
             return await _dbContext.SharedFiles
                 .Where(sf => sf.ReceiverId == userGuid)
                 .Include(sf => sf.File)
                 .Include(sf => sf.Sender)
-                .Select(sf => new FileEntity
+                .AsNoTracking()
+                .Select(sf => new IndexViewModel
                 {
                     Id = sf.File.Id,
                     Name = sf.File.Name,
                     Extension = sf.File.Extension,
                     StorageUrl = sf.File.StorageUrl,
-                    UploadAt = sf.SharedOn,
+                    UploadedAt = sf.SharedOn,
                     SenderName = sf.Sender.UserName
                 })
                 .ToListAsync();

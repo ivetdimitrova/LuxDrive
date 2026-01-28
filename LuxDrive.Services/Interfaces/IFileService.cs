@@ -16,7 +16,7 @@ namespace LuxDrive.Services.Interfaces
         Task ShareFileAsync(Guid fileId, string senderId, string receiverId);
 
         Task<IEnumerable<IndexViewModel>> GetUserFilesAsync(string userId);
-        Task<IEnumerable<LuxDrive.Data.Models.File>> GetSharedWithMeFilesAsync(string userId);
+        Task<IEnumerable<IndexViewModel>> GetSharedWithMeFilesAsync(string userId);
 
         Task<bool> ChangeFileNameAsync(string userId, Guid fileId, string newName);
 
