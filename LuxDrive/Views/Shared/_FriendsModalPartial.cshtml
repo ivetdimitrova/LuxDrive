@@ -1,0 +1,51 @@
+﻿@using  LuxDrive.ViewModels.Friends;
+@model IEnumerable<FriendViewModel>
+
+<div class="social-hub">
+    <div class="modal-header-custom">
+        <div class="header-title">
+            <i class="fas fa-users yellow-text"></i>
+            <span>Friends</span>
+        </div>
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+    </div>
+
+    <div class="modal-tabs">
+        <button class="tab-link active" onclick="openTab(event, 'MyFriends')">My Friends</button>
+        <button class="tab-link" onclick="openTab(event, 'AddNew')">Add New</button>
+        <button class="tab-link" onclick="openTab(event, 'Requests')">Requests</button>
+    </div>
+
+    <div id="MyFriends" class="tab-content" style="display: block;">
+        @foreach (var friend in Model)
+        {
+            <div class="friend-row">
+                <div class="friend-avatar">@friend.Name.First()</div>
+                <div class="friend-info">
+                    <div class="friend-name">@friend.Name</div>
+                    <div class="friend-email">@friend.Email</div>
+                </div>
+                <div class="friend-actions">
+                    <i class="fas fa-eye info-icon"></i>
+                    <i class="fas fa-user-minus remove-icon"></i>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div id="AddNew" class="tab-content" style="display: none;">
+        <p class="input-label">Enter email to send an invite:</p>
+        <div class="invite-box">
+            <input type="email" placeholder="friend@example.com" id="inviteEmail">
+            <button class="btn-invite">INVITE</button>
+        </div>
+        <div class="pending-section">
+            <p class="small-label">SENT PENDING REQUESTS</p>
+            <p class="empty-msg">No sent requests.</p>
+        </div>
+    </div>
+
+    <div id="Requests" class="tab-content" style="display: none;">
+        <p class="empty-msg center">No incoming requests.</p>
+    </div>
+</div>
