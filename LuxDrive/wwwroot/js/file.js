@@ -54,10 +54,32 @@ function updateSelectionUI() {
     }
 }
 
-function openHub() {
-    document.getElementById('socialHub')?.classList.add('active');
+async function showFriends(event, element) {
+    event.preventDefault();
+
+    const url = element.getAttribute('href');
+
+    try {
+        const response = await fetch(url);
+        const html = await response.text();
+
+        const container = document.getElementById('modalContainer');
+        container.innerHTML = html;
+        container.style.display = 'flex';
+
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) sidebar.style.display = 'none';
+    } catch (err) {
+        console.error("Грешка при зареждане на приятели:", err);
+    }
 }
 
-function closeHub() {
-    document.getElementById('socialHub')?.classList.remove('active');
+function closeFriendsTab() {
+    const container = document.getElementById('modalContainer');
+    container.style.display = 'none';
+    container.innerHTML = '';
+
+
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) sidebar.style.display = 'flex';
 }
