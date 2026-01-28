@@ -22,11 +22,11 @@
         <div class="nav-section" style="margin-top:20px;">
             <div class="nav-title">Menu</div>
 
-            <a asp-controller="File" asp-action="Index" class="nav-item active">
+            <a asp-controller="File" asp-action="Index" class="nav-item @(currentAction == "Index" ? "active" : "")">
                 <i class="fas fa-house"></i> All Files
             </a>
 
-            <a asp-controller="File" asp-action="SharedWithMe" class="nav-item" >
+            <a asp-controller="File" asp-action="SharedWithMe" class="nav-item @(currentAction == "SharedWithMe" ? "active" : "")">
                 <i class="fas fa-share-nodes"></i> Shared
             </a>
 
