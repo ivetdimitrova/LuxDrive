@@ -634,3 +634,55 @@ body {
 .close-btn {
     cursor: pointer;
 }
+
+
+.invite-box {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05); 
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 5px;
+    margin-bottom: 25px;
+    align-items: center;
+}
+
+    .invite-box input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: white;
+        padding: 10px 15px;
+        outline: none;
+        font-size: 0.9rem;
+    }
+
+.btn-invite-yellow {
+    background-color: #fdd835;
+    color: #1a1a1a;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 8px;
+    font-weight: 800;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+    .btn-invite-yellow:hover {
+        background-color: #ffeb3b;
+    }
+
+
+.small-label-header {
+    color: #777;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+}
+
+.input-label {
+    color: #bbb;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
