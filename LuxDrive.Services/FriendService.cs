@@ -4,10 +4,6 @@ using LuxDrive.Data.Models.Enums;
 using LuxDrive.Services.Interfaces;
 using LuxDrive.ViewModels.Friends;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LuxDrive.Services
 {
@@ -20,19 +16,24 @@ namespace LuxDrive.Services
             _context = context;
         }
 
-        public async Task SendRequestAsync(Guid senderId, Guid receiverId)
+        public async Task SendRequestAsync(Guid senderId, string receiverEmail)
         {
-            if (senderId == receiverId) throw new InvalidOperationException("You cannot send an invitation to yourself..");
+            var receiver = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == receiverEmail);
+
+            if (receiver == null) throw new InvalidOperationException("The user with the provided email does not exist.");
+
+            if (senderId == receiver.Id) throw new InvalidOperationException("You cannot send an invitation to yourself..");
 
             bool exists = await _context.FriendRequests
-                .AnyAsync(x => x.SenderId == senderId && x.ReceiverId == receiverId && x.Status == FriendRequestStatus.Pending);
+                .AnyAsync(x => x.SenderId == senderId && x.ReceiverId == receiver.Id && x.Status == FriendRequestStatus.Pending);
 
             if (exists) return;
 
             var request = new FriendRequest
             {
                 SenderId = senderId,
-                ReceiverId = receiverId,
+                ReceiverId = receiver.Id,
                 Status = FriendRequestStatus.Pending,
                 CreatedOn = DateTime.UtcNow
             };
@@ -77,12 +78,15 @@ namespace LuxDrive.Services
         {
             return await _context.FriendRequests
                 .Include(r => r.Sender)
+                .Include(r => r.Receiver)
                 .AsNoTracking()
-                .Where(r => r.ReceiverId == userId && r.Status == FriendRequestStatus.Pending)
+                .Where(r => r.SenderId == userId && r.Status == FriendRequestStatus.Pending)
                 .Select(r => new RequestViewModel
                 {
                     Id = r.Id,
                     SenderName = r.Sender.UserName,
+                    ReceiverName = r.Receiver.UserName,
+                    Status = (int)r.Status
                 })
                 .ToListAsync();
         }

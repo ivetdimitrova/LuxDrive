@@ -6,7 +6,7 @@ namespace LuxDrive.Services.Interfaces
 {
     public interface IFriendService
     {
-        Task SendRequestAsync(Guid senderId, Guid receiverId);
+        Task SendRequestAsync(Guid senderId, string receiverEmail);
         Task AcceptRequestAsync(Guid requestId);
         Task RejectRequestAsync(Guid requestId);
         Task<IEnumerable<RequestViewModel>> GetPendingRequestsAsync(Guid userId);
