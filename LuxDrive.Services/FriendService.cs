@@ -41,7 +41,7 @@ namespace LuxDrive.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task AcceptRequestAsync(int requestId)
+        public async Task AcceptRequestAsync(Guid requestId)
         {
             var request = await _context.FriendRequests
                 .FirstOrDefaultAsync(x => x.Id == requestId);
@@ -58,7 +58,7 @@ namespace LuxDrive.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task RejectRequestAsync(int requestId)
+        public async Task RejectRequestAsync(Guid requestId)
         {
             var request = await _context.FriendRequests.FindAsync(requestId);
 
@@ -73,19 +73,16 @@ namespace LuxDrive.Services
             }
         }
 
-        public async Task<IEnumerable<object>> GetPendingRequestsAsync(Guid userId)
+        public async Task<IEnumerable<RequestViewModel>> GetPendingRequestsAsync(Guid userId)
         {
             return await _context.FriendRequests
                 .Include(r => r.Sender)
+                .AsNoTracking()
                 .Where(r => r.ReceiverId == userId && r.Status == FriendRequestStatus.Pending)
-                .Select(r => new
+                .Select(r => new RequestViewModel
                 {
                     Id = r.Id,
                     SenderName = r.Sender.UserName,
-                    SenderEmail = r.Sender.Email,
-                    FirstName = r.Sender.FirstName,
-                    LastName = r.Sender.LastName,
-                    SentOn = r.CreatedOn
                 })
                 .ToListAsync();
         }
@@ -107,7 +104,7 @@ namespace LuxDrive.Services
                     Id = uf.FriendId,
                     Email = uf.Friend.Email,
                     Name = $"{uf.Friend.FirstName} {uf.Friend.LastName}",
-                    
+
                 })
                 .ToListAsync();
         }
