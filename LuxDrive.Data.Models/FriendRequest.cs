@@ -9,7 +9,7 @@ using LuxDrive.Data.Models.Enums;
     {
         public class FriendRequest
         {
-            public int Id { get; set; }
+            public Guid Id { get; set; }
 
             public Guid SenderId { get; set; }
             public ApplicationUser Sender { get; set; } = null!;

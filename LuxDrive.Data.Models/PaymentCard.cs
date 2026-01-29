@@ -4,7 +4,7 @@ namespace LuxDrive.Data.Models
 {
     public class PaymentCard
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         public string UserId { get; set; } 
 

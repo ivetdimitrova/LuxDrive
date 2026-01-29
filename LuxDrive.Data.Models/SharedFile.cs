@@ -5,7 +5,7 @@ namespace LuxDrive.Data.Models
 {
     public class SharedFile
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
         public Guid FileId { get; set; }
         public virtual File File { get; set; } = null!;
 
