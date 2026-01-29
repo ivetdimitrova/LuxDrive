@@ -11,5 +11,7 @@ namespace LuxDrive.ViewModels.Friends
         public Guid Id { get; set; }
 
         public string SenderName { get; set; } = string.Empty;
+        public int Status { get; set; }
+        public string ReceiverName { get; set; } = string.Empty;
     }
 }
