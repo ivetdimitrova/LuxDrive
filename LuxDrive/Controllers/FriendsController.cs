@@ -44,7 +44,7 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost("accept")]
-        public async Task<IActionResult> Accept(int requestId)
+        public async Task<IActionResult> Accept(Guid requestId)
         {
             try
             {
@@ -70,11 +70,17 @@ namespace LuxDrive.Controllers
         }
 
         [HttpGet("list")]
-        public async Task<IActionResult> GetFriends()
+        public async Task<IActionResult> LoadFriendList()
         {
             IEnumerable<FriendViewModel> friends = await _friendService.GetFriendsAsync(CurrentUserId);
+            IEnumerable<RequestViewModel> requests = await _friendService.GetPendingRequestsAsync(CurrentUserId);
 
-            return PartialView("_FriendsModalPartial", friends);
+            FriendsMainViewModel model = new FriendsMainViewModel
+            {
+                Friends = friends,
+                Requests = requests
+            };
+            return PartialView("_FriendsModalPartial", model);
         }
 
         [HttpPost("share")]
@@ -112,7 +118,7 @@ namespace LuxDrive.Controllers
             return Ok(requests);
         }
         [HttpPost("reject")]
-        public async Task<IActionResult> Reject(int requestId)
+        public async Task<IActionResult> Reject(Guid requestId)
         {
             try
             {
