@@ -1,5 +1,5 @@
-﻿@using  LuxDrive.ViewModels.Friends;
-@model IEnumerable<FriendViewModel>
+﻿@using LuxDrive.ViewModels.Friends;
+@model FriendsMainViewModel
 
 <div class="social-hub">
     <div class="modal-header-custom">
@@ -17,27 +17,41 @@
     </div>
 
     <div id="MyFriends" class="tab-content" style="display: block;">
-        @foreach (var friend in Model)
+        @if (Model.Friends != null && Model.Friends.Any())
         {
-            <div class="friend-row">
-                <div class="friend-avatar">@friend.Name.First()</div>
-                <div class="friend-info">
-                    <div class="friend-name">@friend.Name</div>
-                    <div class="friend-email">@friend.Email</div>
+            @foreach (var friend in Model.Friends)
+            {
+                <div class="friend-row">
+                    <div class="friend-avatar">@friend.Name.First()</div>
+                    <div class="friend-info">
+                        <div class="friend-name">@friend.Name</div>
+                        <div class="friend-email">@friend.Email</div>
+                    </div>
+                    <div class="friend-actions">
+                        <i class="fas fa-eye info-icon"></i>
+                        <i class="fas fa-user-minus remove-icon"></i>
+                    </div>
                 </div>
-                <div class="friend-actions">
-                    <i class="fas fa-eye info-icon"></i>
-                    <i class="fas fa-user-minus remove-icon"></i>
-                </div>
-            </div>
+            }
         }
+        else
+        {
+            <p style="text-align:center;color:#666;padding:20px;">No friends added yet.</p>
+        }
+
     </div>
 
     <div id="AddNew" class="tab-content" style="display: none;">
         <p class="input-label">Enter email to send an invite:</p>
         <div class="invite-box">
-            <input type="email" placeholder="friend@example.com" id="inviteEmail">
-            <button class="btn-invite">INVITE</button>
+            <form asp-controller="Friends"
+                  asp-action="Send"
+                  method="post">
+
+                <input type="hidden" name="email" value="friend@example.com" />
+
+                <button type="submit" class="btn-invite">INVITE</button>
+            </form>
         </div>
         <div class="pending-section">
             <p class="small-label">SENT PENDING REQUESTS</p>
@@ -46,6 +60,24 @@
     </div>
 
     <div id="Requests" class="tab-content" style="display: none;">
-        <p class="empty-msg center">No incoming requests.</p>
+        @if (Model.Friends != null && Model.Friends.Any())
+        {
+            @foreach (var request in Model.Requests)
+            {
+                <div class="req-card">
+                    <div class="user-avatar">${q.senderName ? q.senderName[0].toUpperCase() : '?'}</div>
+                    <div style="margin-left:10px;">${q.senderName}</div>
+                    <div class="req-actions">
+                        <button class="btn-yes" onclick="accept('${q.id}')">Accept</button>
+                        <button class="btn-no" onclick="reject('${q.id}')">Reject</button>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <p class="empty-msg center">No incoming requests.</p>
+        }
+       
     </div>
 </div>
