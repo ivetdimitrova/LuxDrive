@@ -48,7 +48,11 @@
                   asp-action="Send"
                   method="post">
 
-                <input type="hidden" name="email" value="friend@example.com" />
+                <input type="email"
+                       name="email"
+                       class="custom-input"
+                       placeholder="friend@example.com"
+                       required />
 
                 <button type="submit" class="btn-invite">INVITE</button>
             </form>
