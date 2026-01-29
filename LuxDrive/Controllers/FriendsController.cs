@@ -21,7 +21,6 @@ namespace LuxDrive.Controllers
             _friendService = friendService;
             _fileService = fileService;
         }
-
         private Guid CurrentUserId
         {
             get
@@ -32,13 +31,13 @@ namespace LuxDrive.Controllers
             }
         }
 
-        [HttpPost("request")]
-        public async Task<IActionResult> Send(Guid receiverId)
+        [HttpPost]
+        public async Task<IActionResult> Send([FromForm] string receiverEmail)
         {
             try
             {
-                await _friendService.SendRequestAsync(CurrentUserId, receiverId);
-                return Ok();
+                await _friendService.SendRequestAsync(CurrentUserId, receiverEmail);
+                return RedirectToAction("Index","File");
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
@@ -69,11 +68,11 @@ namespace LuxDrive.Controllers
             return Ok(new { id = user.Id, username = user.UserName, email = user.Email });
         }
 
-        [HttpGet("list")]
+        [HttpGet]
         public async Task<IActionResult> LoadFriendList()
         {
-            IEnumerable<FriendViewModel> friends = await _friendService.GetFriendsAsync(CurrentUserId);
-            IEnumerable<RequestViewModel> requests = await _friendService.GetPendingRequestsAsync(CurrentUserId);
+            IEnumerable<FriendViewModel> friends = await _friendService.GetFriendsAsync(Guid.Parse(base.GetUserId()));
+            IEnumerable<RequestViewModel> requests = await _friendService.GetPendingRequestsAsync(Guid.Parse(base.GetUserId()));
 
             FriendsMainViewModel model = new FriendsMainViewModel
             {
