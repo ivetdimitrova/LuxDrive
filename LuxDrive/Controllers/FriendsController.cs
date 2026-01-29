@@ -111,12 +111,6 @@ namespace LuxDrive.Controllers
             }
         }
 
-        [HttpGet("sent")]
-        public async Task<IActionResult> GetSentRequests()
-        {
-            var requests = await _friendService.GetSentPendingRequestsAsync(CurrentUserId);
-            return Ok(requests);
-        }
         [HttpPost("reject")]
         public async Task<IActionResult> Reject(Guid requestId)
         {
