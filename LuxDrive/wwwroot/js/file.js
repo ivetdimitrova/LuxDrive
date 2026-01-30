@@ -101,4 +101,4 @@ function closeFriendsTab() {
         document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
         const activeBtn = document.querySelector(`button[onclick*="${tabName}"]`);
         if (activeBtn) activeBtn.classList.add('active');
-    }
+}
