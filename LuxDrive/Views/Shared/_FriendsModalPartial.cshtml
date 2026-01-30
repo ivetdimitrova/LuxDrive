@@ -87,7 +87,10 @@
                     <div class="user-avatar">@request.SenderName[0]</div>
                     <div style="margin-left:10px;">@request.SenderName</div>
                     <div class="req-actions">
-                        <button class="btn-yes">Accept</button>
+                        <form asp-controller="Friends" asp-action="Accept" method="post">
+                            <input type="hidden" name="requestId" value="@request.Id" />
+                            <button type="submit" class="btn-yes">Accept</button>
+                        </form>
                         <button class="btn-no">Reject</button>
                     </div>
                 </div>
