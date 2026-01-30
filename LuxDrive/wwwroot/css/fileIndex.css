@@ -710,3 +710,53 @@ input-label {
     margin-top: 10px;
     text-align: center;
 }
+
+.req-card {
+    background: #181818;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    border-left: 3px solid var(--gold);
+}
+
+.req-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 10px;
+}
+
+.btn-yes {
+    background: #2ecc71;
+    color: #000;
+    border: none;
+    padding: 5px 15px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-no {
+    background: transparent;
+    border: 1px solid #444;
+    color: #888;
+    padding: 5px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: #222;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    margin-right: 15px;
+    border: 2px solid #333;
+    position: relative;
+}
