@@ -59,9 +59,9 @@
         </div>
         <div class="pending-section">
             <p class="small-label">SENT PENDING REQUESTS</p>
-            @if (Model.Requests.Where(r => r.Status == 0).Any())
+            @if (Model.SentRequests != null && Model.SentRequests.Any())
             {
-                @foreach (var request in Model.Requests.Where(r => r.Status == 0))
+                @foreach (var request in Model.SentRequests)
                 {
                     <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #222;">
                         <span>@request.ReceiverName</span><span style="color:var(--gold)">
@@ -77,27 +77,27 @@
             }
 
         </div>
-
-
-        <div id="Requests" class="tab-content" style="display: none;">
-            @if (Model.Friends != null && Model.Friends.Any())
+</div>
+    <div id="Requests" class="tab-content" style="display: none;">
+        @if (Model.ReceivedRequests != null && Model.ReceivedRequests.Any())
+        {
+            @foreach (var request in Model.ReceivedRequests)
             {
-                @foreach (var request in Model.Requests)
-                {
-                    <div class="req-card">
-                        <div class="user-avatar">${q.senderName ? q.senderName[0].toUpperCase() : '?'}</div>
-                        <div style="margin-left:10px;">${q.senderName}</div>
-                        <div class="req-actions">
-                            <button class="btn-yes" onclick="accept('${q.id}')">Accept</button>
-                            <button class="btn-no" onclick="reject('${q.id}')">Reject</button>
-                        </div>
+                <div class="req-card">
+                    <div class="user-avatar">@request.SenderName[0]</div>
+                    <div style="margin-left:10px;">@request.SenderName</div>
+                    <div class="req-actions">
+                        <button class="btn-yes">Accept</button>
+                        <button class="btn-no">Reject</button>
                     </div>
-                }
+                </div>
             }
-            else
-            {
-                <p class="empty-msg center">No incoming requests.</p>
-            }
+        }
+        else
+        {
+            <p class="empty-msg center">No incoming requests.</p>
+        }
 
-        </div>
     </div>
+
+</div>
