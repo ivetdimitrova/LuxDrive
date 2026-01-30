@@ -16,32 +16,6 @@ namespace LuxDrive.Services
             _context = context;
         }
 
-        public async Task SendRequestAsync(Guid senderId, string receiverEmail)
-        {
-            var receiver = await _context.Users
-                .FirstOrDefaultAsync(u => u.Email == receiverEmail);
-
-            if (receiver == null) throw new InvalidOperationException("The user with the provided email does not exist.");
-
-            if (senderId == receiver.Id) throw new InvalidOperationException("You cannot send an invitation to yourself..");
-
-            bool exists = await _context.FriendRequests
-                .AnyAsync(x => x.SenderId == senderId && x.ReceiverId == receiver.Id && x.Status == FriendRequestStatus.Pending);
-
-            if (exists) return;
-
-            var request = new FriendRequest
-            {
-                SenderId = senderId,
-                ReceiverId = receiver.Id,
-                Status = FriendRequestStatus.Pending,
-                CreatedOn = DateTime.UtcNow
-            };
-
-            _context.FriendRequests.Add(request);
-            await _context.SaveChangesAsync();
-        }
-
         public async Task AcceptRequestAsync(Guid requestId)
         {
             var request = await _context.FriendRequests
@@ -72,23 +46,6 @@ namespace LuxDrive.Services
             {
                 throw new Exception("Request not found.");
             }
-        }
-
-        public async Task<IEnumerable<RequestViewModel>> GetPendingRequestsAsync(Guid userId)
-        {
-            return await _context.FriendRequests
-                .Include(r => r.Sender)
-                .Include(r => r.Receiver)
-                .AsNoTracking()
-                .Where(r => r.SenderId == userId && r.Status == FriendRequestStatus.Pending)
-                .Select(r => new RequestViewModel
-                {
-                    Id = r.Id,
-                    SenderName = r.Sender.UserName,
-                    ReceiverName = r.Receiver.UserName,
-                    Status = (int)r.Status
-                })
-                .ToListAsync();
         }
 
         public async Task<ApplicationUser?> FindUserByEmailAsync(string email)
@@ -127,21 +84,6 @@ namespace LuxDrive.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<object>> GetSentPendingRequestsAsync(Guid userId)
-        {
-            return await _context.FriendRequests
-                .Include(r => r.Receiver)
-                .Where(r => r.SenderId == userId && r.Status == FriendRequestStatus.Pending)
-                .Select(r => new
-                {
-                    Id = r.Id,
-                    ReceiverName = r.Receiver.UserName,
-                    ReceiverEmail = r.Receiver.Email,
-                    FirstName = r.Receiver.FirstName,
-                    LastName = r.Receiver.LastName,
-                    SentOn = r.CreatedOn
-                })
-                .ToListAsync();
-        }
+ 
     }
 }
