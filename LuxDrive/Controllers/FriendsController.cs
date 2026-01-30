@@ -44,13 +44,13 @@ namespace LuxDrive.Controllers
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
-        [HttpPost("accept")]
-        public async Task<IActionResult> Accept(Guid requestId)
+        [HttpPost("friends/accept-request")]
+        public async Task<IActionResult> Accept([FromForm] Guid requestId)
         {
             try
             {
-                await _friendService.AcceptRequestAsync(requestId);
-                return Ok();
+                await _friendRequestService.AcceptRequestAsync(requestId);
+                return RedirectToAction("Index", "File");
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
