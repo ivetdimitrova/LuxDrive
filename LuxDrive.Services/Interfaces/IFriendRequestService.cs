@@ -13,6 +13,8 @@ namespace LuxDrive.Services.Interfaces
         Task<IEnumerable<ReceivedRequsetViewModel>> GetReceivedRequestAsync(Guid userId);
         Task SendRequestAsync(Guid senderId, string receiverEmail);
 
+        Task AcceptRequestAsync(Guid requestId);
+
 
     }
 }
