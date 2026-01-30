@@ -15,11 +15,13 @@ namespace LuxDrive.Controllers
     {
         private readonly IFriendService _friendService;
         private readonly IFileService _fileService;
+        private readonly IFriendRequestService _friendRequestService;
 
-        public FriendsController(IFriendService friendService, IFileService fileService)
+        public FriendsController(IFriendService friendService, IFileService fileService, IFriendRequestService friendRequestService)
         {
             _friendService = friendService;
             _fileService = fileService;
+            _friendRequestService = friendRequestService;
         }
         private Guid CurrentUserId
         {
@@ -36,7 +38,7 @@ namespace LuxDrive.Controllers
         {
             try
             {
-                await _friendService.SendRequestAsync(CurrentUserId, receiverEmail);
+                await _friendRequestService.SendRequestAsync(CurrentUserId, receiverEmail);
                 return RedirectToAction("Index","File");
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
@@ -53,12 +55,12 @@ namespace LuxDrive.Controllers
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
-        [HttpGet("pending")]
-        public async Task<IActionResult> GetPendingRequests()
-        {
-            var requests = await _friendService.GetPendingRequestsAsync(CurrentUserId);
-            return Ok(requests);
-        }
+        //[HttpGet("pending")]
+        //public async Task<IActionResult> GetPendingRequests()
+        //{
+        //    var requests = await _friendService.GetPendingRequestsAsync(CurrentUserId);
+        //    return Ok(requests);
+        //}
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchUser(string email)
@@ -72,12 +74,14 @@ namespace LuxDrive.Controllers
         public async Task<IActionResult> LoadFriendList()
         {
             IEnumerable<FriendViewModel> friends = await _friendService.GetFriendsAsync(Guid.Parse(base.GetUserId()));
-            IEnumerable<RequestViewModel> requests = await _friendService.GetPendingRequestsAsync(Guid.Parse(base.GetUserId()));
+            IEnumerable<UserSentRequestVIewModel> sentRequests = await _friendRequestService.GetSentRequestAsync(Guid.Parse(base.GetUserId()));
+            IEnumerable<ReceivedRequsetViewModel> receivedRequests = await _friendRequestService.GetReceivedRequestAsync(Guid.Parse(base.GetUserId()));
 
             FriendsMainViewModel model = new FriendsMainViewModel
             {
                 Friends = friends,
-                Requests = requests
+                SentRequests = sentRequests,
+                ReceivedRequests = receivedRequests
             };
             return PartialView("_FriendsModalPartial", model);
         }
