@@ -9,7 +9,6 @@ namespace LuxDrive.ViewModels.Friends
     public class ReceivedRequsetViewModel
     {
         public Guid Id { get; set; }
-        public int Status { get; set; }
         public string SenderName { get; set; } = string.Empty;
     }
 }
