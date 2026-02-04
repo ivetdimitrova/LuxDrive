@@ -1,8 +1,8 @@
-﻿using LuxDrive.Data.Models;
+﻿using LuxDrive.ViewModels.Settings;
 using Microsoft.AspNetCore.Http;
 using System.ComponentModel.DataAnnotations;
 
-namespace LuxDrive.Models
+namespace LuxDrive.ViewModels.Settings
 {
     public class UserSettingsViewModel
     {
@@ -25,8 +25,8 @@ namespace LuxDrive.Models
         public string Email { get; set; }
 
         [Display(Name = "Phone Number")]
-        [RegularExpression(@"^\+?[0-9\s]+$", ErrorMessage = "Phone must contain only digits and +.")]
-        public string PhoneNumber { get; set; }
+        [RegularExpression(@"^\+?[0-9\s]+$", ErrorMessage = "Phone must contain only digits and +.")] 
+        public string? PhoneNumber { get; set; }
 
         [DataType(DataType.Password)]
         [Display(Name = "Current Password")]
@@ -41,7 +41,7 @@ namespace LuxDrive.Models
         [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
         public string ConfirmNewPassword { get; set; }
 
-        public List<PaymentCard> SavedCards { get; set; } = new List<PaymentCard>();
+        public List<CardViewModel> SavedCards { get; set; } = new List<CardViewModel>();
 
         public string NewCardNumber { get; set; }
         public string NewCardExpiry { get; set; }
