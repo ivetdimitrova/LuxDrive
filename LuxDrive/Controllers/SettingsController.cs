@@ -40,7 +40,7 @@ namespace LuxDrive.Controllers
 
             return new UserSettingsViewModel
             {
-                Username = user.UserName,
+                Username = user.UserName.Contains("@") ? user.UserName.Split('@')[0] : user.UserName,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
@@ -50,6 +50,7 @@ namespace LuxDrive.Controllers
                                   ? "/images/default-avatar.png"
                                   : user.ProfileImagePath
             };
+            
         }
 
         [HttpGet]
