@@ -35,12 +35,14 @@ function toggleSelect(circle, id) {
 function selectAllTrash() {
     const allCircles = document.querySelectorAll('.check-circle');
     allCircles.forEach(circle => {
-        const id = circle.getAttribute('onclick').match(/'([^']+)'/)[1];
-        const card = document.getElementById(`file-${id}`);
-
-        selectedIds.add(id);
-        circle.classList.add('checked');
-        card.classList.add('selected');
+        const match = circle.getAttribute('onclick').match(/'([^']+)'/);
+        if (match) {
+            const id = match[1];
+            const card = document.getElementById(`file-${id}`);
+            selectedIds.add(id);
+            circle.classList.add('checked');
+            if (card) card.classList.add('selected');
+        }
     });
     updateTrashUI();
 }
@@ -52,23 +54,24 @@ function deselectAllTrash() {
     updateTrashUI();
 }
 
-async function submitBulk(action) {
+function submitBulk(action) {
     if (selectedIds.size === 0) return;
-    if (action.includes('Permanent') && !confirm("Permanently delete selected items?")) return;
 
-    const idsArray = Array.from(selectedIds);
-    const response = await fetch(`/File/${action}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-        },
-        body: JSON.stringify(idsArray)
+    if (action.includes('Delete') && !confirm("Permanently delete selected items?")) return;
+
+    const form = document.getElementById('bulkActionForm');
+    const container = document.getElementById('hiddenInputsContainer');
+
+    container.innerHTML = '';
+    form.action = `/File/${action}`;
+
+    selectedIds.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'ids'; 
+        input.value = id;
+        container.appendChild(input);
     });
 
-    if (response.ok) {
-        window.location.reload();
-    } else {
-        alert("Error processing request.");
-    }
+    form.submit();
 }
