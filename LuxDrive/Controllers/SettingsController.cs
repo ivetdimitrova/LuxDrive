@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LuxDrive.Data;
 using LuxDrive.Data.Models;
-using LuxDrive.Models;
-using System.Text.RegularExpressions;
+
+using LuxDrive.ViewModels.Settings;
 
 namespace LuxDrive.Controllers
 {
@@ -30,6 +30,12 @@ namespace LuxDrive.Controllers
         {
             var cards = await _context.PaymentCards
                                       .Where(c => c.UserId == user.Id.ToString())
+                                      .Select(c => new CardViewModel
+                                      {
+                                          Id = c.Id,
+                                          CardLast4 = c.CardLast4,
+                                          CardType = c.CardType
+                                      })
                                       .ToListAsync();
 
             return new UserSettingsViewModel
@@ -80,11 +86,7 @@ namespace LuxDrive.Controllers
                 ModelState.AddModelError("Email", "Email is required.");
                 isValid = false;
             }
-            if (string.IsNullOrWhiteSpace(model.PhoneNumber))
-            {
-                ModelState.AddModelError("PhoneNumber", "Phone number is required.");
-                isValid = false;
-            }
+         
 
             if (!isValid)
             {
