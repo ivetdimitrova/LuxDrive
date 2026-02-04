@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using LuxDrive.Data;
 using LuxDrive.Data.Models;
+using LuxDrive.ViewModels.Pricing; 
 using System.Text.RegularExpressions;
-using System.Globalization;
 
 namespace LuxDrive.Controllers
 {
@@ -18,17 +18,6 @@ namespace LuxDrive.Controllers
         {
             _context = context;
             _userManager = userManager;
-        }
-
-        private int GetPlanRank(string plan)
-        {
-            return plan switch
-            {
-                "Enterprise" => 3,
-                "Pro" => 2,
-                "Basic" => 1,
-                _ => 0
-            };
         }
 
         private string GetUserKey(string baseKey)
@@ -95,52 +84,58 @@ namespace LuxDrive.Controllers
         }
 
         [Authorize]
+        [HttpGet]
         public IActionResult Checkout(string plan)
         {
             if (string.IsNullOrEmpty(plan)) return RedirectToAction(nameof(Index));
-            ViewBag.Plan = plan;
-            return View();
+
+            var model = new CheckoutViewModel
+            {
+                PlanName = plan
+            };
+
+            return View(model);
         }
 
         [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Process(string cardNumber, string expiry, string cvc, string cardName, string plan)
+        public async Task<IActionResult> Process(CheckoutViewModel model)
         {
-            if (string.IsNullOrEmpty(cardName) || !Regex.IsMatch(cardName, @"^[a-zA-Zа-яА-Я\s\-]+$"))
+            if (string.IsNullOrEmpty(model.CardName) || !Regex.IsMatch(model.CardName, @"^[a-zA-Zа-яА-Я\s\-]+$"))
             {
                 TempData["ErrorMessage"] = "Card name must contain only letters.";
-                return RedirectToAction("Checkout", new { plan = plan });
+                return View("Checkout", model);
             }
 
-            if (string.IsNullOrEmpty(cardNumber) || cardNumber.Replace(" ", "").Length < 15)
+            if (string.IsNullOrEmpty(model.CardNumber) || model.CardNumber.Replace(" ", "").Length < 15)
             {
                 TempData["ErrorMessage"] = "Invalid card number.";
-                return RedirectToAction("Checkout", new { plan = plan });
+                return View("Checkout", model);
             }
 
-            if (!string.IsNullOrEmpty(expiry) && expiry.Contains("/"))
+            if (!string.IsNullOrEmpty(model.Expiry) && model.Expiry.Contains("/"))
             {
-                var parts = expiry.Split('/');
+                var parts = model.Expiry.Split('/');
                 if (int.TryParse(parts[0], out int month))
                 {
                     if (month < 1 || month > 12)
                     {
                         TempData["ErrorMessage"] = "Invalid month! Please enter 01 to 12.";
-                        return RedirectToAction("Checkout", new { plan = plan });
+                        return View("Checkout", model);
                     }
                 }
             }
             else
             {
                 TempData["ErrorMessage"] = "Invalid expiry date format.";
-                return RedirectToAction("Checkout", new { plan = plan });
+                return View("Checkout", model);
             }
 
-            if (string.IsNullOrEmpty(cvc) || cvc.Length < 3)
+            if (string.IsNullOrEmpty(model.CVC) || model.CVC.Length < 3)
             {
                 TempData["ErrorMessage"] = "CVC must be at least 3 digits.";
-                return RedirectToAction("Checkout", new { plan = plan });
+                return View("Checkout", model);
             }
 
             var user = await _userManager.GetUserAsync(User);
@@ -150,7 +145,7 @@ namespace LuxDrive.Controllers
 
             try
             {
-                string cleanNumber = cardNumber.Replace(" ", "").Trim();
+                string cleanNumber = model.CardNumber.Replace(" ", "").Trim();
                 string last4 = cleanNumber.Length >= 4 ? cleanNumber.Substring(cleanNumber.Length - 4) : cleanNumber;
 
                 string cardType = "unknown";
@@ -172,7 +167,7 @@ namespace LuxDrive.Controllers
                     await _context.SaveChangesAsync();
                 }
             }
-            catch (Exception) { }
+            catch (Exception) {  }
 
             string planKey = GetUserKey("CurrentPlan");
             string expiryKey = GetUserKey("PlanExpiry");
@@ -180,10 +175,10 @@ namespace LuxDrive.Controllers
             DateTime validUntil = DateTime.Now.AddMonths(1);
             CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(400) };
 
-            Response.Cookies.Append(planKey, plan, option);
+            Response.Cookies.Append(planKey, model.PlanName, option);
             Response.Cookies.Append(expiryKey, validUntil.ToString(), option);
 
-            TempData["SuccessMessage"] = $"Successfully activated {plan} plan! Valid until {validUntil:dd.MM.yyyy}.";
+            TempData["SuccessMessage"] = $"Successfully activated {model.PlanName} plan! Valid until {validUntil:dd.MM.yyyy}.";
             return RedirectToAction("Index");
         }
 
@@ -227,9 +222,24 @@ namespace LuxDrive.Controllers
             return RedirectToAction("Index");
         }
 
+
+        [HttpGet]
         public IActionResult ContactSales()
         {
-            return View();
+            var model = new ContactSalesViewModel();
+            return View(model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ContactSales(ContactSalesViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
+            return View(model);
         }
     }
 }
