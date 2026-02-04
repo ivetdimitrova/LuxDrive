@@ -1,4 +1,6 @@
-﻿@{
+﻿@model LuxDrive.ViewModels.Pricing.ContactSalesViewModel
+
+@{
     ViewData["Title"] = "Contact Sales";
 }
 
@@ -23,25 +25,27 @@
             <button class="btn-lux" onclick="location.reload()">Return to Form</button>
         </div>
 
-        <form id="contact-form">
+        <form id="contact-form" asp-action="ContactSales" method="post">
+            @Html.AntiForgeryToken()
+
             <div class="form-floating">
-                <input type="text" class="form-control" id="name" placeholder="Full Name" required>
-                <label for="name">Full Name</label>
+                <input type="text" class="form-control" asp-for="Name" id="name" placeholder="Full Name" required>
+                <label asp-for="Name">Full Name</label>
             </div>
 
             <div class="form-floating">
-                <input type="email" class="form-control" id="email" placeholder="Email Address" required>
-                <label for="email">Email Address</label>
+                <input type="email" class="form-control" asp-for="Email" id="email" placeholder="Email Address" required>
+                <label asp-for="Email">Email Address</label>
             </div>
 
             <div class="form-floating">
-                <input type="text" class="form-control" id="company" placeholder="Company Name">
-                <label for="company">Company Name (Optional)</label>
+                <input type="text" class="form-control" asp-for="Company" id="company" placeholder="Company Name">
+                <label asp-for="Company">Company Name (Optional)</label>
             </div>
 
             <div class="form-floating">
-                <textarea class="form-control" id="message" placeholder="Your Message" required></textarea>
-                <label for="message">How can we help you?</label>
+                <textarea class="form-control" asp-for="Message" id="message" placeholder="Your Message" required></textarea>
+                <label asp-for="Message">How can we help you?</label>
             </div>
 
             <button type="submit" class="btn-lux" id="send-btn">Send Request</button>
