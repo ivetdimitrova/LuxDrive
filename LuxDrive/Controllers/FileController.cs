@@ -1,12 +1,15 @@
-﻿using LuxDrive.Data;
-using FileEntity = LuxDrive.Data.Models.File;
+﻿using Azure.Core;
+using LuxDrive.Data;
 using LuxDrive.Services;
 using LuxDrive.Services.Interfaces;
+using LuxDrive.ViewModels.File;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using LuxDrive.ViewModels.File;
+using FileEntity = LuxDrive.Data.Models.File;
+using LuxDrive.ViewModels.File; 
+
 
 namespace LuxDrive.Controllers
 {
@@ -76,26 +79,38 @@ namespace LuxDrive.Controllers
             return View("Index", sharedFiles);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Trash()
+
+     [HttpGet]
+    public async Task<IActionResult> Trash()
+    {
+        var userIdStr = GetUserId();
+        if (userIdStr == null) return Unauthorized();
+
+        var trashedFiles = await _dbContext.Files
+            .Where(f => f.UserId.ToString() == userIdStr && f.IsDeleted)
+            .OrderByDescending(f => f.DeletedOn)
+            .ToListAsync();
+
+        var allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
+        string planKey = GetUserKey("CurrentPlan");
+        string currentPlan = Request.Cookies[planKey] ?? "Free";
+        CalculateStorageUsage(allUserFiles, currentPlan);
+
+        var viewModel = new TrashViewModel
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
+            Files = trashedFiles.Select(f => new TrashItemViewModel
+            {
+                Id = f.Id.ToString(),
+                Name = f.Name,
+                Extension = f.Extension,
+                DeletedOn = f.DeletedOn
+            }).ToList()
+        };
 
-            var trashedFiles = await _dbContext.Files
-                .Where(f => f.UserId.ToString() == userIdStr && f.IsDeleted)
-                .OrderByDescending(f => f.DeletedOn)
-                .ToListAsync();
+        return View(viewModel);
+    }
 
-            var allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
-            string planKey = GetUserKey("CurrentPlan");
-            string currentPlan = Request.Cookies[planKey] ?? "Free";
-            CalculateStorageUsage(allUserFiles, currentPlan);
-
-            return View(trashedFiles);
-        }
-
-        [HttpPost]
+    [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
