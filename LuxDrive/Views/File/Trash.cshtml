@@ -1,4 +1,4 @@
-﻿@model IEnumerable<LuxDrive.Data.Models.File>
+﻿@model LuxDrive.ViewModels.File.TrashViewModel
 
 @{
     ViewData["Title"] = "LuxDrive | Trash Bin";
@@ -38,7 +38,7 @@
                 Trash <span style="color:var(--gold)">Bin</span>
             </h2>
 
-            @if (Model != null && Model.Any())
+            @if (Model.Files != null && Model.Files.Any())
             {
                 <form asp-action="EmptyTrash" method="post" onsubmit="return confirm('Clear all files?');">
                     @Html.AntiForgeryToken()
@@ -69,13 +69,10 @@
         </div>
 
         <div class="files-grid">
-            @if (Model != null && Model.Any())
+            @if (Model.Files != null && Model.Files.Any())
             {
-                foreach (var file in Model)
+                foreach (var file in Model.Files)
                 {
-                    string ext = file.Extension?.ToLower() ?? "";
-                    var daysLeft = file.DeletedOn.HasValue ? 30 - (DateTime.UtcNow - file.DeletedOn.Value).Days : 30;
-
                     <div class="file-item in-trash" id="file-@file.Id">
                         <div class="preview-box">
                             <div class="check-circle" onclick="toggleSelect(this, '@file.Id')"></div>
@@ -94,7 +91,7 @@
                         </div>
                         <div class="file-info">
                             <h3 title="@file.Name">@file.Name</h3>
-                            <p><span>@ext.ToUpper()</span> <span class="urgent-timer" style="margin-left:auto;">@Math.Max(0, daysLeft)d left</span></p>
+                            <p><span>@file.DisplayExtension</span> <span class="urgent-timer" style="margin-left:auto;">@file.DaysLeft d left</span></p>
                         </div>
                     </div>
                 }
@@ -107,6 +104,11 @@
                 </div>
             }
         </div>
+
+        <form id="bulkActionForm" method="post" style="display:none;">
+            @Html.AntiForgeryToken()
+            <div id="hiddenInputsContainer"></div>
+        </form>
 
         <div id="bulkBar" class="bulk-bar" style="background: rgba(15,15,15,0.95); border: 1px solid rgba(198, 166, 100, 0.3); display:none; align-items:center; justify-content:space-between; padding: 15px 40px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); border-radius: 100px; min-width: 450px; z-index: 1000; backdrop-filter: blur(10px); box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
             <span id="bulkCount" style="color:var(--gold); font-weight:700; font-size: 0.9rem;">0 SELECTED</span>
