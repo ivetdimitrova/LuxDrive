@@ -10,7 +10,7 @@ namespace LuxDrive.Services.Interfaces
     public interface IFriendRequestService
     {
         Task<IEnumerable<UserSentRequestVIewModel>> GetSentRequestAsync(Guid userId);
-        Task<IEnumerable<ReceivedRequsetViewModel>> GetReceivedRequestAsync(Guid userId);
+        Task<IEnumerable<ReceivedRequestViewModel>> GetReceivedRequestAsync(Guid userId);
         Task SendRequestAsync(Guid senderId, string receiverEmail);
 
         Task AcceptRequestAsync(Guid requestId);

@@ -21,13 +21,13 @@ namespace LuxDrive.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<ReceivedRequsetViewModel>> GetReceivedRequestAsync(Guid userId)
+        public async Task<IEnumerable<ReceivedRequestViewModel>> GetReceivedRequestAsync(Guid userId)
         {
             return await _context.FriendRequests
                .Include(r => r.Sender)
                .AsNoTracking()
                .Where(r => r.ReceiverId == userId && r.Status == FriendRequestStatus.Pending)
-               .Select(r => new ReceivedRequsetViewModel
+               .Select(r => new ReceivedRequestViewModel
                {
                    Id = r.Id,
                    SenderName = r.Sender.UserName,

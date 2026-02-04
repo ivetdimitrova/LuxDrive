@@ -75,7 +75,7 @@ namespace LuxDrive.Controllers
         {
             IEnumerable<FriendViewModel> friends = await _friendService.GetFriendsAsync(Guid.Parse(base.GetUserId()));
             IEnumerable<UserSentRequestVIewModel> sentRequests = await _friendRequestService.GetSentRequestAsync(Guid.Parse(base.GetUserId()));
-            IEnumerable<ReceivedRequsetViewModel> receivedRequests = await _friendRequestService.GetReceivedRequestAsync(Guid.Parse(base.GetUserId()));
+            IEnumerable<ReceivedRequestViewModel> receivedRequests = await _friendRequestService.GetReceivedRequestAsync(Guid.Parse(base.GetUserId()));
 
             FriendsMainViewModel model = new FriendsMainViewModel
             {
