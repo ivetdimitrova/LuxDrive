@@ -10,6 +10,6 @@ namespace LuxDrive.ViewModels.Friends
     {
         public IEnumerable<FriendViewModel> Friends { get; set; } 
         public IEnumerable<UserSentRequestVIewModel> SentRequests { get; set; }
-        public IEnumerable<ReceivedRequsetViewModel> ReceivedRequests { get; set; }
+        public IEnumerable<ReceivedRequestViewModel> ReceivedRequests { get; set; }
     }
 }
