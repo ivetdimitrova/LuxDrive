@@ -286,7 +286,7 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RemoveCard(int cardId)
+        public async Task<IActionResult> RemoveCard(Guid cardId)
         {
             TempData["ActiveTab"] = "billing";
             var card = await _context.PaymentCards.FindAsync(cardId);
