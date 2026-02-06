@@ -236,7 +236,12 @@ namespace LuxDrive.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(model);
+                return BadRequest(ModelState);
+            }
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Ok(new { success = true });
             }
 
             return View(model);
