@@ -99,12 +99,40 @@ namespace LuxDrive.Areas.Identity.Pages.Account
 
             returnUrl ??= Url.Content("~/");
 
-            // Clear the existing external cookie to ensure a clean login process
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
 
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
             ReturnUrl = returnUrl;
+        }
+        public async Task<IActionResult> OnPostSimulateResetAsync(string email, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return new JsonResult(new { success = false, error = "A user with this email does not exist.." });
+            }
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+            if (result.Succeeded)
+            {
+                return new JsonResult(new { success = true });
+            }
+
+            var errorMsg = result.Errors.FirstOrDefault()?.Description ?? "Update error.";
+            return new JsonResult(new { success = false, error = errorMsg });
+        }
+        public async Task<IActionResult> OnPostCheckEmailAsync(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                return new JsonResult(new { exists = false, error = "User with this email does not exist." });
+            }
+            return new JsonResult(new { exists = true });
         }
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
