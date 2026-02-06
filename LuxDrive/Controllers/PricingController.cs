@@ -102,39 +102,8 @@ namespace LuxDrive.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Process(CheckoutViewModel model)
         {
-            if (string.IsNullOrEmpty(model.CardName) || !Regex.IsMatch(model.CardName, @"^[a-zA-Zа-яА-Я\s\-]+$"))
+            if (!ModelState.IsValid)
             {
-                TempData["ErrorMessage"] = "Card name must contain only letters.";
-                return View("Checkout", model);
-            }
-
-            if (string.IsNullOrEmpty(model.CardNumber) || model.CardNumber.Replace(" ", "").Length < 15)
-            {
-                TempData["ErrorMessage"] = "Invalid card number.";
-                return View("Checkout", model);
-            }
-
-            if (!string.IsNullOrEmpty(model.Expiry) && model.Expiry.Contains("/"))
-            {
-                var parts = model.Expiry.Split('/');
-                if (int.TryParse(parts[0], out int month))
-                {
-                    if (month < 1 || month > 12)
-                    {
-                        TempData["ErrorMessage"] = "Invalid month! Please enter 01 to 12.";
-                        return View("Checkout", model);
-                    }
-                }
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Invalid expiry date format.";
-                return View("Checkout", model);
-            }
-
-            if (string.IsNullOrEmpty(model.CVC) || model.CVC.Length < 3)
-            {
-                TempData["ErrorMessage"] = "CVC must be at least 3 digits.";
                 return View("Checkout", model);
             }
 
@@ -146,12 +115,11 @@ namespace LuxDrive.Controllers
             try
             {
                 string cleanNumber = model.CardNumber.Replace(" ", "").Trim();
-                string last4 = cleanNumber.Length >= 4 ? cleanNumber.Substring(cleanNumber.Length - 4) : cleanNumber;
+                string last4 = cleanNumber.Substring(cleanNumber.Length - 4);
 
-                string cardType = "unknown";
-                if (cleanNumber.StartsWith("4")) cardType = "visa";
-                else if (cleanNumber.StartsWith("5")) cardType = "mastercard";
-                else if (cleanNumber.StartsWith("3")) cardType = "amex";
+                string cardType = cleanNumber.StartsWith("4") ? "visa" :
+                                 cleanNumber.StartsWith("5") ? "mastercard" :
+                                 cleanNumber.StartsWith("3") ? "amex" : "unknown";
 
                 bool exists = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id.ToString() && c.CardLast4 == last4);
 
@@ -167,18 +135,17 @@ namespace LuxDrive.Controllers
                     await _context.SaveChangesAsync();
                 }
             }
-            catch (Exception) {  }
+            catch (Exception) { }
 
             string planKey = GetUserKey("CurrentPlan");
             string expiryKey = GetUserKey("PlanExpiry");
-
             DateTime validUntil = DateTime.Now.AddMonths(1);
             CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(400) };
 
             Response.Cookies.Append(planKey, model.PlanName, option);
             Response.Cookies.Append(expiryKey, validUntil.ToString(), option);
 
-            TempData["SuccessMessage"] = $"Successfully activated {model.PlanName} plan! Valid until {validUntil:dd.MM.yyyy}.";
+            TempData["SuccessMessage"] = $"Successfully activated {model.PlanName} plan!";
             return RedirectToAction("Index");
         }
 
