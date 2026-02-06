@@ -334,5 +334,23 @@ namespace LuxDrive.Controllers
             TempData["ErrorMessage"] = "Error deleting account.";
             return RedirectToAction("Index");
         }
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> SimulateResetPassword(string email, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return NotFound();
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+            if (result.Succeeded)
+            {
+                return Ok(new { success = true });
+            }
+
+            return BadRequest(result.Errors);
+        }
     }
 }
