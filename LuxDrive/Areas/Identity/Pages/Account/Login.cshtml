@@ -40,12 +40,36 @@
 
             <div class="auth-footer">
                 <p class="mb-2">Don't have an account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Sign Up</a></p>
-                <a id="resend-confirmation" asp-page="./ResendEmailConfirmation" style="font-size:0.8rem; opacity:0.7;">Resend email confirmation</a>
             </div>
         </form>
     </div>
 </div>
+<div id="forgotPasswordModal" class="lux-modal" style="display:none;">
+    <div class="lux-modal-content">
+        <span class="close-modal" onclick="closeForgotModal()">&times;</span>
 
+        <div id="reset-step-1">
+            <h3 class="gold-text">Forgot Password</h3>
+            <p>Enter your email to receive a code.</p>
+            <input type="email" id="reset-email" class="form-control mb-3" placeholder="email@example.com" />
+            <button class="btn-lux w-100" onclick="simulateSendCode()">Send Code</button>
+        </div>
+
+        <div id="reset-step-2" style="display:none;">
+            <h3 class="gold-text">Verify Code</h3>
+            <p>We've sent a code to your email. </p>
+            <input type="text" id="reset-code-input" class="form-control mb-3" placeholder="Enter 4-digit code" maxlength="4" />
+            <button class="btn-lux w-100" onclick="simulateVerifyCode()">Verify</button>
+        </div>
+
+        <div id="reset-step-3" style="display:none;">
+            <h3 class="gold-text">New Password</h3>
+            <input type="password" id="new-password" class="form-control mb-2" placeholder="New Password" />
+            <input type="password" id="confirm-password" class="form-control mb-3" placeholder="Confirm New Password" />
+            <button class="btn-lux w-100" onclick="simulateFinishReset()">Reset Password</button>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 }
