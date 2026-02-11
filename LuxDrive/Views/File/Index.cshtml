@@ -119,12 +119,9 @@
 
                         <div class="actions-overlay">
 
-                            <form asp-controller="File" asp-action="Download" method="post" style="display:inline;">
-                                <input type="hidden" name="storageUrl" value="@file.StorageUrl" />
-                                <button type="submit" class="action-btn" title="Download">
-                                    <i class="fas fa-download"></i>
-                                </button>
-                            </form>
+                            <a asp-controller="File" asp-action="Download" asp-route-id="@file.Id" class="action-btn" title="Download">
+                                <i class="fas fa-download"></i>
+                            </a>
                             <form asp-controller="File" asp-action="Share" method="post" style="display:inline;">
                                 <input type="hidden" name="id" value="@file.Id" />
 
