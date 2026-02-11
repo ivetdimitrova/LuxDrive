@@ -19,5 +19,9 @@ namespace LuxDrive.ViewModels.File
 
         public string? SenderName { get; set; } 
         public DateTime UploadedAt { get; set; }
+        public bool IsImage =>
+            !string.IsNullOrEmpty(Extension) &&
+            new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg" }
+            .Contains(Extension.ToLower());
     }
 }
