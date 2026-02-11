@@ -3,13 +3,17 @@
 
 @{
     ViewData["Title"] = "LuxDrive Dashboard";
-    var currentAction = ViewContext.RouteData.Values["action"].ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
 
-    int totalFiles = Model?.Count() ?? 0;
-    int imgCount = Model?.Count(f => f.Extension.Contains("jpg") || f.Extension.Contains("png") || f.Extension.Contains("webp")) ?? 0;
-    int vidCount = Model?.Count(f => f.Extension.Contains("mp4") || f.Extension.Contains("avi") || f.Extension.Contains("mov")) ?? 0;
-    int docCount = Model?.Count(f => f.Extension.Contains("pdf") || f.Extension.Contains("doc") || f.Extension.Contains("txt")) ?? 0;
-    int arcCount = Model?.Count(f => f.Extension.Contains("zip") || f.Extension.Contains("rar") || f.Extension.Contains("7z")) ?? 0;
+    var files = Model ?? Enumerable.Empty<IndexViewModel>();
+    int totalFiles = files.Count();
+    int imgCount = files.Count(f => f.IsImage);
+    int vidCount = files.Count(f => new[] { ".mp4", ".avi", ".mov", ".mkv" }
+        .Contains(f.Extension?.ToLower()));
+    int docCount = files.Count(f => new[] { ".pdf", ".doc", ".docx", ".txt", ".xlsx" }
+        .Contains(f.Extension?.ToLower()));
+    int arcCount = files.Count(f => new[] { ".zip", ".rar", ".7z", ".tar" }
+        .Contains(f.Extension?.ToLower()));
 }
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -17,7 +21,6 @@
 <link rel="stylesheet" href="~/css/file.css" asp-append-version="true" />
 
 <div class="app-wrapper">
-
     <aside class="sidebar">
         <div class="nav-section" style="margin-top:20px;">
             <div class="nav-title">Menu</div>
@@ -104,9 +107,9 @@
                         <div class="preview-box">
                             <div class="check-circle" onclick="toggleSelect(this,'@file.Id')"></div>
 
-                            @if (file.Type == "image")
+                            @if (file.IsImage)
                             {
-                                <img src="@file.StorageUrl" />
+                                <img src="@file.StorageUrl" alt="@file.Name" loading="lazy" />
                             }
                             else
                             {
@@ -151,19 +154,33 @@
             }
             else
             {
-                <div id="empty-state" style="display:none; text-align:center; padding:40px;">
-                    <i class="fas fa-folder-open" style="font-size:3rem; opacity:.3"></i>
-                    <p id="empty-text">No files uploaded</p>
+                <div id="empty-state" class="empty-state-container">
+                    <i class="fas fa-folder-open"></i>
+                    <p id="empty-text">No files found</p>
                 </div>
-           
-
-        }
+            }
     </div>
         <div id="modalContainer" class="modal-overlay" style="display:none;"></div>
 
-    <div id="bulkBar" class="bulk-bar">
-        <span id="bulkCount">0 Selected</span>
-    </div>
+        <div id="bulkBar" class="bulk-bar">
+            <div class="bulk-content">
+                <span id="bulkCount" class="bulk-count">0 Selected</span>
+
+                <div class="bulk-actions">
+                    <button type="button" class="bulk-btn" onclick="bulkDownload()">
+                        <i class="fas fa-file-download"></i> Download
+                    </button>
+
+                    <button type="button" class="bulk-btn" onclick="bulkShare()">
+                        <i class="fas fa-share-nodes"></i> Share
+                    </button>
+
+                    <button type="button" class="bulk-btn delete" onclick="bulkDelete()">
+                        <i class="fas fa-trash-can"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
 </div>
 </div>
 
