@@ -616,7 +616,26 @@ body {
     color: #888;
 }
 
-.friend-actions i {
+.friend-actions {
+    display: flex;
+    align-items: center;
+}
+    .friend-actions form {
+        display: inline;
+        margin: 0;
+        padding: 0;
+    }
+
+   
+    .friend-actions button {
+        background: none;
+        border: none;
+        padding: 0;
+        margin-left: 10px;
+        cursor: pointer;
+        outline: none;
+    }
+        .friend-actions i {
     margin-left: 10px;
     cursor: pointer;
     color: #666;

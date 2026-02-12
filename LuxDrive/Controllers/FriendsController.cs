@@ -86,6 +86,18 @@ namespace LuxDrive.Controllers
             return PartialView("_FriendsModalPartial", model);
         }
 
+        [HttpPost("load-share-list", Name = "LoadShareRoute")]
+        public async Task<ActionResult> LoadShareList(Guid fileId)
+        {
+            ShareWithFriendViewModel model = new ShareWithFriendViewModel
+            {
+                FileId = fileId,
+                Friends = await _friendService.GetFriendsAsync(Guid.Parse(base.GetUserId()))
+            };
+
+            return PartialView("_ShareModal", model);
+        }
+
         [HttpPost("share")]
         public async Task<IActionResult> ShareFile(Guid fileId, Guid receiverId)
         {
@@ -101,12 +113,12 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost("remove")]
-        public async Task<IActionResult> RemoveFriend(Guid friendId)
+        public async Task<IActionResult> RemoveFriend([FromForm] Guid friendId)
         {
             try
             {
                 await _friendService.RemoveFriendAsync(CurrentUserId, friendId);
-                return Ok();
+                return RedirectToAction("Index", "File");
             }
             catch (Exception ex)
             {

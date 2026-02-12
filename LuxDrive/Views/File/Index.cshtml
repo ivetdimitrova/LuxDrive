@@ -122,8 +122,8 @@
                                     <i class="fas fa-download"></i>
                                 </button>
                             </form>
-                            <form asp-controller="File" asp-action="Share" method="post" style="display:inline;">
-                                <input type="hidden" name="id" value="@file.Id" />
+                            <form asp-route="LoadShareRoute" method="post" onclick="showShareList(event, this) style="display:inline;">
+                                <input type="hidden" name="fileId" value="@file.Id" />
 
                                 <button type="submit" class="action-btn" title="Share">
                                     <i class="fas fa-share-alt"></i>
@@ -160,6 +160,8 @@
         }
     </div>
         <div id="modalContainer" class="modal-overlay" style="display:none;"></div>
+        <div id="shareModal" class="modal" style="display:none;">
+        </div>
 
     <div id="bulkBar" class="bulk-bar">
         <span id="bulkCount">0 Selected</span>

@@ -102,3 +102,23 @@ function closeFriendsTab() {
         const activeBtn = document.querySelector(`button[onclick*="${tabName}"]`);
         if (activeBtn) activeBtn.classList.add('active');
 }
+
+async function showShareList(event, element) {
+    event.preventDefault();
+
+    const url = element.getAttribute('href');
+
+    try {
+        const response = await fetch(url);
+        const html = await response.text();
+
+        const container = document.getElementById('shareModal');
+        container.innerHTML = html;
+        container.style.display = 'flex';
+
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) sidebar.style.display = 'none';
+    } catch (err) {
+        console.error("Грешка при зареждане на приятели:", err);
+    }
+}
