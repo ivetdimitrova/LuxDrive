@@ -20,7 +20,7 @@ namespace LuxDrive.Data
         public DbSet<FriendRequest> FriendRequests { get; set; } = null!;
         public DbSet<UserFriend> UserFriends { get; set; } = null!;
         public DbSet<SharedFile> SharedFiles { get; set; } = null!;
-
+        public DbSet<PaymentCard> PaymentCards { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -32,6 +32,6 @@ namespace LuxDrive.Data
             builder.ApplyConfiguration(new FriendRequestConfiguration());
             builder.ApplyConfiguration(new SharedFileConfiguration());
         }
-        public DbSet<PaymentCard> PaymentCards { get; set; }
+       
     }
 }

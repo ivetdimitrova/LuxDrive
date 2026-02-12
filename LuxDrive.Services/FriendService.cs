@@ -57,6 +57,7 @@ namespace LuxDrive.Services
 
         public async Task RemoveFriendAsync(Guid userId, Guid friendId)
         {
+            //TODO: remove 1 relation
             var friendship1 = await _context.UserFriends
                 .FirstOrDefaultAsync(x => x.UserId == userId && x.FriendId == friendId);
 
