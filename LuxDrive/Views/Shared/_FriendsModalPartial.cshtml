@@ -97,7 +97,11 @@
                             <input type="hidden" name="requestId" value="@request.Id" />
                             <button type="submit" class="btn-yes">Accept</button>
                         </form>
-                        <button class="btn-no">Reject</button>
+                        <form asp-controller="Friends" asp-action="Reject" method="post">
+                            <input type="hidden" name="requestId" value="@request.Id" />
+                            <button class="btn-no">Reject</button>
+                        </form>
+                      
                     </div>
                 </div>
             }

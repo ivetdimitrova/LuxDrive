@@ -127,12 +127,12 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost("reject")]
-        public async Task<IActionResult> Reject(Guid requestId)
+        public async Task<IActionResult> Reject([FromForm]Guid requestId)
         {
             try
             {
                 await _friendService.RejectRequestAsync(requestId);
-                return Ok();
+                return RedirectToAction("Index", "File");
             }
             catch (Exception ex)
             {
