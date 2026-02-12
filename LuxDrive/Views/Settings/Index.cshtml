@@ -38,30 +38,20 @@
 
             <div id="profile" class="tab-content">
                 <h2 class="gold-text" style="margin-bottom: 20px;">Profile Information</h2>
-
                 <form asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
-
                     <div class="profile-upload-section">
                         <div class="profile-img-container">
                             <img src="@Model.ProfileImageUrl" id="profile-preview" alt="Profile" />
                         </div>
-
                         <div class="button-group-lux">
                             <input asp-for="ProfileImage" type="file" id="imageInput" style="display:none;" accept="image/*" onchange="handleImageUpload(event)" />
-
-                            <button type="button" class="btn-lux-change" onclick="document.getElementById('imageInput').click()">
-                                EDIT PHOTO
-                            </button>
-
-                            <button type="button" class="btn-lux-outline" onclick="markForRemoval()">
-                                Remove
-                            </button>
+                            <button type="button" class="btn-lux-change" onclick="document.getElementById('imageInput').click()">EDIT PHOTO</button>
+                            <button type="button" class="btn-lux-outline" onclick="markForRemoval()">Remove</button>
                         </div>
-
                         <p class="upload-info">JPG, PNG or WEBP • Max 2MB</p>
-
                         <input type="hidden" name="RemovePhoto" id="removePhotoFlag" value="false" />
                     </div>
+
                     <div class="form-group">
                         <label>Username</label>
                         <input asp-for="Username" class="lux-input" disabled />
@@ -91,7 +81,6 @@
                         <input asp-for="PhoneNumber" id="phoneInput" class="lux-input" type="tel" />
                         <span asp-validation-for="PhoneNumber" style="color:#ff4d4d; display:block; margin-top:5px;"></span>
                     </div>
-
                     <button type="submit" class="btn-gold">Save Changes</button>
                 </form>
             </div>
@@ -101,17 +90,17 @@
                 <form asp-action="ChangePassword" method="post">
                     <div class="form-group">
                         <label>Current Password</label>
-                        <input asp-for="CurrentPassword" class="lux-input" required />
+                        <input asp-for="CurrentPassword" type="password" class="lux-input" />
                         <span asp-validation-for="CurrentPassword" style="color:#ff4d4d;"></span>
                     </div>
                     <div class="form-group">
                         <label>New Password</label>
-                        <input asp-for="NewPassword" class="lux-input" required />
+                        <input asp-for="NewPassword" type="password" class="lux-input" />
                         <span asp-validation-for="NewPassword" style="color:#ff4d4d;"></span>
                     </div>
                     <div class="form-group">
                         <label>Confirm New Password</label>
-                        <input asp-for="ConfirmNewPassword" class="lux-input" required />
+                        <input asp-for="ConfirmNewPassword" type="password" class="lux-input" />
                         <span asp-validation-for="ConfirmNewPassword" style="color:#ff4d4d;"></span>
                     </div>
                     <button type="submit" class="btn-gold">Update Password</button>
@@ -119,7 +108,7 @@
             </div>
 
             <div id="billing" class="tab-content" style="display:none;">
-                <h2>Saved Cards</h2>
+                <h2 class="gold-text">Saved Cards</h2>
                 <div class="cards-list">
                     @if (Model.SavedCards != null && Model.SavedCards.Any())
                     {
@@ -139,39 +128,44 @@
                     }
                     else
                     {
-                        <p style="color:#666;">No cards saved yet.</p>
+                        <p style="color:#666; margin-bottom: 20px;">No cards saved yet.</p>
                     }
                 </div>
                 <hr style="border-color:rgba(255,255,255,0.1); margin: 30px 0;" />
-                <h3>Add New Card</h3>
+                <h3 class="gold-text">Add New Card</h3>
                 <form asp-action="AddCard" method="post">
                     <div class="form-group">
+                        <label>Name on Card</label>
+                        <input asp-for="NewCardName" id="newCardName" class="lux-input" placeholder="John Doe" />
+                        <span asp-validation-for="NewCardName" style="color:#ff4d4d; display:block; margin-top:5px;"></span>
+                    </div>
+                    <div class="form-group">
                         <label>Card Number</label>
-                        <input asp-for="NewCardNumber" id="cardNumber" class="lux-input" placeholder="0000 0000 0000 0000" maxlength="19" required />
-                        <span asp-validation-for="NewCardNumber" style="color:#ff4d4d;"></span>
+                        <input asp-for="NewCardNumber" id="cardNumber" class="lux-input" placeholder="0000 0000 0000 0000" maxlength="19" />
+                        <span asp-validation-for="NewCardNumber" style="color:#ff4d4d; display:block; margin-top:5px;"></span>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Expiry (MM/YY)</label>
                             <input asp-for="NewCardExpiry" id="cardExpiry" class="lux-input" placeholder="MM/YY" maxlength="5" />
-                            <span asp-validation-for="NewCardExpiry" style="color:#ff4d4d;"></span>
+                            <span asp-validation-for="NewCardExpiry" style="color:#ff4d4d; display:block; margin-top:5px;"></span>
                         </div>
                         <div class="form-group">
                             <label>CVC</label>
                             <input asp-for="NewCardCvc" id="cardCvc" class="lux-input" placeholder="123" maxlength="3" />
-                            <span asp-validation-for="NewCardCvc" style="color:#ff4d4d;"></span>
+                            <span asp-validation-for="NewCardCvc" style="color:#ff4d4d; display:block; margin-top:5px;"></span>
                         </div>
                     </div>
-                    <button type="submit" class="btn-outline-gold">+ Add Card</button>
+                    <button type="submit" class="btn-outline-gold" style="margin-top: 15px;">+ Add Card</button>
                 </form>
             </div>
 
             <div id="danger" class="tab-content" style="display:none;">
                 <h2 class="text-danger">Delete Account</h2>
                 <p>Deleting your account is permanent. All your data will be wiped immediately.</p>
-
                 <div style="margin-top: 20px;">
                     <form asp-action="DeleteAccount" method="post" onsubmit="return confirm('WARNING: Are you sure you want to delete your account? This cannot be undone!');">
+                        @Html.AntiForgeryToken()
                         <button type="submit" class="btn-danger-glow">DELETE ACCOUNT</button>
                     </form>
                 </div>

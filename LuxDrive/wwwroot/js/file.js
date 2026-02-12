@@ -70,7 +70,7 @@ async function showFriends(event, element) {
         const sidebar = document.querySelector('.sidebar');
         if (sidebar) sidebar.style.display = 'none';
     } catch (err) {
-        console.error("Грешка при зареждане на приятели:", err);
+        console.error("Error loading friends:", err);
     }
 }
 
@@ -95,30 +95,170 @@ function closeFriendsTab() {
         if (targetTab) {
             targetTab.style.display = 'block';
         } else {
-            console.error("Не е намерен елемент с ID: " + tabName);
+            console.error("No element found with ID: " + tabName);
         }
 
         document.querySelectorAll('.tab-link').forEach(btn => btn.classList.remove('active'));
         const activeBtn = document.querySelector(`button[onclick*="${tabName}"]`);
         if (activeBtn) activeBtn.classList.add('active');
 }
+async function downloadSelected() {
+    const ids = Array.from(selection);
 
-async function showShareList(event, element) {
-    event.preventDefault();
+    if (ids.length === 0) return;
 
-    const url = element.getAttribute('href');
+    if (ids.length === 1) {
+        window.location.href = `/File/Download/${ids[0]}`;
+        return;
+    }
 
     try {
-        const response = await fetch(url);
-        const html = await response.text();
+        const response = await fetch('/File/DownloadMultiple', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(ids)
+        });
 
-        const container = document.getElementById('shareModal');
-        container.innerHTML = html;
-        container.style.display = 'flex';
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "LuxDrive_Files.zip";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        } else {
+            alert('Download error.');
+        }
+    } catch (error) {
+        console.error('Download error:', error);
+    }
+}
+async function bulkDownload() {
+    const ids = Array.from(selection); 
+    if (ids.length === 0) return;
 
-        const sidebar = document.querySelector('.sidebar');
-        if (sidebar) sidebar.style.display = 'none';
-    } catch (err) {
-        console.error("Грешка при зареждане на приятели:", err);
+    if (ids.length === 1) {
+        window.location.href = `/File/Download?id=${ids[0]}`;
+        return;
+    }
+
+    const response = await fetch('/File/DownloadMultiple', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ids)
+    });
+
+    if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "LuxDrive_Archive.zip";
+        a.click();
+    }
+}
+async function renameFile(id, oldName) {
+    const newName = prompt("Enter a new file name:", oldName);
+
+    if (newName === null || newName.trim() === "" || newName === oldName) {
+        return;
+    }
+
+    try {
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('newName', newName.trim());
+
+        const response = await fetch('/File/Rename', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const fileItem = document.getElementById(`file-${id}`);
+            if (fileItem) {
+                const h3 = fileItem.querySelector('h3');
+                if (h3) h3.innerText = newName.trim();
+
+                const renameBtn = fileItem.querySelector('button[title="Rename"]');
+                if (renameBtn) {
+                    renameBtn.setAttribute('onclick', `renameFile('${id}', '${newName.trim()}')`);
+                }
+            }
+            alert("File renamed successfully.");
+        } else {
+            const errorText = await response.text();
+            alert("Rename error: " + (errorText || "A problem occurred."));
+        }
+    } catch (error) {
+        console.error("Rename error:", error);
+        alert("Server connection error.");
+    }
+}
+async function deleteFile(id) {
+    if (!confirm("Are you sure you want to move this file to the trash?")) {
+        return;
+    }
+
+    try {
+        const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+        const formData = new FormData();
+        formData.append('id', id);
+        formData.append('__RequestVerificationToken', token);
+
+        const response = await fetch('/File/Delete', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (response.ok) {
+            const fileItem = document.getElementById(`file-${id}`);
+            if (fileItem) {
+                fileItem.style.opacity = '0';
+                fileItem.style.transform = 'scale(0.9)';
+                setTimeout(() => location.reload(), 300);
+            } else {
+                location.reload();
+            }
+        } else {
+            alert("Error deleting file.");
+        }
+    } catch (error) {
+        console.error("Delete error:", error);
+        alert("There was a problem connecting to the server..");
+    }
+}
+async function bulkDelete() {
+    const ids = Array.from(selection); 
+
+    if (ids.length === 0) return;
+
+    if (!confirm(`Are you sure you want to delete ${ids.length} selected files?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/File/DeleteMultiple', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+               
+            },
+            body: JSON.stringify(ids)
+        });
+
+        if (response.ok) {
+            alert("Files moved to the trash.");
+            location.reload();
+        } else {
+            alert("Bulk delete error.");
+        }
+    } catch (error) {
+        console.error("Bulk delete error:", error);
     }
 }

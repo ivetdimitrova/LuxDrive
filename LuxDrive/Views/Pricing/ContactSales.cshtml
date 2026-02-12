@@ -1,4 +1,6 @@
-﻿@{
+﻿@model LuxDrive.ViewModels.Pricing.ContactSalesViewModel
+
+@{
     ViewData["Title"] = "Contact Sales";
 }
 
@@ -23,25 +25,31 @@
             <button class="btn-lux" onclick="location.reload()">Return to Form</button>
         </div>
 
-        <form id="contact-form">
-            <div class="form-floating">
-                <input type="text" class="form-control" id="name" placeholder="Full Name" required>
-                <label for="name">Full Name</label>
+        <form id="contact-form" asp-action="ContactSales" method="post" novalidate>
+            @Html.AntiForgeryToken()
+
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" asp-for="Name" id="name" placeholder="Full Name">
+                <label asp-for="Name">Full Name</label>
+                <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
-            <div class="form-floating">
-                <input type="email" class="form-control" id="email" placeholder="Email Address" required>
-                <label for="email">Email Address</label>
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" asp-for="Email" id="email" placeholder="Email Address">
+                <label asp-for="Email">Email Address</label>
+                <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
-            <div class="form-floating">
-                <input type="text" class="form-control" id="company" placeholder="Company Name">
-                <label for="company">Company Name (Optional)</label>
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" asp-for="Company" id="company" placeholder="Company Name">
+                <label asp-for="Company">Company Name (Optional)</label>
+                <span asp-validation-for="Company" class="text-danger"></span>
             </div>
 
-            <div class="form-floating">
-                <textarea class="form-control" id="message" placeholder="Your Message" required></textarea>
-                <label for="message">How can we help you?</label>
+            <div class="form-floating mb-3">
+                <textarea class="form-control" asp-for="Message" id="message" placeholder="Your Message" style="height: 120px;"></textarea>
+                <label asp-for="Message">How can we help you?</label>
+                <span asp-validation-for="Message" class="text-danger"></span>
             </div>
 
             <button type="submit" class="btn-lux" id="send-btn">Send Request</button>
@@ -56,5 +64,7 @@
 </div>
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
     <script src="~/js/contact.js"></script>
 }

@@ -1,4 +1,13 @@
 ﻿document.getElementById('payment-form').addEventListener('submit', function (e) {
+    const form = e.target;
+
+    if (typeof jQuery !== 'undefined') {
+        if (!jQuery(form).valid()) {
+            e.preventDefault(); 
+            return;
+        }
+    }
+
     const btn = document.getElementById('pay-btn');
     btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...';
     btn.style.opacity = '0.7';

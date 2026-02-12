@@ -1,10 +1,7 @@
-﻿@{
+﻿@model LuxDrive.ViewModels.Pricing.CheckoutViewModel
+
+@{
     ViewData["Title"] = "Checkout";
-    var plan = ViewBag.Plan?.ToString() ?? "Basic";
-    string price = "4.99";
-    if (plan.ToLower().Contains("pro")) { price = "14.99"; }
-    else if (plan.ToLower().Contains("premium")) { price = "29.99"; }
-    else if (plan.ToLower().Contains("enterprise")) { price = "Custom"; }
 }
 
 @section Styles {
@@ -13,7 +10,6 @@
 
 <div class="lux-payment-wrapper">
     <div class="lux-card">
-
         @if (TempData["ErrorMessage"] != null)
         {
             <div class="error-banner">
@@ -25,43 +21,45 @@
         }
 
         <div class="checkout-header">
-            <h2>@plan Plan</h2>
+            <h2>@Model.PlanName Plan</h2>
             <p>Secure Credit Card Payment</p>
-            <span class="price-display">€@price</span>
+            <span class="price-display">€@Model.PriceDisplay</span>
         </div>
 
-        <form method="post" asp-controller="Pricing" asp-action="Process" id="payment-form">
+        <form method="post" asp-controller="Pricing" asp-action="Process" id="payment-form" novalidate>
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="PlanName" />
 
-            <input type="hidden" name="plan" value="@plan" />
-
-            <div class="form-floating">
-                <input type="text" class="form-control" id="cardName" name="CardName" placeholder="Name on Card" required>
-                <label for="cardName">Name on Card</label>
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" asp-for="CardName" placeholder="Name on Card">
+                <label asp-for="CardName">Name on Card</label>
+                <span asp-validation-for="CardName" class="text-danger"></span>
             </div>
 
-            <div class="form-floating">
-                <input type="text" class="form-control" id="cardNumber" name="CardNumber" placeholder="0000 0000 0000 0000" maxlength="19" required>
+            <div class="form-floating mb-3">
+                <input type="text" class="form-control" id="cardNumber" asp-for="CardNumber" placeholder="0000 0000 0000 0000" maxlength="19">
                 <label for="cardNumber">Card Number</label>
+                <span asp-validation-for="CardNumber" class="text-danger"></span>
             </div>
 
             <div class="row-gaps">
                 <div class="col-half">
-                    <div class="form-floating">
-                        <input type="text" class="form-control" id="expiry" name="Expiry" placeholder="MM/YY" maxlength="5" required>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="expiry" asp-for="Expiry" placeholder="MM/YY" maxlength="5">
                         <label for="expiry">Expiry (MM/YY)</label>
+                        <span asp-validation-for="Expiry" class="text-danger"></span>
                     </div>
                 </div>
                 <div class="col-half">
-                    <div class="form-floating">
-                        <input type="password" class="form-control" id="cvc" name="CVC" placeholder="123" maxlength="3" required>
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control" id="cvc" asp-for="CVC" placeholder="123" maxlength="3">
                         <label for="cvc">CVC</label>
+                        <span asp-validation-for="CVC" class="text-danger"></span>
                     </div>
                 </div>
             </div>
 
-            <button type="submit" class="btn-lux" id="pay-btn">
-                Pay Now
-            </button>
+            <button type="submit" class="btn-lux" id="pay-btn">Pay Now</button>
 
             <div class="secure-badge">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#c6a664" viewBox="0 0 16 16">
@@ -69,12 +67,11 @@
                 </svg>
                 Encrypted & Secure Transaction
             </div>
-
         </form>
-
     </div>
 </div>
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script src="~/js/checkout.js"></script>
 }

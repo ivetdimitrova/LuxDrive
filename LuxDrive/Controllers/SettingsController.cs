@@ -40,7 +40,7 @@ namespace LuxDrive.Controllers
 
             return new UserSettingsViewModel
             {
-                Username = user.UserName,
+                Username = user.UserName.Contains("@") ? user.UserName.Split('@')[0] : user.UserName,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Email = user.Email,
@@ -50,6 +50,7 @@ namespace LuxDrive.Controllers
                                   ? "/images/default-avatar.png"
                                   : user.ProfileImagePath
             };
+            
         }
 
         [HttpGet]
@@ -285,7 +286,7 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RemoveCard(int cardId)
+        public async Task<IActionResult> RemoveCard(Guid cardId)
         {
             TempData["ActiveTab"] = "billing";
             var card = await _context.PaymentCards.FindAsync(cardId);
@@ -332,6 +333,24 @@ namespace LuxDrive.Controllers
 
             TempData["ErrorMessage"] = "Error deleting account.";
             return RedirectToAction("Index");
+        }
+        [HttpPost]
+        [AllowAnonymous]
+        public async Task<IActionResult> SimulateResetPassword(string email, string newPassword)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return NotFound();
+
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+            var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+            if (result.Succeeded)
+            {
+                return Ok(new { success = true });
+            }
+
+            return BadRequest(result.Errors);
         }
     }
 }

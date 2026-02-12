@@ -539,12 +539,12 @@ body {
     align-items: center;
 }
 .modal-header-custom {
-    padding: 24px 24px 10px 24px;
+    padding: 20px 25px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
-
 .header-title {
     font-size: 1.2rem;
     font-weight: 700;
@@ -661,8 +661,26 @@ body {
 
 .close-btn {
     cursor: pointer;
+    font-size: 1.8rem; 
+    color: rgba(255, 255, 255, 0.5); 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px; 
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+    .close-btn:hover {
+        color: var(--gold); 
+        background: rgba(212, 175, 55, 0.1); 
+        border-color: var(--gold);
+        transform: scale(1.1) rotate(90deg); 
+        box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); 
+    }
 
 input-label {
     color: #cccccc;
@@ -672,19 +690,26 @@ input-label {
 }
 
 .invite-box {
-    background: #080808;
-    border: 1px solid #333;
-    border-radius: 12px;
-    padding: 5px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 6px; 
     display: flex;
     margin-bottom: 25px;
+    transition: var(--transition);
 }
 
-    .invite-box form {
-        display: flex;
-        width: 100%;
-        align-items: center;
-    }
+.invite-box:focus-within {
+    border-color: var(--gold);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.invite-box form {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 10px; 
+}
 
 .custom-input {
     flex: 1;
@@ -696,19 +721,28 @@ input-label {
 }
 
 .btn-invite {
-    background-color: #ffeb3b;
+    background: linear-gradient(135deg, #b88a44, #e6c86e); 
     color: #000;
     border: none;
-    border-radius: 6px;
-    padding: 8px 20px;
+    border-radius: 10px;
+    padding: 10px 22px;
     font-weight: 700;
     cursor: pointer;
-    font-size: 13px;
-    transition: background-color 0.2s;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    white-space: nowrap; 
 }
 
     .btn-invite:hover {
-        background-color: #fdd835;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(198, 166, 100, 0.3);
+        filter: brightness(1.1);
+    }
+
+    .btn-invite:active {
+        transform: translateY(0);
     }
 
 .pending-section {
@@ -779,3 +813,109 @@ input-label {
     border: 2px solid #333;
     position: relative;
 }
+
+.empty-state-container {
+    grid-column: 1 / -1; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 300px; 
+    text-align: center;
+    padding: 50px;
+    opacity: 0.5; 
+}
+
+    .empty-state-container i {
+        font-size: 4rem;
+        color: var(--gold);
+        margin-bottom: 15px;
+        display: block;
+    }
+
+    .empty-state-container p {
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: #fff;
+        margin: 0;
+    }
+#empty-state {
+    min-height: 40vh; 
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+#empty-icon {
+    display: block;
+    margin: 0 auto 15px;
+}
+.bulk-bar {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(150px); 
+    background: rgba(15, 15, 15, 0.95);
+    border: 1px solid var(--gold);
+    border-radius: 100px;
+    padding: 12px 40px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.8), 0 0 20px rgba(212, 175, 55, 0.1);
+    z-index: 1000;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+    .bulk-bar.active {
+        transform: translateX(-50%) translateY(0); 
+    }
+
+.bulk-content {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.bulk-count {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.bulk-actions {
+    display: flex;
+    gap: 25px;
+    align-items: center;
+}
+
+.bulk-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: 0.3s;
+    padding: 8px 15px;
+    border-radius: 50px;
+}
+
+    .bulk-btn i {
+        font-size: 1.1rem;
+    }
+
+    .bulk-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--gold);
+    }
+
+    .bulk-btn.delete {
+        color: #ff5f5f; 
+    }
+
+        .bulk-btn.delete:hover {
+            background: rgba(255, 95, 95, 0.1);
+            color: #ff3333;
+        }

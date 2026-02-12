@@ -1,12 +1,15 @@
-﻿using LuxDrive.Data;
-using FileEntity = LuxDrive.Data.Models.File;
+﻿using Azure.Core;
+using LuxDrive.Data;
 using LuxDrive.Services;
 using LuxDrive.Services.Interfaces;
+using LuxDrive.ViewModels.File;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using LuxDrive.ViewModels.File;
+using FileEntity = LuxDrive.Data.Models.File;
+using LuxDrive.ViewModels.File; 
+
 
 namespace LuxDrive.Controllers
 {
@@ -76,26 +79,38 @@ namespace LuxDrive.Controllers
             return View("Index", sharedFiles);
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Trash()
+
+     [HttpGet]
+    public async Task<IActionResult> Trash()
+    {
+        var userIdStr = GetUserId();
+        if (userIdStr == null) return Unauthorized();
+
+        var trashedFiles = await _dbContext.Files
+            .Where(f => f.UserId.ToString() == userIdStr && f.IsDeleted)
+            .OrderByDescending(f => f.DeletedOn)
+            .ToListAsync();
+
+        var allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
+        string planKey = GetUserKey("CurrentPlan");
+        string currentPlan = Request.Cookies[planKey] ?? "Free";
+        CalculateStorageUsage(allUserFiles, currentPlan);
+
+        var viewModel = new TrashViewModel
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
+            Files = trashedFiles.Select(f => new TrashItemViewModel
+            {
+                Id = f.Id.ToString(),
+                Name = f.Name,
+                Extension = f.Extension,
+                DeletedOn = f.DeletedOn
+            }).ToList()
+        };
 
-            var trashedFiles = await _dbContext.Files
-                .Where(f => f.UserId.ToString() == userIdStr && f.IsDeleted)
-                .OrderByDescending(f => f.DeletedOn)
-                .ToListAsync();
+        return View(viewModel);
+    }
 
-            var allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
-            string planKey = GetUserKey("CurrentPlan");
-            string currentPlan = Request.Cookies[planKey] ?? "Free";
-            CalculateStorageUsage(allUserFiles, currentPlan);
-
-            return View(trashedFiles);
-        }
-
-        [HttpPost]
+    [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
@@ -144,6 +159,7 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost]
+        [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Rename(Guid id, string newName)
         {
             var userIdStr = GetUserId();
@@ -391,6 +407,70 @@ namespace LuxDrive.Controllers
 
             await _dbContext.SaveChangesAsync();
             return Ok();
+        }
+        [HttpGet]
+        public async Task<IActionResult> Download(Guid id)
+        {
+            var userIdStr = GetUserId();
+            if (userIdStr == null) return Unauthorized();
+
+            var file = await _dbContext.Files
+                .FirstOrDefaultAsync(f => f.Id == id && f.UserId.ToString() == userIdStr);
+
+            if (file == null) return NotFound();
+
+            using var httpClient = new HttpClient();
+            try
+            {
+                var response = await httpClient.GetAsync(file.StorageUrl);
+                if (!response.IsSuccessStatusCode) return BadRequest("File not found in storage.");
+
+                var stream = await response.Content.ReadAsStreamAsync();
+
+                return File(stream, "application/octet-stream", file.Name + file.Extension);
+            }
+            catch
+            {
+                return BadRequest("Connection to storage failed.");
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> DownloadMultiple([FromBody] List<Guid> ids)
+        {
+            var userIdStr = GetUserId();
+            if (userIdStr == null) return Unauthorized();
+
+            var files = await _dbContext.Files
+                .Where(f => ids.Contains(f.Id) && f.UserId.ToString() == userIdStr)
+                .ToListAsync();
+
+            if (!files.Any()) return NotFound();
+
+            using var ms = new MemoryStream();
+            using (var archive = new System.IO.Compression.ZipArchive(ms, System.IO.Compression.ZipArchiveMode.Create, true))
+            {
+                using var httpClient = new HttpClient();
+
+                foreach (var file in files)
+                {
+                    try
+                    {
+                        var response = await httpClient.GetAsync(file.StorageUrl);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var fileStream = await response.Content.ReadAsStreamAsync();
+
+                            var entry = archive.CreateEntry(file.Name + file.Extension);
+                            using var entryStream = entry.Open();
+                            await fileStream.CopyToAsync(entryStream);
+                        }
+                    }
+                    catch { }
+                }
+            }
+
+            ms.Position = 0;
+            return File(ms.ToArray(), "application/zip", "LuxDrive_Download.zip");
         }
     }
 }
