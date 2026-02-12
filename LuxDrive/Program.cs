@@ -33,7 +33,6 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole<Guid>>(options =>
 .AddDefaultTokenProviders(); 
 
 builder.Services.AddScoped<SpacesService>();
-builder.Services.AddScoped<IEmailSender, EmailSender>();
 builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IFriendService, FriendService>(); 
 builder.Services.AddScoped<IFriendRequestService, FriendRequestService>();
