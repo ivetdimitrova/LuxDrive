@@ -164,35 +164,6 @@ namespace LuxDrive.Areas.Identity.Pages.Account
                     ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                     return Page();
                 }
-
-                //    var user = await _userManager.FindByEmailAsync(Input.Email);
-                //    if (user == null)
-                //    {
-                //        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                //        return Page();
-                //    }
-
-                //    bool isValidPassword = await _userManager.CheckPasswordAsync(user, Input.Password);
-                //    if (!isValidPassword)
-                //    {
-                //        ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                //        return Page();
-                //    }
-
-                //    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-
-                //    var link = Url.Page(
-                //                "/Account/ConfirmLogin",
-                //                 pageHandler: null,
-                //                 values: new { userId = user.Id, token },
-                //                protocol: Request.Scheme);
-
-                //    await _emailSender.SendEmailAsync(user.Email, "Confirm your login",
-                //$"Click <a href='{link}'>here</a> to confirm login.");
-
-                //    ViewData["Message"] = "Check your email for the login confirmation link.";
-
-                //    return RedirectToAction("Index", "File");
             }
 
 
