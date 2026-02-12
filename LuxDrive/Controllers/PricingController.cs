@@ -38,7 +38,7 @@ namespace LuxDrive.Controllers
                 var user = await _userManager.GetUserAsync(User);
                 if (user != null)
                 {
-                    hasCard = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id.ToString());
+                    hasCard = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id);
 
                     string planKey = GetUserKey("CurrentPlan");
                     string expiryKey = GetUserKey("PlanExpiry");
@@ -121,13 +121,13 @@ namespace LuxDrive.Controllers
                                  cleanNumber.StartsWith("5") ? "mastercard" :
                                  cleanNumber.StartsWith("3") ? "amex" : "unknown";
 
-                bool exists = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id.ToString() && c.CardLast4 == last4);
+                bool exists = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id && c.CardLast4 == last4);
 
                 if (!exists)
                 {
                     var newCard = new PaymentCard
                     {
-                        UserId = user.Id.ToString(),
+                        UserId = user.Id,
                         CardLast4 = last4,
                         CardType = cardType
                     };
@@ -153,7 +153,7 @@ namespace LuxDrive.Controllers
         public async Task<IActionResult> QuickPurchase(string plan)
         {
             var user = await _userManager.GetUserAsync(User);
-            bool hasCardInDb = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id.ToString());
+            bool hasCardInDb = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id);
 
             if (!hasCardInDb)
             {

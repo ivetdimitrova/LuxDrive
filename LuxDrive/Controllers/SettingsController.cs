@@ -29,7 +29,7 @@ namespace LuxDrive.Controllers
         private async Task<UserSettingsViewModel> LoadViewModelAsync(ApplicationUser user)
         {
             var cards = await _context.PaymentCards
-                                      .Where(c => c.UserId == user.Id.ToString())
+                                      .Where(c => c.UserId == user.Id)
                                       .Select(c => new CardViewModel
                                       {
                                           Id = c.Id,
@@ -273,7 +273,7 @@ namespace LuxDrive.Controllers
 
             var newCard = new PaymentCard
             {
-                UserId = user.Id.ToString(),
+                UserId = user.Id,
                 CardLast4 = last4,
                 CardType = type
             };
@@ -318,7 +318,7 @@ namespace LuxDrive.Controllers
             var userFiles = _context.Files.Where(f => f.UserId == user.Id);
             _context.Files.RemoveRange(userFiles);
 
-            var userCards = _context.PaymentCards.Where(c => c.UserId == user.Id.ToString());
+            var userCards = _context.PaymentCards.Where(c => c.UserId == user.Id);
             _context.PaymentCards.RemoveRange(userCards);
 
             await _context.SaveChangesAsync();

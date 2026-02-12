@@ -6,7 +6,8 @@ namespace LuxDrive.Data.Models
     {
         public Guid Id { get; set; }
 
-        public string UserId { get; set; } 
+        public Guid UserId { get; set; } 
+        public ApplicationUser User { get; set; } = null!;
 
         public string CardLast4 { get; set; } 
         public string CardType { get; set; } 
