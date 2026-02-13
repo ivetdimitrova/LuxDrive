@@ -87,7 +87,7 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost("load-share-list", Name = "LoadShareRoute")]
-        public async Task<ActionResult> LoadShareList(Guid fileId)
+        public async Task<ActionResult> LoadShareList([FromForm]Guid fileId)
         {
             ShareWithFriendViewModel model = new ShareWithFriendViewModel
             {

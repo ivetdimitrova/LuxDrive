@@ -919,3 +919,49 @@ input-label {
             background: rgba(255, 95, 95, 0.1);
             color: #ff3333;
         }
+
+.modal-content-custom {
+    background: #1a1a1a;
+    border: 1px solid #ffd700; 
+    border-radius: 12px;
+    width: 400px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.modal-header-custom {
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    color: #ffd700;
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+}
+
+.form-select-custom {
+    background: #222;
+    color: white;
+    border: 1px solid #444;
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.share-submit-btn {
+    background: #ffd700;
+    color: black;
+    border: none;
+    width: 100%;
+    padding: 10px;
+    margin-top: 15px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}

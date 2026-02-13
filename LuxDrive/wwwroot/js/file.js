@@ -74,6 +74,35 @@ async function showFriends(event, element) {
     }
 }
 
+async function showShare(event, element) {
+    event.preventDefault();
+
+ 
+    const url = element.action;
+
+  
+    const formData = new FormData(element);
+
+    try {
+       
+        const response = await fetch(url, {
+            method: 'POST',
+            body: formData
+        });
+
+        const html = await response.text();
+
+        const container = document.getElementById('shareContainer');
+        container.innerHTML = html;
+        container.style.display = 'flex';
+
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) sidebar.style.display = 'none';
+    } catch (err) {
+        console.error("Error loading share:", err);
+    }
+}
+
 function closeFriendsTab() {
     const container = document.getElementById('modalContainer');
     container.style.display = 'none';
