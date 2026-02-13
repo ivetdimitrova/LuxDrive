@@ -266,7 +266,7 @@ namespace LuxDrive.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> ShareMultiple(string receiverId, [FromBody] List<Guid> fileIds)
+        public async Task<IActionResult> ShareMultiple(Guid receiverId, [FromBody] List<Guid> fileIds)
         {
             var userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
@@ -286,10 +286,10 @@ namespace LuxDrive.Controllers
             catch { return BadRequest("Error sharing files."); }
         }
         [HttpPost]
-        public async Task<IActionResult> Share(Guid fileId, string receiverId)
+        public async Task<IActionResult> Share(Guid fileId, Guid receiverId)
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null || string.IsNullOrEmpty(receiverId)) return BadRequest();
+            var userIdStr = base.GetUserId();
+            if (userIdStr == null ) return BadRequest();
 
             try
             {

@@ -920,48 +920,95 @@ input-label {
             color: #ff3333;
         }
 
-.modal-content-custom {
-    background: #1a1a1a;
-    border: 1px solid #ffd700; 
+
+/*Za _ShareModal*/
+.custom-share-modal {
+    background-color: #1a1a1a;
+    border: 1px solid #ffc107; 
     border-radius: 12px;
-    width: 400px;
-    box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    padding: 0;
+    width: 100%;
+    max-width: 450px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    color: #ffffff;
 }
 
 .modal-header-custom {
-    padding: 15px;
-    border-bottom: 1px solid #333;
-    color: #ffd700;
     display: flex;
     justify-content: space-between;
-    font-weight: bold;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid #333;
 }
 
-.form-select-custom {
-    background: #222;
-    color: white;
-    border: 1px solid #444;
-    width: 100%;
-    padding: 10px;
-    border-radius: 5px;
-}
+    .modal-header-custom h4 {
+        margin: 0;
+        color: #ffc107; 
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
 
-.share-submit-btn {
-    background: #ffd700;
-    color: black;
-    border: none;
-    width: 100%;
-    padding: 10px;
-    margin-top: 15px;
-    font-weight: bold;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.close-btn {
+.close-modal {
     background: none;
     border: none;
-    color: white;
-    font-size: 20px;
+    color: #666;
+    font-size: 1.5rem;
     cursor: pointer;
+    transition: color 0.2s;
 }
+
+    .close-modal:hover {
+        color: #ffc107;
+    }
+
+
+.share-form {
+    padding: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 10px;
+    color: #bbb;
+    font-size: 0.9rem;
+}
+
+.custom-select {
+    background-color: #252525 !important;
+    border: 1px solid #444 !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    padding: 10px !important;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+    .custom-select:focus {
+        border-color: #ffc107 !important;
+        box-shadow: 0 0 5px rgba(255, 193, 7, 0.3);
+    }
+
+
+.btn-share-submit {
+    background-color: #ffc107;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    width: 100%;
+    font-weight: bold;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+    .btn-share-submit:hover {
+        background-color: #e5ac00;
+        transform: translateY(-2px);
+    }
+
+    .btn-share-submit:active {
+        transform: translateY(0);
+    }

@@ -103,6 +103,20 @@ async function showShare(event, element) {
     }
 }
 
+function closeShareModal() {
+    const container = document.getElementById('shareContainer');
+  
+    if (container) {
+        container.style.display = 'none';
+        container.innerHTML = '';
+    }
+
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar) {
+        sidebar.style.display = 'flex';
+    }
+}
+
 function closeFriendsTab() {
     const container = document.getElementById('modalContainer');
     container.style.display = 'none';

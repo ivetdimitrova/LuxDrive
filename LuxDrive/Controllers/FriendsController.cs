@@ -103,7 +103,7 @@ namespace LuxDrive.Controllers
         {
             try
             {
-                await _fileService.ShareFileAsync(fileId, CurrentUserId.ToString(), receiverId.ToString());
+                await _fileService.ShareFileAsync(fileId, CurrentUserId.ToString(), receiverId);
                 return Ok();
             }
             catch (Exception ex)

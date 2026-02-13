@@ -13,7 +13,7 @@ namespace LuxDrive.Services.Interfaces
         Task<string?> GetFileExtensionAsync(Guid? fileId);
         Task<bool> UpdateFileUrlAsync(Guid? fileId, string url);
 
-        Task ShareFileAsync(Guid fileId, string senderId, string receiverId);
+        Task ShareFileAsync(Guid fileId, string senderId, Guid receiverId);
 
         Task<IEnumerable<IndexViewModel>> GetUserFilesAsync(string userId);
         Task<IEnumerable<IndexViewModel>> GetSharedWithMeFilesAsync(string userId);

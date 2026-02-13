@@ -1,26 +1,27 @@
 ﻿@model LuxDrive.ViewModels.Friends.ShareWithFriendViewModel
 
-<div class="modal-content">
-    <h4>Share file</h4>
+<div class="modal-content custom-share-modal">
+    <div class="modal-header-custom">
+        <h4><i class="fas fa-share-alt"></i> Share file</h4>
+        <button type="button" class="close-modal" onclick="closeShareModal()">&times;</button>
+    </div>
 
-    <form asp-controller="File"
-          asp-action="Share"
-          method="post">
-
+    <form asp-controller="File" asp-action="Share" method="post" class="share-form">
         <input type="hidden" asp-for="FileId" />
 
-        <select asp-for="ReceiverId" class="form-select" required>
-            <option value="">-- Select a friend --</option>
-            @foreach (var f in Model.Friends)
-            {
-                <option value="@f.Id">
-                    @f.Name
-            </option>
-                        }
-        </select>
+        <div class="form-group">
+            <label asp-for="ReceiverId">Select a friend to share with</label>
+            <select asp-for="ReceiverId" class="form-select custom-select" required>
+                <option value="">-- Choose from your list --</option>
+                @foreach (var f in Model.Friends)
+                {
+                    <option value="@f.Id">@f.Name</option>
+                }
+            </select>
+        </div>
 
-        <button type="submit" class="btn btn-primary mt-2">
-            Share
+        <button type="submit" class="btn btn-share-submit">
+            Share with Friend
         </button>
     </form>
 </div>

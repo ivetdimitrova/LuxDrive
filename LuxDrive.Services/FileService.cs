@@ -172,21 +172,20 @@ namespace LuxDrive.Services
             return await _dbContext.SaveChangesAsync() == 1;
         }
 
-        public async Task ShareFileAsync(Guid fileId, string senderId, string receiverId)
+        public async Task ShareFileAsync(Guid fileId, string senderId, Guid receiverId)
         {
-            if (!Guid.TryParse(senderId, out Guid senderGuid) ||
-                !Guid.TryParse(receiverId, out Guid receiverGuid))
+            if (!Guid.TryParse(senderId, out Guid senderGuid))
             {
                 throw new ArgumentException("Invalid IDs.");
             }
 
             bool areFriends = await _dbContext.UserFriends
-                .AnyAsync(x => x.UserId == senderGuid && x.FriendId == receiverGuid);
+                .AnyAsync(x => x.UserId == senderGuid && x.FriendId == receiverId);
 
             if (!areFriends) throw new InvalidOperationException("Users are not friends.");
 
             bool alreadyShared = await _dbContext.SharedFiles
-                .AnyAsync(x => x.FileId == fileId && x.ReceiverId == receiverGuid);
+                .AnyAsync(x => x.FileId == fileId && x.ReceiverId == receiverId);
 
             if (alreadyShared) return;
 
@@ -194,7 +193,7 @@ namespace LuxDrive.Services
             {
                 FileId = fileId,
                 SenderId = senderGuid,
-                ReceiverId = receiverGuid,
+                ReceiverId = receiverId,
                 SharedOn = DateTime.UtcNow
             };
 
