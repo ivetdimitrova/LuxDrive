@@ -122,16 +122,16 @@
                             <a asp-controller="File" asp-action="Download" asp-route-id="@file.Id" class="action-btn" title="Download">
                                 <i class="fas fa-download"></i>
                             </a>
-                            <form asp-controller="Friends" asp-action="LoadShareList" method="post" style="display:inline;" onsubmit="showShare(event, this)">
+                           
+
+                            @if (currentAction == "Index")
+                            { <form asp-controller="Friends" asp-action="LoadShareList" method="post" style="display:inline;" onsubmit="showShare(event, this)">
                                 <input type="hidden" name="fileId" value="@file.Id" />
 
                                 <button type="submit" class="action-btn" title="Share" >
                                     <i class="fas fa-share-alt" ></i>
                                 </button>
                             </form>
-
-                            @if (currentAction == "Index")
-                            {
                                 <button class="action-btn" onclick="renameFile('@file.Id', '@file.Name')" title="Rename"><i class="fas fa-pen"></i></button>
                                 <button class="action-btn" onclick="deleteFile('@file.Id')" title="Delete"><i class="fas fa-trash"></i></button>
                             }

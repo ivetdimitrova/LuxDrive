@@ -425,7 +425,9 @@ namespace LuxDrive.Controllers
             if (userIdStr == null) return Unauthorized();
 
             var file = await _dbContext.Files
-                .FirstOrDefaultAsync(f => f.Id == id && f.UserId.ToString() == userIdStr);
+                .FirstOrDefaultAsync(f => f.Id == id );
+
+            //&& f.UserId.ToString() == userIdStr
 
             if (file == null) return NotFound();
 
