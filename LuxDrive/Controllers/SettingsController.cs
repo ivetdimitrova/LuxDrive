@@ -137,9 +137,18 @@ namespace LuxDrive.Controllers
 
                 //user.ProfileImagePath = "/uploads/profiles/" + uniqueFileName;
 
+                var key = string.Empty;
+
+                if (!string.IsNullOrEmpty(user.ProfileImagePath))
+                {
+                    var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/";
+                    key = user.ProfileImagePath.Replace(endpoint, string.Empty);
+                    await _spacesService.DeleteAsync(key);
+                }
+
                 string extension = Path.GetExtension(model.ProfileImage.FileName);
 
-                var key = $"profilePhotos/{user.Id.ToString()}{extension}";
+                key = $"profilePhotos/{user.Id.ToString()}{extension}";
 
                 using (var stream = model.ProfileImage.OpenReadStream())
                 { 

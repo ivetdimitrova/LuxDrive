@@ -22,7 +22,18 @@
             @foreach (var friend in Model.Friends)
             {
                 <div class="friend-row">
-                    <div class="friend-avatar">@friend.Name.First()</div>
+                    <div class="friend-avatar">
+                        @if (!string.IsNullOrEmpty(friend.ProfileImageUrl))
+                        {
+                            <img src="@friend.ProfileImageUrl" alt="@friend.Name" class="avatar-img" />
+                        }
+                        else
+                        {
+                            <div class="avatar-letter">
+                                @friend.Name.First()
+                            </div>
+                        }
+                    </div>
                     <div class="friend-info">
                         <div class="friend-name">@friend.Name</div>
                         <div class="friend-email">@friend.Email</div>
@@ -90,7 +101,18 @@
             @foreach (var request in Model.ReceivedRequests)
             {
                 <div class="req-card">
-                    <div class="user-avatar">@request.SenderName[0]</div>
+                    <div class="user-avatar">
+                        @if (!string.IsNullOrEmpty(request.ProfileImageUrl))
+                        {
+                            <img src="@request.ProfileImageUrl" alt="@request.SenderName" class="avatar-img" />
+                        }
+                        else
+                        {
+                            <div class="avatar-letter">
+                                @request.SenderName.First()
+                            </div>
+                        }
+                    </div>
                     <div style="margin-left:10px;">@request.SenderName</div>
                     <div class="req-actions">
                         <form asp-controller="Friends" asp-action="Accept" method="post">

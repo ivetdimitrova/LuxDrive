@@ -50,6 +50,7 @@ namespace LuxDrive.Services
                     Id = uf.FriendId,
                     Email = uf.Friend.Email,
                     Name = $"{uf.Friend.FirstName} {uf.Friend.LastName}",
+                    ProfileImageUrl = uf.Friend.ProfileImagePath
 
                 })
                 .ToListAsync();

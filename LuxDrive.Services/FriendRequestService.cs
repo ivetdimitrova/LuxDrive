@@ -31,6 +31,7 @@ namespace LuxDrive.Services
                {
                    Id = r.Id,
                    SenderName = r.Sender.UserName,
+                   ProfileImageUrl = r.Sender.ProfileImagePath
                })
                .ToListAsync();
         }
@@ -45,6 +46,7 @@ namespace LuxDrive.Services
                 {
                     Id = r.Id,
                     ReceiverName = r.Receiver.UserName,
+                    ProfileImageUrl = r.Receiver.ProfileImagePath
                 })
                 .ToListAsync();
         }

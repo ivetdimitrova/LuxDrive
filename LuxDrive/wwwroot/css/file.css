@@ -531,6 +531,14 @@ body {
     overflow: hidden;
 }
 
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 2px solid #ffc107;
+    border-radius: 50%;
+}
+
 .tab-content {
     padding: 25px 30px;
     border-bottom: 1px solid #222;
