@@ -370,9 +370,11 @@ namespace LuxDrive.Controllers
             return $"{mb:F1} MB";
         }
         [HttpPost]
-        public async Task<IActionResult> RestoreMultiple([FromBody] List<Guid> ids)
+        public async Task<IActionResult> RestoreMultiple(List<Guid> ids)
         {
             var userId = GetUserId();
+            if (ids == null || !ids.Any()) return BadRequest("No files selected.");
+
             var files = await _dbContext.Files
                 .Where(f => ids.Contains(f.Id) && f.UserId.ToString() == userId)
                 .ToListAsync();
@@ -384,13 +386,15 @@ namespace LuxDrive.Controllers
             }
 
             await _dbContext.SaveChangesAsync();
-            return Ok();
+            return RedirectToAction(nameof(Trash));
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeleteMultiplePermanent([FromBody] List<Guid> ids)
+        public async Task<IActionResult> DeleteMultiplePermanent(List<Guid> ids)
         {
             var userId = GetUserId();
+            if (ids == null || !ids.Any()) return BadRequest("No files selected.");
+
             var files = await _dbContext.Files
                 .Where(f => ids.Contains(f.Id) && f.UserId.ToString() == userId)
                 .ToListAsync();
@@ -399,14 +403,20 @@ namespace LuxDrive.Controllers
             {
                 if (!string.IsNullOrEmpty(file.StorageUrl))
                 {
-                    var key = file.StorageUrl.Replace("https://luxdrive.ams3.digitaloceanspaces.com/", "");
-                    await _spacesService.DeleteAsync(key);
+                    try
+                    {
+                        var key = file.StorageUrl.Replace("https://luxdrive.ams3.digitaloceanspaces.com/", "");
+                        await _spacesService.DeleteAsync(key);
+                    }
+                    catch
+                    {
+                    }
                 }
                 _dbContext.Files.Remove(file);
             }
 
             await _dbContext.SaveChangesAsync();
-            return Ok();
+            return RedirectToAction(nameof(Trash));
         }
         [HttpGet]
         public async Task<IActionResult> Download(Guid id)
