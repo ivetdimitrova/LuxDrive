@@ -330,28 +330,28 @@ body {
 
 .file-item {
     background: var(--card-bg);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--glass-border); 
     border-radius: 20px;
     padding: 15px;
     position: relative;
     transition: 0.4s;
-    animation: fadeUp 0.5s backwards;
     display: flex;
     flex-direction: column;
     backdrop-filter: blur(5px);
+    overflow: hidden;
 }
 
     .file-item:hover {
         transform: translateY(-10px);
         background: rgba(30, 30, 30, 0.6);
-        border-color: rgba(198,166,100,0.4);
+        border-color: rgba(198, 166, 100, 0.4); 
         box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
 
 .preview-box {
     width: 100%;
     height: 160px;
-    background: rgba(0,0,0,0.3);
+    background: transparent; 
     border-radius: 12px;
     margin-bottom: 15px;
     display: flex;
@@ -359,8 +359,8 @@ body {
     justify-content: center;
     overflow: hidden;
     position: relative;
+    border: none; 
 }
-
     .preview-box img {
         width: 100% !important;
         height: 100% !important;
@@ -924,12 +924,12 @@ input-label {
 /*Za _ShareModal*/
 .custom-share-modal {
     background-color: #1a1a1a;
-    border: 1px solid #ffc107; 
-    border-radius: 12px;
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
     padding: 0;
     width: 100%;
     max-width: 450px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
     overflow: hidden;
     color: #ffffff;
 }
@@ -938,33 +938,44 @@ input-label {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #333;
+    padding: 20px 25px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
-
     .modal-header-custom h4 {
         margin: 0;
-        color: #ffc107; 
+        color: #fdd835; 
         font-size: 1.2rem;
-        font-weight: 600;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: none; 
     }
 
 .close-modal {
-    background: none;
-    border: none;
-    color: #666;
-    font-size: 1.5rem;
     cursor: pointer;
-    transition: color 0.2s;
+    font-size: 1.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    outline: none;
 }
-
     .close-modal:hover {
-        color: #ffc107;
+        color: var(--gold);
+        background: rgba(212, 175, 55, 0.1);
+        border-color: var(--gold);
+        transform: scale(1.1) rotate(90deg); 
+        box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
     }
 
 
 .share-form {
-    padding: 20px;
+    padding: 25px;
 }
 
 .form-group label {
@@ -975,19 +986,27 @@ input-label {
 }
 
 .custom-select {
-    background-color: #252525 !important;
-    border: 1px solid #444 !important;
+    background-color: #1a1a1a !important; 
+    border: 1px solid var(--glass-border) !important;
     color: #fff !important;
-    border-radius: 8px !important;
-    padding: 10px !important;
+    border-radius: 12px !important;
+    padding: 12px 15px !important;
     width: 100%;
-    outline: none;
-    transition: border-color 0.3s;
+    outline: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    transition: var(--transition);
 }
 
     .custom-select:focus {
-        border-color: #ffc107 !important;
-        box-shadow: 0 0 5px rgba(255, 193, 7, 0.3);
+        border-color: var(--gold) !important;
+        outline: none !important;
+        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2) !important;
+    }
+    .custom-select option {
+        background-color: #1a1a1a; 
+        color: #fff;
+        padding: 10px;
     }
 
 
