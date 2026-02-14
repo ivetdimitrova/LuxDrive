@@ -170,13 +170,16 @@
                         <i class="fas fa-file-download"></i> Download
                     </button>
 
-                    <button type="button" class="bulk-btn" onclick="bulkShare()">
-                        <i class="fas fa-share-nodes"></i> Share
-                    </button>
+                    @if (currentAction == "Index")
+                    {
+                        <button type="button" class="bulk-btn" onclick="bulkShare()">
+                            <i class="fas fa-share-nodes"></i> Share
+                        </button>
 
-                    <button type="button" class="bulk-btn delete" onclick="bulkDelete()">
-                        <i class="fas fa-trash-can"></i> Delete
-                    </button>
+                        <button type="button" class="bulk-btn delete" onclick="bulkDelete()">
+                            <i class="fas fa-trash-can"></i> Delete
+                        </button>
+                    }
                 </div>
             </div>
         </div>
