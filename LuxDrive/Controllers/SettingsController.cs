@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using LuxDrive.Data;
+using LuxDrive.Data.Models;
+using LuxDrive.Services;
+using LuxDrive.ViewModels.Settings;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using LuxDrive.Data;
-using LuxDrive.Data.Models;
-
-using LuxDrive.ViewModels.Settings;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace LuxDrive.Controllers
 {
@@ -15,15 +16,18 @@ namespace LuxDrive.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly LuxDriveDbContext _context;
+        private readonly SpacesService _spacesService;
 
         public SettingsController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            LuxDriveDbContext context)
+            LuxDriveDbContext context,
+             SpacesService spacesService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _context = context;
+            _spacesService = spacesService;
         }
 
         private async Task<UserSettingsViewModel> LoadViewModelAsync(ApplicationUser user)
@@ -114,27 +118,44 @@ namespace LuxDrive.Controllers
                     return View("Index", await LoadViewModelAsync(user));
                 }
 
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/profiles");
-                if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
+                //var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/profiles");
+                //if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
 
-                var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProfileImage.FileName);
-                var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                //var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProfileImage.FileName);
+                //var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                if (!string.IsNullOrEmpty(user.ProfileImagePath))
-                {
-                    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.ProfileImagePath.TrimStart('/'));
-                    if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
+                //if (!string.IsNullOrEmpty(user.ProfileImagePath))
+                //{
+                //    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.ProfileImagePath.TrimStart('/'));
+                //    if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
+                //}
+
+                //using (var fileStream = new FileStream(filePath, FileMode.Create))
+                //{
+                //    await model.ProfileImage.CopyToAsync(fileStream);
+                //}
+
+                //user.ProfileImagePath = "/uploads/profiles/" + uniqueFileName;
+
+                string extension = Path.GetExtension(model.ProfileImage.FileName);
+
+                var key = $"profilePhotos/{user.Id.ToString()}/{Guid.NewGuid()}{extension}";
+
+                using (var stream = model.ProfileImage.OpenReadStream())
+                { 
+                    var url = await _spacesService.UploadAsync(stream, key, model.ProfileImage.ContentType);
+
+                    user.ProfileImagePath = url;
                 }
 
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
-                {
-                    await model.ProfileImage.CopyToAsync(fileStream);
-                }
-
-                user.ProfileImagePath = "/uploads/profiles/" + uniqueFileName;
+               
             }
 
-            user.FirstName = model.FirstName;
+            
+            
+        
+
+        user.FirstName = model.FirstName;
             user.LastName = model.LastName;
             user.PhoneNumber = model.PhoneNumber;
 
@@ -158,6 +179,8 @@ namespace LuxDrive.Controllers
 
             await _signInManager.RefreshSignInAsync(user);
             TempData["Success"] = "Profile updated successfully!";
+            
+            await _userManager.UpdateAsync(user);
 
             return RedirectToAction("Index");
         }
