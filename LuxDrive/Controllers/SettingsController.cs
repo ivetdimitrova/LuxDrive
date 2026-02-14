@@ -139,7 +139,7 @@ namespace LuxDrive.Controllers
 
                 string extension = Path.GetExtension(model.ProfileImage.FileName);
 
-                var key = $"profilePhotos/{user.Id.ToString()}/{Guid.NewGuid()}{extension}";
+                var key = $"profilePhotos/{user.Id.ToString()}{extension}";
 
                 using (var stream = model.ProfileImage.OpenReadStream())
                 { 
