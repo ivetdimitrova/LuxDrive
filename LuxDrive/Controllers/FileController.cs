@@ -294,7 +294,7 @@ namespace LuxDrive.Controllers
             try
             {
                 await fileService.ShareFileAsync(fileId, userIdStr, receiverId);
-                return Ok();
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {

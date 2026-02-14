@@ -12,11 +12,19 @@
         <div class="form-group">
             <label asp-for="ReceiverId">Select a friend to share with</label>
             <select asp-for="ReceiverId" class="form-select custom-select" required>
-                <option value="">-- Choose from your list --</option>
-                @foreach (var f in Model.Friends)
+                @if (!Model.Friends.Any())
                 {
-                    <option value="@f.Id">@f.Name</option>
+                    <option value="" selected disabled>-- You don't have friends --</option>
                 }
+                else
+                {
+                    <option value="" selected disabled hidden>Choose friend</option>
+                    @foreach (var f in Model.Friends)
+                    {
+                        <option value="@f.Id">@f.Name</option>
+                    }
+                }
+
             </select>
         </div>
 
