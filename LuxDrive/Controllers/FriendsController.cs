@@ -114,6 +114,9 @@ namespace LuxDrive.Controllers
             try
             {
                 await _friendService.RemoveFriendAsync(CurrentUserId, friendId);
+
+                TempData["AlertMessage"] = "Friend removed.";
+
                 return RedirectToAction("Index", "File");
             }
             catch (Exception ex)
