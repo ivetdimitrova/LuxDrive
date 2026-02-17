@@ -294,6 +294,8 @@ namespace LuxDrive.Controllers
             try
             {
                 await fileService.ShareFileAsync(fileId, userIdStr, receiverId);
+
+                TempData["AlertMessage"] = "File was shared.";
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
