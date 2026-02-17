@@ -50,17 +50,13 @@ namespace LuxDrive.Controllers
             try
             {
                 await _friendRequestService.AcceptRequestAsync(requestId);
+                TempData["AlertMessage"] = "The invitation was accepted.";
                 return RedirectToAction("Index", "File");
+
+                
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
-
-        //[HttpGet("pending")]
-        //public async Task<IActionResult> GetPendingRequests()
-        //{
-        //    var requests = await _friendService.GetPendingRequestsAsync(CurrentUserId);
-        //    return Ok(requests);
-        //}
 
         [HttpGet("search")]
         public async Task<IActionResult> SearchUser(string email)
