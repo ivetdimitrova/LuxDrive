@@ -39,7 +39,6 @@
                         <div class="friend-email">@friend.Email</div>
                     </div>
                     <div class="friend-actions">
-                        <i class="fas fa-eye info-icon"></i>
                         <form asp-controller="Friends" asp-action="RemoveFriend" method="post">
                             <input type="hidden" name="friendId" value="@friend.Id" />
 
