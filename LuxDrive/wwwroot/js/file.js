@@ -317,6 +317,6 @@ function showAlert(message) {
         setTimeout(function () {
             element.classList.add("custom-alert-hidden");
             element.classList.remove("custom-alert-visible");
-        }, 500);
+        }, 1000);
     }
 }
