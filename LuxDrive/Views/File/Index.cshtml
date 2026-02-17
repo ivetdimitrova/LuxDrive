@@ -195,20 +195,18 @@
     </div>
 
     <script>
-        // Кодът се изпълнява веднага след като елементът се появи
+       
         (function() {
             const alertBox = document.getElementById("customAlert");
 
-            // Първоначално го показваме (ако CSS го крие)
             alertBox.style.display = "block";
 
-            // Автоматично изчезване след 5 секунди
             setTimeout(() => {
                 alertBox.style.opacity = "0";
                 setTimeout(() => {
                     alertBox.remove(); // Премахва го от HTML-а напълно
                 }, 500);
-            }, 5000);
+            }, 1000);
         })();
     </script>
 }
