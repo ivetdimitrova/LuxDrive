@@ -132,6 +132,8 @@ namespace LuxDrive.Controllers
             try
             {
                 await _friendService.RejectRequestAsync(requestId);
+                TempData["AlertMessage"] = "The invitation was rejected.";
+
                 return RedirectToAction("Index", "File");
             }
             catch (Exception ex)

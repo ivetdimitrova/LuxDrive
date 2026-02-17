@@ -1039,3 +1039,50 @@ input-label {
     .btn-share-submit:active {
         transform: translateY(0);
     }
+
+
+#customAlert {
+    position: fixed;
+    top: 5%;
+    left: 30%;
+    background-color: #121212;
+    border: 1px solid #C5A059;
+    border-radius: 12px;
+    padding: 18px 25px 18px 65px;
+    min-width: 350px;
+    z-index: 99999 !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+    font-family: 'Montserrat', sans-serif;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    display: none;
+}
+
+  
+    #customAlert::before {
+        position: absolute;
+        left: 22px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 28px;
+        color: #F4BD61;
+    }
+
+
+.alert-content::before {
+    display: block;
+    color: #C5A059;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+}
+
+
+#alertMessage {
+    color: #FFFFFF;
+    margin: 0;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+}

@@ -305,3 +305,18 @@ async function bulkDelete() {
         console.error("Bulk delete error:", error);
     }
 }
+
+function showAlert(message) {
+    var element = document.getElementById("customAlert");
+    if (element) {
+        
+        element.classList.remove("custom-alert-hidden");
+        element.classList.add("custom-alert-visible"); 
+
+      
+        setTimeout(function () {
+            element.classList.add("custom-alert-hidden");
+            element.classList.remove("custom-alert-visible");
+        }, 3000);
+    }
+}
