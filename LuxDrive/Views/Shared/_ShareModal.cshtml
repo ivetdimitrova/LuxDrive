@@ -11,7 +11,9 @@
 
         <div class="form-group">
             <label asp-for="ReceiverId">Select a friend to share with</label>
-            <select asp-for="ReceiverId" class="form-select custom-select" required>
+            <select asp-for="ReceiverId" class="form-select custom-select" required
+                    oninvalid="this.setCustomValidity('Please select a friend from the list.')"
+                    onchange="this.setCustomValidity('')">
                 @if (!Model.Friends.Any())
                 {
                     <option value="" selected disabled>-- You don't have friends --</option>
