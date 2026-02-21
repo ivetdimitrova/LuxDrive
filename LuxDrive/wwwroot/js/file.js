@@ -69,17 +69,24 @@ function clearSelection() {
 function updateSelectionUI() {
     const bulkBar = document.getElementById('bulkBar');
     const selectionTools = document.getElementById('selection-tools'); 
-    const countDisplay = document.getElementById('selectedCountDisplay');
+    const countDisplay = document.getElementById('selectedCountDisplay'); 
+    const bulkCountDisplay = document.getElementById('bulkCount');      
 
     const count = selection.size;
+    const text = `${count} selected`;
 
     if (count > 0) {
         if (bulkBar) bulkBar.classList.add('active');
         if (selectionTools) selectionTools.style.display = 'block';
-        if (countDisplay) countDisplay.innerText = `${count} selected`;
+        
+        if (countDisplay) countDisplay.innerText = text;
+        if (bulkCountDisplay) bulkCountDisplay.innerText = text;
     } else {
         if (bulkBar) bulkBar.classList.remove('active');
         if (selectionTools) selectionTools.style.display = 'none';
+        
+        if (countDisplay) countDisplay.innerText = "0 selected";
+        if (bulkCountDisplay) bulkCountDisplay.innerText = "0 Selected";
     }
 }
 
