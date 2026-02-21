@@ -181,27 +181,44 @@ async function downloadSelected() {
     }
 }
 async function bulkDownload() {
-    const ids = Array.from(selection); 
+    const ids = Array.from(selection);
     if (ids.length === 0) return;
+
+    const clearSelectionUI = () => {
+        selection.clear();
+        document.querySelectorAll('.check-circle.checked').forEach(el => {
+            el.classList.remove('checked');
+        });
+        updateSelectionUI(); 
+    };
 
     if (ids.length === 1) {
         window.location.href = `/File/Download?id=${ids[0]}`;
+        clearSelectionUI(); 
         return;
     }
 
-    const response = await fetch('/File/DownloadMultiple', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(ids)
-    });
+    try {
+        const response = await fetch('/File/DownloadMultiple', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(ids)
+        });
 
-    if (response.ok) {
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = "LuxDrive_Archive.zip";
-        a.click();
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "LuxDrive_Archive.zip";
+            a.click();
+
+            clearSelectionUI();
+        } else {
+            alert("An error occurred during bulk download..");
+        }
+    } catch (error) {
+        console.error("Download error:", error);
     }
 }
 async function renameFile(id, oldName) {
