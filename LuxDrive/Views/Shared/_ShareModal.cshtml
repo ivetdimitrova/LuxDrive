@@ -6,7 +6,7 @@
         <button type="button" class="close-modal" onclick="closeShareModal()">&times;</button>
     </div>
 
-    <form asp-controller="File" asp-action="Share" method="post" class="share-form">
+    <form asp-controller="File" asp-action="Share" method="post" class="share-form" onsubmit="handleShareSubmit(event, this)">
         <input type="hidden" asp-for="FileId" />
 
         <div class="form-group">
@@ -24,7 +24,6 @@
                         <option value="@f.Id">@f.Name</option>
                     }
                 }
-
             </select>
         </div>
 
