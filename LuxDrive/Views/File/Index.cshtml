@@ -118,10 +118,28 @@
             {
                 @foreach (var file in Model)
                 {
+                    string fileCategory = "other";
+                    var ext = file.Extension?.ToLower() ?? "";
+
+                    if (file.IsImage)
+                    {
+                        fileCategory = "image";
+                    }
+                    else if (new[] { ".mp4", ".avi", ".mov", ".mkv" }.Contains(ext))
+                    {
+                        fileCategory = "video";
+                    }
+                    else if (new[] { ".pdf", ".doc", ".docx", ".txt", ".xlsx" }.Contains(ext))
+                    {
+                        fileCategory = "document";
+                    }
+                    else if (new[] { ".zip", ".rar", ".7z", ".tar" }.Contains(ext))
+                    {
+                        fileCategory = "archive";
+                    }
                     <div class="file-item"
-                         id="file-@file.Id"
-                         data-type="@file.Type"
-                         data-download-url="@file.StorageUrl">
+                        id="file-@file.Id"
+                        data-type="@fileCategory" data-download-url="@file.StorageUrl">
 
                         <div class="preview-box">
                             <div class="check-circle" onclick="toggleSelect(this,'@file.Id')"></div>
@@ -168,14 +186,12 @@
                     </div>
                 }
             }
-            else
-            {
-                <div id="empty-state" class="empty-state-container">
-                    <i class="fas fa-folder-open"></i>
-                    <p id="empty-text">No files found</p>
-                </div>
-            }
-    </div>
+
+            <div id="empty-state" class="empty-state-container" style="display: @(Model != null && Model.Any() ? "none" : "flex");">
+                <i class="fas fa-folder-open"></i>
+                <p id="empty-text">No files found</p>
+            </div>
+        </div>
         <div id="modalContainer" class="modal-overlay" style="display:none;"></div>
 
         <div id="shareContainer" class="modal-overlay" style="display:none;"></div>
