@@ -455,7 +455,7 @@ namespace LuxDrive.Controllers
             if (userIdStr == null) return Unauthorized();
 
             var files = await _dbContext.Files
-                .Where(f => ids.Contains(f.Id) && f.UserId.ToString() == userIdStr)
+                .Where(f => ids.Contains(f.Id))
                 .ToListAsync();
 
             if (!files.Any()) return NotFound();
