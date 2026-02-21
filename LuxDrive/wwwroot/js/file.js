@@ -305,3 +305,72 @@ async function bulkDelete() {
         console.error("Bulk delete error:", error);
     }
 }
+async function bulkShare() {
+    const ids = Array.from(selection);
+    if (ids.length === 0) return;
+
+    try {
+        const formData = new FormData();
+        formData.append("fileId", ids[0]);
+
+        const response = await fetch('/api/friends/load-share-list', {
+            method: 'POST',
+            body: formData
+        });
+
+        const html = await response.text();
+
+        const container = document.getElementById('shareContainer');
+        container.innerHTML = html;
+        container.style.display = 'flex';
+
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) sidebar.style.display = 'none';
+
+        container.dataset.mode = 'bulk';
+    } catch (err) {
+        console.error("Error loading sharing modal:", err);
+    }
+}
+
+async function handleShareSubmit(event, form) {
+    const container = document.getElementById('shareContainer');
+    const isBulkMode = container.dataset.mode === 'bulk';
+
+    if (isBulkMode) {
+        event.preventDefault();
+
+        const receiverId = form.querySelector('[name="ReceiverId"]').value;
+        const ids = Array.from(selection);
+
+        if (!receiverId || ids.length === 0) return;
+
+        try {
+            const response = await fetch(`/File/ShareMultiple?receiverId=${receiverId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(ids)
+            });
+
+            if (response.ok) {
+                selection.clear();
+                updateSelectionUI();
+                closeShareModal();
+
+                document.querySelectorAll('.check-circle.checked').forEach(el => {
+                    el.classList.remove('checked');
+                });
+
+                container.dataset.mode = ''; 
+                alert("Files were shared successfully!");
+            } else {
+                alert("An error occurred while mass sharing.");
+            }
+        } catch (error) {
+            console.error("Error sending files:", error);
+            alert("Server error.");
+        }
+    }
+}
