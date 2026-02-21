@@ -224,14 +224,30 @@ async function bulkDownload() {
 async function renameFile(id, oldName) {
     const newName = prompt("Enter a new file name:", oldName);
 
-    if (newName === null || newName.trim() === "" || newName === oldName) {
+    if (newName === null) {
+        return;
+    }
+
+    const trimmedName = newName.trim();
+
+    if (trimmedName === "") {
+        alert("File name cannot be empty.");
+        return;
+    }
+
+    if (trimmedName.length > 100) {
+        alert("File name is too long. Please use up to 100 characters.");
+        return;
+    }
+
+    if (trimmedName === oldName.trim()) {
         return;
     }
 
     try {
         const formData = new FormData();
         formData.append('id', id);
-        formData.append('newName', newName.trim());
+        formData.append('newName', trimmedName);
 
         const response = await fetch('/File/Rename', {
             method: 'POST',
@@ -242,11 +258,11 @@ async function renameFile(id, oldName) {
             const fileItem = document.getElementById(`file-${id}`);
             if (fileItem) {
                 const h3 = fileItem.querySelector('h3');
-                if (h3) h3.innerText = newName.trim();
+                if (h3) h3.innerText = trimmedName;
 
                 const renameBtn = fileItem.querySelector('button[title="Rename"]');
                 if (renameBtn) {
-                    renameBtn.setAttribute('onclick', `renameFile('${id}', '${newName.trim()}')`);
+                    renameBtn.setAttribute('onclick', `renameFile('${id}', '${trimmedName}')`);
                 }
             }
             alert("File renamed successfully.");
@@ -351,23 +367,31 @@ async function bulkShare() {
 }
 
 async function handleShareSubmit(event, form) {
+    event.preventDefault();
+
     const container = document.getElementById('shareContainer');
     const isBulkMode = container.dataset.mode === 'bulk';
 
-    if (isBulkMode) {
-        event.preventDefault();
+    const receiverElement = form.querySelector('[name="ReceiverId"]');
+    const receiverId = receiverElement ? receiverElement.value : null;
 
-        const receiverId = form.querySelector('[name="ReceiverId"]').value;
+    if (!receiverId || receiverId.trim() === "") {
+        alert("Please select a friend from the list before sharing.");
+        return; 
+    }
+
+    if (isBulkMode) {
         const ids = Array.from(selection);
 
-        if (!receiverId || ids.length === 0) return;
+        if (ids.length === 0) {
+            alert("Please select at least one file to share.");
+            return;
+        }
 
         try {
             const response = await fetch(`/File/ShareMultiple?receiverId=${receiverId}`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(ids)
             });
 
@@ -380,14 +404,17 @@ async function handleShareSubmit(event, form) {
                     el.classList.remove('checked');
                 });
 
-                container.dataset.mode = ''; 
+                container.dataset.mode = '';
                 alert("Files were shared successfully!");
             } else {
                 alert("An error occurred while mass sharing.");
             }
         } catch (error) {
             console.error("Error sending files:", error);
-            alert("Server error.");
+            alert("Server connection error.");
         }
+    }
+    else {
+        form.submit();
     }
 }
