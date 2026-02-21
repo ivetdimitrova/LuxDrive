@@ -32,25 +32,54 @@ const selection = new Set();
 
 function toggleSelect(el, id) {
     el.classList.toggle('checked');
+    const fileItem = document.getElementById(`file-${id}`);
 
     if (el.classList.contains('checked')) {
         selection.add(id);
+        if (fileItem) fileItem.classList.add('selected');
     } else {
         selection.delete(id);
+        if (fileItem) fileItem.classList.remove('selected');
     }
 
     updateSelectionUI();
 }
+function selectAllFiles() {
+    const allVisibleFiles = document.querySelectorAll('.file-item:not([style*="display: none"])');
+    allVisibleFiles.forEach(item => {
+        const id = item.id.replace('file-', '');
+        const checkCircle = item.querySelector('.check-circle');
+
+        if (!selection.has(id)) {
+            selection.add(id);
+            if (checkCircle) checkCircle.classList.add('checked');
+            item.classList.add('selected');
+        }
+    });
+    updateSelectionUI();
+}
+
+function clearSelection() {
+    selection.clear();
+    document.querySelectorAll('.check-circle').forEach(el => el.classList.remove('checked'));
+    document.querySelectorAll('.file-item').forEach(el => el.classList.remove('selected'));
+    updateSelectionUI();
+}
 
 function updateSelectionUI() {
-    const bar = document.getElementById('bulkBar');
-    const count = document.getElementById('bulkCount');
+    const bulkBar = document.getElementById('bulkBar');
+    const selectionTools = document.getElementById('selection-tools'); 
+    const countDisplay = document.getElementById('selectedCountDisplay');
 
-    if (selection.size > 0) {
-        bar.classList.add('active');
-        count.innerText = `${selection.size} Selected`;
+    const count = selection.size;
+
+    if (count > 0) {
+        if (bulkBar) bulkBar.classList.add('active');
+        if (selectionTools) selectionTools.style.display = 'block';
+        if (countDisplay) countDisplay.innerText = `${count} selected`;
     } else {
-        bar.classList.remove('active');
+        if (bulkBar) bulkBar.classList.remove('active');
+        if (selectionTools) selectionTools.style.display = 'none';
     }
 }
 
