@@ -20,7 +20,9 @@ namespace LuxDrive.Services
 
         public async Task<bool> ChangeFileNameAsync(string userId, Guid fileId, string newName)
         {
-            if (!Guid.TryParse(userId, out Guid userGuid)) return false;
+            if (string.IsNullOrWhiteSpace(newName) || !Guid.TryParse(userId, out Guid userGuid))
+             return false;
+            
 
             var file = await _dbContext.Files
                 .FirstOrDefaultAsync(f => f.Id == fileId && f.UserId == userGuid);
@@ -28,6 +30,9 @@ namespace LuxDrive.Services
             if (file == null) return false;
 
             string clean = newName.Trim();
+
+            if (string.IsNullOrEmpty(clean)|| string.IsNullOrWhiteSpace(clean)) return false; 
+
             if (!string.IsNullOrEmpty(file.Extension) &&
                 clean.EndsWith(file.Extension, StringComparison.OrdinalIgnoreCase))
             {
@@ -38,6 +43,8 @@ namespace LuxDrive.Services
                 var dotIndex = clean.LastIndexOf('.');
                 if (dotIndex > 0) clean = clean.Substring(0, dotIndex);
             }
+
+            if (file.Name == clean) return true;
 
             file.Name = clean;
             return await _dbContext.SaveChangesAsync() == 1;
