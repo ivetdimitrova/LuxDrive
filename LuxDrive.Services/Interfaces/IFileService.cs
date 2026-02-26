@@ -20,8 +20,6 @@ namespace LuxDrive.Services.Interfaces
 
         Task<bool> ChangeFileNameAsync(string userId, Guid fileId, string newName);
 
-        //Task<LuxDrive.Data.Models.File?> GetUserFileAsync(Guid fileId, string userId);
-
         Task<bool> RemoveFileAsync(LuxDrive.Data.Models.File file);
 
         Task<long> GetTotalUsedStorageAsync(string userId);

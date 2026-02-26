@@ -90,14 +90,6 @@ namespace LuxDrive.Services
                 .FirstOrDefaultAsync();
         }
 
-        //public async Task<FileEntity?> GetUserFileAsync(Guid fileId, string userId)
-        //{
-        //    if (!Guid.TryParse(userId, out Guid userGuid)) return null;
-
-        //    return await _dbContext.Files
-        //        .Where(f => f.Id == fileId && f.UserId == userGuid)
-        //        .FirstOrDefaultAsync();
-        //}
 
         public async Task<IEnumerable<IndexViewModel>> GetUserFilesAsync(string userId)
         {
