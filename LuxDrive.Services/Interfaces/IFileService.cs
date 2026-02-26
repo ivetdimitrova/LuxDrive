@@ -23,5 +23,7 @@ namespace LuxDrive.Services.Interfaces
         Task<LuxDrive.Data.Models.File?> GetUserFileAsync(Guid fileId, string userId);
 
         Task<bool> RemoveFileAsync(LuxDrive.Data.Models.File file);
+
+        Task<long> GetTotalUsedStorageAsync(string userId);
     }
 }
