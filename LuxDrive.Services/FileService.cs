@@ -21,8 +21,8 @@ namespace LuxDrive.Services
         public async Task<bool> ChangeFileNameAsync(string userId, Guid fileId, string newName)
         {
             if (string.IsNullOrWhiteSpace(newName) || !Guid.TryParse(userId, out Guid userGuid))
-             return false;
-            
+                return false;
+
 
             var file = await _dbContext.Files
                 .FirstOrDefaultAsync(f => f.Id == fileId && f.UserId == userGuid);
@@ -31,7 +31,7 @@ namespace LuxDrive.Services
 
             string clean = newName.Trim();
 
-            if (string.IsNullOrEmpty(clean)|| string.IsNullOrWhiteSpace(clean)) return false; 
+            if (string.IsNullOrEmpty(clean) || string.IsNullOrWhiteSpace(clean)) return false;
 
             if (!string.IsNullOrEmpty(file.Extension) &&
                 clean.EndsWith(file.Extension, StringComparison.OrdinalIgnoreCase))
@@ -53,6 +53,11 @@ namespace LuxDrive.Services
         public async Task<Guid?> CreateFileAsync(string userId, IFormFile file)
         {
             if (!Guid.TryParse(userId, out Guid userGuid)) return null;
+
+            if (file == null || string.IsNullOrWhiteSpace(file.FileName))
+            {
+                return null;
+            }
 
             var newFile = new FileEntity
             {
@@ -227,6 +232,15 @@ namespace LuxDrive.Services
                     SenderName = sf.Sender.UserName
                 })
                 .ToListAsync();
+        }
+
+        public async Task<long> GetTotalUsedStorageAsync(string userId)
+        {
+            if (!Guid.TryParse(userId, out Guid userGuid)) return 0;
+
+            return await _dbContext.Files
+                .Where(f => f.UserId == userGuid)
+                .SumAsync(f => (long?)f.Size) ?? 0;
         }
     }
 }
