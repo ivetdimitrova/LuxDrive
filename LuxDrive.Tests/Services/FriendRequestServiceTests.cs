@@ -1,0 +1,192 @@
+﻿using NUnit.Framework;
+using Microsoft.EntityFrameworkCore;
+using LuxDrive.Data;
+using LuxDrive.Data.Models;
+using LuxDrive.Data.Models.Enums;
+using LuxDrive.Services;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace LuxDrive.Tests.Services
+{
+    [TestFixture]
+    public class FriendRequestServiceTests
+    {
+        private LuxDriveDbContext _dbContext;
+        private FriendRequestService _service;
+
+        [SetUp]
+        public void Setup()
+        {
+            var options = new DbContextOptionsBuilder<LuxDriveDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
+
+            _dbContext = new LuxDriveDbContext(options);
+            _service = new FriendRequestService(_dbContext);
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            _dbContext.Database.EnsureDeleted();
+            _dbContext.Dispose();
+        }
+
+        [Test]
+        public async Task SendRequestAsync_WithValidData_CreatesNewPendingRequest()
+        {
+            // Arrange 
+            var senderId = Guid.NewGuid();
+            var receiver = new ApplicationUser
+            {
+                Id = Guid.NewGuid(),
+                Email = "receiver@test.com",
+                UserName = "Receiver",
+                FirstName = "Ivan", 
+                LastName = "Ivanov"
+            };
+
+            _dbContext.Users.Add(receiver);
+            await _dbContext.SaveChangesAsync();
+
+            // Act 
+            await _service.SendRequestAsync(senderId, "receiver@test.com");
+
+            // Assert 
+            var request = await _dbContext.FriendRequests.FirstOrDefaultAsync();
+
+            Assert.IsNotNull(request);
+            Assert.AreEqual(senderId, request.SenderId);
+            Assert.AreEqual(receiver.Id, request.ReceiverId);
+            Assert.AreEqual(FriendRequestStatus.Pending, request.Status);
+        }
+
+        [Test]
+        public void SendRequestAsync_ReceiverDoesNotExist_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var senderId = Guid.NewGuid();
+            var fakeEmail = "notfound@test.com";
+
+            // Act & Assert 
+            var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await _service.SendRequestAsync(senderId, fakeEmail));
+
+            Assert.AreEqual("The user with the provided email does not exist.", ex.Message);
+        }
+
+        [Test]
+        public async Task SendRequestAsync_SendingToSelf_ThrowsInvalidOperationException()
+        {
+            // Arrange
+            var userId = Guid.NewGuid();
+            var user = new ApplicationUser
+            {
+                Id = userId,
+                Email = "myself@test.com",
+                FirstName = "Ivan", 
+                LastName = "Ivanov" 
+            };
+
+            _dbContext.Users.Add(user);
+            await _dbContext.SaveChangesAsync();
+
+            // Act & Assert
+            var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await _service.SendRequestAsync(userId, "myself@test.com"));
+
+            Assert.AreEqual("You cannot send an invitation to yourself..", ex.Message);
+        }
+
+        [Test]
+        public async Task AcceptRequestAsync_ValidRequest_UpdatesStatusAndCreatesFriendships()
+        {
+            // Arrange
+            var requestId = Guid.NewGuid();
+            var senderId = Guid.NewGuid();
+            var receiverId = Guid.NewGuid();
+
+            var request = new FriendRequest
+            {
+                Id = requestId,
+                SenderId = senderId,
+                ReceiverId = receiverId,
+                Status = FriendRequestStatus.Pending,
+                CreatedOn = DateTime.UtcNow
+            };
+
+            _dbContext.FriendRequests.Add(request);
+            await _dbContext.SaveChangesAsync();
+
+            // Act
+            await _service.AcceptRequestAsync(requestId);
+
+            // Assert
+            var updatedRequest = await _dbContext.FriendRequests.FindAsync(requestId);
+            Assert.AreEqual(FriendRequestStatus.Accepted, updatedRequest.Status);
+
+            var friendships = await _dbContext.UserFriends.ToListAsync();
+            Assert.AreEqual(2, friendships.Count);
+            Assert.IsTrue(friendships.Any(f => f.UserId == senderId && f.FriendId == receiverId));
+            Assert.IsTrue(friendships.Any(f => f.UserId == receiverId && f.FriendId == senderId));
+        }
+
+        [Test]
+        public void AcceptRequestAsync_RequestNotFoundOrNotPending_ThrowsException()
+        {
+            // Act & Assert
+            var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
+                await _service.AcceptRequestAsync(Guid.NewGuid()));
+
+            Assert.AreEqual("Invitation not found or not active.", ex.Message);
+        }
+
+        [Test]
+        public async Task GetReceivedRequestAsync_ReturnsOnlyPendingRequestsForUser()
+        {
+            // Arrange
+            var receiverId = Guid.NewGuid();
+            var sender1 = new ApplicationUser { Id = Guid.NewGuid(), UserName = "User1", Email = "1@test.com", FirstName = "A", LastName = "B" };
+            var sender2 = new ApplicationUser { Id = Guid.NewGuid(), UserName = "User2", Email = "2@test.com", FirstName = "C", LastName = "D" };
+
+            _dbContext.FriendRequests.Add(new FriendRequest { Id = Guid.NewGuid(), ReceiverId = receiverId, SenderId = sender1.Id, Sender = sender1, Status = FriendRequestStatus.Pending });
+
+            _dbContext.FriendRequests.Add(new FriendRequest { Id = Guid.NewGuid(), ReceiverId = receiverId, SenderId = sender2.Id, Sender = sender2, Status = FriendRequestStatus.Accepted });
+
+            await _dbContext.SaveChangesAsync();
+
+            // Act
+            var result = await _service.GetReceivedRequestAsync(receiverId);
+
+            // Assert
+            var requests = result.ToList();
+            Assert.AreEqual(1, requests.Count);
+            Assert.AreEqual("User1", requests[0].SenderName); 
+        }
+
+        [Test]
+        public async Task GetSentRequestAsync_ReturnsOnlyPendingRequestsSentByUser()
+        {
+            // Arrange
+            var senderId = Guid.NewGuid();
+            var receiver1 = new ApplicationUser { Id = Guid.NewGuid(), UserName = "Receiver1", Email = "1@test.com", FirstName = "A", LastName = "B" };
+            var receiver2 = new ApplicationUser { Id = Guid.NewGuid(), UserName = "Receiver2", Email = "2@test.com", FirstName = "C", LastName = "D" };
+
+            _dbContext.FriendRequests.Add(new FriendRequest { Id = Guid.NewGuid(), SenderId = senderId, ReceiverId = receiver1.Id, Receiver = receiver1, Status = FriendRequestStatus.Pending });
+
+            _dbContext.FriendRequests.Add(new FriendRequest { Id = Guid.NewGuid(), SenderId = senderId, ReceiverId = receiver2.Id, Receiver = receiver2, Status = FriendRequestStatus.Accepted });
+
+            await _dbContext.SaveChangesAsync();
+
+            // Act
+            var result = await _service.GetSentRequestAsync(senderId);
+
+            // Assert
+            var requests = result.ToList();
+            Assert.AreEqual(1, requests.Count);
+            Assert.AreEqual("Receiver1", requests[0].ReceiverName);
+        }
+    }
+}
