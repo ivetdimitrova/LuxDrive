@@ -78,6 +78,11 @@ namespace LuxDrive.Services
 
         public async Task<string?> GetFileExtensionAsync(Guid? fileId)
         {
+            if (fileId == null || fileId == Guid.Empty)
+            {
+                return null;
+            }
+
             return await _dbContext.Files
                 .AsNoTracking()
                 .Where(f => f.Id == fileId)
