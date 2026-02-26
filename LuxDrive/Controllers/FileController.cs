@@ -48,18 +48,26 @@ namespace LuxDrive.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var userIdStr = GetUserId();
+            string? userIdStr = GetUserId();
             if (userIdStr == null) return Unauthorized();
 
-            IEnumerable<IndexViewModel> allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
-            var activeFiles = allUserFiles.Where(f => !f.IsDeleted).ToList();
+            try
+            {
+                IEnumerable<IndexViewModel> allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
+                var activeFiles = allUserFiles.Where(f => !f.IsDeleted).ToList();
 
-            string planKey = GetUserKey("CurrentPlan");
-            string currentPlan = Request.Cookies[planKey] ?? "Free";
+                string planKey = GetUserKey("CurrentPlan");
+                string currentPlan = Request.Cookies[planKey] ?? "Free";
 
-            CalculateStorageUsage(allUserFiles, currentPlan);
+                CalculateStorageUsage(allUserFiles, currentPlan);
 
-            return View(activeFiles);
+                return View(activeFiles);
+            }
+            catch (Exception)
+            {
+                return View(new List<IndexViewModel>());
+            }
+
         }
 
         [HttpGet]
