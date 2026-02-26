@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using FileEntity = LuxDrive.Data.Models.File;
-using LuxDrive.ViewModels.File; 
+using LuxDrive.ViewModels.File;
 
 
 namespace LuxDrive.Controllers
@@ -80,37 +80,37 @@ namespace LuxDrive.Controllers
         }
 
 
-     [HttpGet]
-    public async Task<IActionResult> Trash()
-    {
-        var userIdStr = GetUserId();
-        if (userIdStr == null) return Unauthorized();
-
-        var trashedFiles = await _dbContext.Files
-            .Where(f => f.UserId.ToString() == userIdStr && f.IsDeleted)
-            .OrderByDescending(f => f.DeletedOn)
-            .ToListAsync();
-
-        var allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
-        string planKey = GetUserKey("CurrentPlan");
-        string currentPlan = Request.Cookies[planKey] ?? "Free";
-        CalculateStorageUsage(allUserFiles, currentPlan);
-
-        var viewModel = new TrashViewModel
+        [HttpGet]
+        public async Task<IActionResult> Trash()
         {
-            Files = trashedFiles.Select(f => new TrashItemViewModel
+            var userIdStr = GetUserId();
+            if (userIdStr == null) return Unauthorized();
+
+            var trashedFiles = await _dbContext.Files
+                .Where(f => f.UserId.ToString() == userIdStr && f.IsDeleted)
+                .OrderByDescending(f => f.DeletedOn)
+                .ToListAsync();
+
+            var allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
+            string planKey = GetUserKey("CurrentPlan");
+            string currentPlan = Request.Cookies[planKey] ?? "Free";
+            CalculateStorageUsage(allUserFiles, currentPlan);
+
+            var viewModel = new TrashViewModel
             {
-                Id = f.Id.ToString(),
-                Name = f.Name,
-                Extension = f.Extension,
-                DeletedOn = f.DeletedOn
-            }).ToList()
-        };
+                Files = trashedFiles.Select(f => new TrashItemViewModel
+                {
+                    Id = f.Id.ToString(),
+                    Name = f.Name,
+                    Extension = f.Extension,
+                    DeletedOn = f.DeletedOn
+                }).ToList()
+            };
 
-        return View(viewModel);
-    }
+            return View(viewModel);
+        }
 
-    [HttpPost]
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
@@ -127,8 +127,7 @@ namespace LuxDrive.Controllers
             string currentPlan = Request.Cookies[planKey] ?? "Free";
             long maxStorageBytes = GetMaxBytesForPlan(currentPlan);
 
-            var userFiles = await this.fileService.GetUserFilesAsync(userIdStr);
-            long currentUsedBytes = userFiles.Sum(f => f.Size);
+            long currentUsedBytes = await this.fileService.GetTotalUsedStorageAsync(userIdStr);
             long newFilesBytes = files.Sum(f => f.Length);
 
             if (currentUsedBytes + newFilesBytes > maxStorageBytes)
@@ -145,14 +144,25 @@ namespace LuxDrive.Controllers
                 if (fileId == null) continue;
 
                 string? extension = await this.fileService.GetFileExtensionAsync(fileId);
-                if (extension == null) continue;
+                if (string.IsNullOrEmpty(extension))
+                {
+                    extension = Path.GetExtension(file.FileName);
+                }
 
                 var key = $"{userIdStr}/{fileId}{extension}";
 
-                using var stream = file.OpenReadStream();
-                var url = await _spacesService.UploadAsync(stream, key, file.ContentType);
+                try
+                {
+                    using var stream = file.OpenReadStream();
+                    var url = await _spacesService.UploadAsync(stream, key, file.ContentType);
 
-                await this.fileService.UpdateFileUrlAsync(fileId, url);
+                    await this.fileService.UpdateFileUrlAsync(fileId, url);
+                }
+                catch (Exception)
+                {
+                    continue;
+                }
+
             }
 
             return RedirectToAction(nameof(Index));
@@ -162,19 +172,27 @@ namespace LuxDrive.Controllers
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Rename(Guid id, string newName)
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
-
-            if (string.IsNullOrWhiteSpace(newName))
+            try
             {
-                return BadRequest("Name cannot be empty.");
+                var userIdStr = GetUserId();
+                if (userIdStr == null) return Unauthorized();
+
+                if (string.IsNullOrWhiteSpace(newName))
+                {
+                    return BadRequest("Name cannot be empty.");
+                }
+
+                bool isRenamed = await this.fileService.ChangeFileNameAsync(userIdStr, id, newName);
+
+                if (!isRenamed) return NotFound();
+
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "An internal error occurred.");
             }
 
-            bool isRenamed = await this.fileService.ChangeFileNameAsync(userIdStr, id, newName);
-
-            if (!isRenamed) return NotFound();
-
-            return Ok();
         }
 
         [HttpPost]
@@ -236,7 +254,7 @@ namespace LuxDrive.Controllers
                         await _spacesService.DeleteAsync(key);
                     }
                 }
-                catch {  }
+                catch { }
 
                 _dbContext.Files.Remove(file);
                 await _dbContext.SaveChangesAsync();
@@ -289,7 +307,7 @@ namespace LuxDrive.Controllers
         public async Task<IActionResult> Share(Guid fileId, Guid receiverId)
         {
             var userIdStr = base.GetUserId();
-            if (userIdStr == null ) return BadRequest();
+            if (userIdStr == null) return BadRequest();
 
             try
             {
@@ -350,7 +368,7 @@ namespace LuxDrive.Controllers
                         await _spacesService.DeleteAsync(key);
                     }
                 }
-                catch {  }
+                catch { }
 
                 _dbContext.Files.Remove(file);
             }
@@ -427,7 +445,7 @@ namespace LuxDrive.Controllers
             if (userIdStr == null) return Unauthorized();
 
             var file = await _dbContext.Files
-                .FirstOrDefaultAsync(f => f.Id == id );
+                .FirstOrDefaultAsync(f => f.Id == id);
 
             //&& f.UserId.ToString() == userIdStr
 
