@@ -7,9 +7,9 @@ namespace LuxDrive.Services.Interfaces
     public interface IFriendService
     {
        
-        Task RejectRequestAsync(Guid requestId);
+       
         Task<ApplicationUser?> FindUserByEmailAsync(string email);
         Task<IEnumerable<FriendViewModel>> GetFriendsAsync(Guid userId);
-        Task RemoveFriendAsync(Guid userId, Guid friendId);
+        Task<bool> RemoveFriendAsync(string userId, Guid friendId);
     }
 }

@@ -2,9 +2,6 @@
 using LuxDrive.ViewModels.Friends;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace LuxDrive.Controllers
 {
@@ -23,22 +20,17 @@ namespace LuxDrive.Controllers
             _fileService = fileService;
             _friendRequestService = friendRequestService;
         }
-        private Guid CurrentUserId
-        {
-            get
-            {
-                var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (string.IsNullOrEmpty(id)) throw new UnauthorizedAccessException();
-                return Guid.Parse(id);
-            }
-        }
+       
 
         [HttpPost]
         public async Task<IActionResult> Send([FromForm] string receiverEmail)
         {
+            string? userIdStr = GetUserId();
+            if (userIdStr == null) return Unauthorized();
+
             try
             {
-                await _friendRequestService.SendRequestAsync(CurrentUserId, receiverEmail);
+                await _friendRequestService.SendRequestAsync(userIdStr, receiverEmail);
                 return RedirectToAction("Index","File");
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
@@ -55,7 +47,8 @@ namespace LuxDrive.Controllers
 
                 
             }
-            catch (Exception ex) { return BadRequest(ex.Message); }
+            catch (Exception ex) 
+            { return BadRequest(ex.Message); }
         }
 
         [HttpGet("search")]
@@ -69,9 +62,13 @@ namespace LuxDrive.Controllers
         [HttpGet]
         public async Task<IActionResult> LoadFriendList()
         {
+
+            string? userIdStr = GetUserId();
+            if (userIdStr == null) return Unauthorized();
+
             IEnumerable<FriendViewModel> friends = await _friendService.GetFriendsAsync(Guid.Parse(base.GetUserId()));
-            IEnumerable<UserSentRequestVIewModel> sentRequests = await _friendRequestService.GetSentRequestAsync(Guid.Parse(base.GetUserId()));
-            IEnumerable<ReceivedRequestViewModel> receivedRequests = await _friendRequestService.GetReceivedRequestAsync(Guid.Parse(base.GetUserId()));
+            IEnumerable<UserSentRequestViewModel>? sentRequests = await _friendRequestService.GetSentRequestAsync(userIdStr);
+            IEnumerable<ReceivedRequestViewModel>? receivedRequests = await _friendRequestService.GetReceivedRequestAsync(userIdStr);
 
             FriendsMainViewModel model = new FriendsMainViewModel
             {
@@ -97,9 +94,12 @@ namespace LuxDrive.Controllers
         [HttpPost("share")]
         public async Task<IActionResult> ShareFile(Guid fileId, Guid receiverId)
         {
+            string? userIdStr = GetUserId();
+            if (userIdStr == null) return Unauthorized();
+
             try
             {
-                await _fileService.ShareFileAsync(fileId, CurrentUserId.ToString(), receiverId);
+                await _fileService.ShareFileAsync(fileId, userIdStr, receiverId);
                 return Ok();
             }
             catch (Exception ex)
@@ -111,10 +111,17 @@ namespace LuxDrive.Controllers
         [HttpPost("remove")]
         public async Task<IActionResult> RemoveFriend([FromForm] Guid friendId)
         {
+            string? userIdStr = GetUserId();
+            if (userIdStr == null) return Unauthorized();
+
             try
             {
-                await _friendService.RemoveFriendAsync(CurrentUserId, friendId);
+                bool isRemoved = await _friendService.RemoveFriendAsync(userIdStr, friendId);
 
+                if(!isRemoved)
+                {
+                    TempData["AlertMessage"] = "An error occurred while deleting the friendship!";
+                }
                 TempData["AlertMessage"] = "Friend removed.";
 
                 return RedirectToAction("Index", "File");
@@ -130,7 +137,7 @@ namespace LuxDrive.Controllers
         {
             try
             {
-                await _friendService.RejectRequestAsync(requestId);
+                await _friendRequestService.RejectRequestAsync(requestId);
                 TempData["AlertMessage"] = "The invitation was rejected.";
 
                 return RedirectToAction("Index", "File");

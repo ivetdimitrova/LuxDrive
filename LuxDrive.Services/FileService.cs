@@ -96,8 +96,8 @@ namespace LuxDrive.Services
             if (!Guid.TryParse(userId, out Guid userGuid)) return new List<IndexViewModel>();
 
             IEnumerable<IndexViewModel> files = await _dbContext.Files
+                .Where(f => f.UserId == userGuid && f.IsDeleted == false)
                  .AsNoTracking()
-                 .Where(f => f.UserId == userGuid)
                  .Select(f => new IndexViewModel
                  {
                      Id = f.Id,
@@ -165,11 +165,11 @@ namespace LuxDrive.Services
             return files;
         }
 
-        public async Task<bool> RemoveFileAsync(FileEntity file)
-        {
-            _dbContext.Files.Remove(file);
-            return await _dbContext.SaveChangesAsync() > 0;
-        }
+        //public async Task<bool> RemoveFileAsync(FileEntity file)
+        //{
+        //    _dbContext.Files.Remove(file);
+        //    return await _dbContext.SaveChangesAsync() > 0;
+        //}
 
         public async Task<bool> UpdateFileUrlAsync(Guid? fileId, string url)
         {
@@ -238,6 +238,251 @@ namespace LuxDrive.Services
             return await _dbContext.Files
                 .Where(f => f.UserId == userGuid)
                 .SumAsync(f => (long?)f.Size) ?? 0;
+        }
+
+        public async Task<bool> DeleteUserFileAsync(Guid id, string userIdStr)
+        {
+            if (string.IsNullOrWhiteSpace(userIdStr))
+            {
+                return false;
+            }
+
+            var file = await _dbContext.Files
+                .FirstOrDefaultAsync(f => f.Id == id && f.UserId.ToString() == userIdStr);
+
+            if (file == null || file.IsDeleted)
+            {
+                return false;
+            }
+
+            file.IsDeleted = true;
+            file.DeletedOn = DateTime.UtcNow;
+            await _dbContext.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> RestoreUserFileAsync(Guid id, string userIdStr)
+        {
+            var file = await _dbContext.Files
+        .FirstOrDefaultAsync(f => f.Id == id && f.UserId.ToString() == userIdStr);
+
+            if (file == null)
+            {
+                return false;
+            }
+
+
+            file.IsDeleted = false;
+            file.DeletedOn = null;
+
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<IEnumerable<TrashViewModel>?> GetTrashedFilesAsync(string userIdStr)
+        {
+            if (!Guid.TryParse(userIdStr, out Guid userGuid)) return null;
+
+            return await _dbContext.Files
+                .Where(f => f.UserId == userGuid && f.IsDeleted == true)
+                .OrderByDescending(f => f.DeletedOn)
+                .AsNoTracking()
+                .Select(f => new TrashViewModel
+                {
+                    Id = f.Id.ToString(),
+                    Name = f.Name,
+                    Extension = f.Extension,
+                    DeletedOn = f.DeletedOn,
+                })
+
+                .ToListAsync();
+        }
+
+        public async Task<string?> PermanentDeleteFileAsync(Guid id, string userIdStr)
+        {
+            if (id == Guid.Empty)
+            {
+
+                return null;
+            }
+
+            if (!Guid.TryParse(userIdStr, out Guid userGuid) || userGuid == Guid.Empty)
+            {
+                return null;
+            }
+            FileEntity? file = await _dbContext.Files
+                  .FirstOrDefaultAsync(f => f.Id == id && f.UserId.ToString() == userIdStr);
+
+            if (file != null && !string.IsNullOrEmpty(file.StorageUrl))
+            {
+                _dbContext.Files.Remove(file);
+                await _dbContext.SaveChangesAsync();
+
+                return file.StorageUrl;
+
+            }
+
+            return null;
+        }
+
+        public async Task<bool> DeleteMultipleFilesAsync(List<Guid> ids, string userIdStr)
+        {
+            if (!Guid.TryParse(userIdStr, out Guid userGuid) || userGuid == Guid.Empty)
+            {
+                return false;
+            }
+
+            List<FileEntity> filesToDelete = await _dbContext.Files
+                .Where(f => ids.Contains(f.Id) && f.UserId == userGuid && !f.IsDeleted)
+                .ToListAsync();
+
+            if (!filesToDelete.Any())
+            {
+                return false;
+            }
+
+            foreach (var file in filesToDelete)
+            {
+                file.IsDeleted = true;
+                file.DeletedOn = DateTime.UtcNow;
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> ShareMultipleFilesAsync(List<Guid> ids, string userIdStr, Guid receiverId)
+        {
+            if (receiverId == Guid.Empty)
+            {
+                return false;
+            }
+
+            foreach (var fileId in ids)
+            {
+                try
+                {
+                    await this.ShareFileAsync(fileId, userIdStr, receiverId);
+                }
+                catch { continue; }
+            }
+
+            return true;
+        }
+
+        public async Task<List<string>?> EmptyTrashAsync(string userIdStr)
+        {
+            if (!Guid.TryParse(userIdStr, out Guid userGuid)) return null;
+
+            List<FileEntity> trashedFiles = await _dbContext.Files
+                .Where(f => f.UserId == userGuid && f.IsDeleted)
+                .ToListAsync();
+
+            if (!trashedFiles.Any()) return null;
+
+            List<string> filesStorageUrls = trashedFiles
+                .Select(f => f.StorageUrl)
+                .ToList();
+
+            if (filesStorageUrls.Any(f => string.IsNullOrEmpty(f)))
+            {
+                return null;
+            }
+
+            foreach (var file in trashedFiles)
+            {
+                _dbContext.Files.Remove(file);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return filesStorageUrls;
+        }
+
+        public async Task<bool> RestoreMultipleFilesAsync(List<Guid> ids, string userIdStr)
+        {
+            if (ids == null || !ids.Any() || !Guid.TryParse(userIdStr, out Guid userGuid))
+                return false;
+
+            var files = await _dbContext.Files
+                .Where(f => ids.Contains(f.Id) && f.UserId == userGuid && f.IsDeleted)
+                .ToListAsync();
+
+            if (!files.Any())
+                return false;
+
+            foreach (var file in files)
+            {
+                file.IsDeleted = false;
+                file.DeletedOn = null;
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+
+        //Remove
+        public async Task<List<string>?> PermanentDeleteMultipleFileсAsync(List<Guid> ids, string userIdStr)
+        {
+            if (!Guid.TryParse(userIdStr, out Guid userGuid)) return null;
+
+            List<FileEntity> trashedFiles = await _dbContext.Files
+                .Where(f => f.UserId == userGuid && f.IsDeleted)
+                .ToListAsync();
+
+            if (!trashedFiles.Any()) return null;
+
+            List<string> filesStorageUrls = trashedFiles
+                .Select(f => f.StorageUrl)
+                .ToList();
+
+            if (filesStorageUrls.Any(f => string.IsNullOrEmpty(f)))
+            {
+                return null;
+            }
+
+            foreach (var file in trashedFiles)
+            {
+                _dbContext.Files.Remove(file);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return filesStorageUrls;
+        }
+
+        public async Task<DownloadFileViewModel?> GetFileToDownloadAsync(Guid id, string userIdStr)
+        {
+            if (!Guid.TryParse(userIdStr, out Guid userGuid)) return null;
+
+            if (id == Guid.Empty) return null;
+
+            return await _dbContext.Files
+                .Where(f => f.Id == id && f.UserId == userGuid && !f.IsDeleted)
+                .AsNoTracking()
+                .Select(f => new DownloadFileViewModel
+                {
+                    Name = f.Name,
+                    Extension= f.Extension,
+                    StorageUrl = f.StorageUrl
+                })
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<DownloadFileViewModel>?> GetMultipleFilesToDownloadAsync(List<Guid> ids, string userIdStr)
+        {
+            if (ids == null || !ids.Any() || !Guid.TryParse(userIdStr, out Guid userGuid))
+                return new List<DownloadFileViewModel>();
+
+            return await _dbContext.Files
+                .Where(f => ids.Contains(f.Id) && f.UserId == userGuid && !f.IsDeleted)
+                .AsNoTracking()
+                .Select(f => new DownloadFileViewModel
+                {
+                    Name = f.Name,
+                    Extension = f.Extension,
+                    StorageUrl = f.StorageUrl
+                })
+                .ToListAsync();
         }
     }
 }

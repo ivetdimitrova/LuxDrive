@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using LuxDrive.Data;
+using LuxDrive.Data.Models;
+using LuxDrive.ViewModels.Pricing;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using LuxDrive.Data;
-using LuxDrive.Data.Models;
-using LuxDrive.ViewModels.Pricing; 
-using System.Text.RegularExpressions;
 
 namespace LuxDrive.Controllers
 {
@@ -193,7 +192,7 @@ namespace LuxDrive.Controllers
         [HttpGet]
         public IActionResult ContactSales()
         {
-            var model = new ContactSalesViewModel();
+            ContactSalesViewModel model = new ContactSalesViewModel();
             return View(model);
         }
 

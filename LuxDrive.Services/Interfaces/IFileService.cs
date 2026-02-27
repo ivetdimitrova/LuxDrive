@@ -20,8 +20,28 @@ namespace LuxDrive.Services.Interfaces
 
         Task<bool> ChangeFileNameAsync(string userId, Guid fileId, string newName);
 
-        Task<bool> RemoveFileAsync(LuxDrive.Data.Models.File file);
-
         Task<long> GetTotalUsedStorageAsync(string userId);
+
+        Task<bool> DeleteUserFileAsync(Guid id, string userIdStr);
+
+        Task<string?> PermanentDeleteFileAsync(Guid id, string userIdStr);
+
+        Task<bool> RestoreUserFileAsync(Guid id, string userIdStr);
+
+        Task<IEnumerable<TrashViewModel>?> GetTrashedFilesAsync(string userIdStr);
+
+        Task<bool> DeleteMultipleFilesAsync(List<Guid> ids, string userIdStr);
+
+        Task<bool> ShareMultipleFilesAsync(List<Guid> ids, string userIdStr, Guid receiverId);
+
+        Task<List<string>?> EmptyTrashAsync(string userIdStr);
+
+        Task<bool> RestoreMultipleFilesAsync(List<Guid> ids, string userIdStr);
+
+        Task<List<string>?> PermanentDeleteMultipleFileсAsync(List<Guid> ids, string userIdStr);
+
+        Task<DownloadFileViewModel?> GetFileToDownloadAsync(Guid id,string userIdStr);
+
+        Task<List<DownloadFileViewModel>?> GetMultipleFilesToDownloadAsync(List<Guid> ids, string userIdStr);
     }
 }
