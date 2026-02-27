@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LuxDrive.ViewModels.Friends
 {
-    public class UserSentRequestVIewModel
+    public class UserSentRequestViewModel
     {
         public Guid Id { get; set; }
         public string ReceiverName { get; set; } = string.Empty;
