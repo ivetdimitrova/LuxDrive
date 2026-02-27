@@ -129,9 +129,12 @@ namespace LuxDrive.Controllers
                                  cleanNumber.StartsWith("5") ? "mastercard" :
                                  cleanNumber.StartsWith("3") ? "amex" : "unknown";
 
-                await _paymentCardService.CreateCard(user.Id, last4, cardType);
+                await _paymentCardService.CreateCardAsync(user.Id, last4, cardType);
             }
-            catch (Exception) { }
+            catch (Exception ex) 
+            {
+                return BadRequest(ex.Message);
+            }
 
             string planKey = GetUserKey("CurrentPlan");
             string expiryKey = GetUserKey("PlanExpiry");

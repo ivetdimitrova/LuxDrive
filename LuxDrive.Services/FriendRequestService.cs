@@ -4,11 +4,6 @@ using LuxDrive.Data.Models.Enums;
 using LuxDrive.Services.Interfaces;
 using LuxDrive.ViewModels.Friends;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LuxDrive.Services
 {

@@ -36,6 +36,7 @@ builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IFriendService, FriendService>(); 
 builder.Services.AddScoped<IFriendRequestService, FriendRequestService>();
 builder.Services.AddScoped<IPaymentCardService, PaymentCardService>();
+builder.Services.AddScoped<IApplicationUserService, ApplicationUserService>();
 
 
 builder.Services.AddHostedService<LuxDrive.Services.FileCleanupService>();

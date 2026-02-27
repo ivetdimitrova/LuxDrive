@@ -1,46 +1,41 @@
 ﻿using LuxDrive.Data;
 using LuxDrive.Data.Models;
 using LuxDrive.Services;
+using LuxDrive.Services.Interfaces;
 using LuxDrive.ViewModels.Settings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace LuxDrive.Controllers
 {
     [Authorize]
-    public class SettingsController : Controller
+    public class SettingsController : BaseController
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly LuxDriveDbContext _context;
+
         private readonly SpacesService _spacesService;
+        private readonly IPaymentCardService _paymentCardService;
+        private readonly IApplicationUserService _applicationUserService;
 
         public SettingsController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            LuxDriveDbContext context,
-             SpacesService spacesService)
+             SpacesService spacesService,
+             IPaymentCardService paymentCardService,
+             IApplicationUserService applicationUserService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _context = context;
             _spacesService = spacesService;
+            _paymentCardService = paymentCardService;
+            _applicationUserService = applicationUserService;
         }
 
         private async Task<UserSettingsViewModel> LoadViewModelAsync(ApplicationUser user)
         {
-            var cards = await _context.PaymentCards
-                                      .Where(c => c.UserId == user.Id)
-                                      .Select(c => new CardViewModel
-                                      {
-                                          Id = c.Id,
-                                          CardLast4 = c.CardLast4,
-                                          CardType = c.CardType
-                                      })
-                                      .ToListAsync();
 
             return new UserSettingsViewModel
             {
@@ -49,25 +44,33 @@ namespace LuxDrive.Controllers
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                SavedCards = cards,
+                SavedCards = await _paymentCardService.GetUserCards(user.Id),
                 ProfileImageUrl = string.IsNullOrEmpty(user.ProfileImagePath)
                                   ? "/images/default-avatar.png"
                                   : user.ProfileImagePath
             };
-            
+
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return RedirectToAction("Login", "Account");
-            var model = await LoadViewModelAsync(user);
-            return View(model);
+            try
+            {
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return RedirectToAction("Login", "Account");
+                var model = await LoadViewModelAsync(user);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateProfile(UserSettingsViewModel model, string RemovePhoto) 
+        public async Task<IActionResult> UpdateProfile(UserSettingsViewModel model, string RemovePhoto)
         {
             TempData["ActiveTab"] = "profile";
             var user = await _userManager.GetUserAsync(User);
@@ -91,7 +94,7 @@ namespace LuxDrive.Controllers
                 ModelState.AddModelError("Email", "Email is required.");
                 isValid = false;
             }
-         
+
 
             if (!isValid)
             {
@@ -107,7 +110,7 @@ namespace LuxDrive.Controllers
                     var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.ProfileImagePath.TrimStart('/'));
                     if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
 
-                    user.ProfileImagePath = null; 
+                    user.ProfileImagePath = null;
                 }
             }
             else if (model.ProfileImage != null && model.ProfileImage.Length > 0)
@@ -117,25 +120,6 @@ namespace LuxDrive.Controllers
                     TempData["Error"] = "Image size must be less than 2MB.";
                     return View("Index", await LoadViewModelAsync(user));
                 }
-
-                //var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads/profiles");
-                //if (!Directory.Exists(uploadsFolder)) Directory.CreateDirectory(uploadsFolder);
-
-                //var uniqueFileName = Guid.NewGuid().ToString() + "_" + Path.GetFileName(model.ProfileImage.FileName);
-                //var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                //if (!string.IsNullOrEmpty(user.ProfileImagePath))
-                //{
-                //    var oldPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", user.ProfileImagePath.TrimStart('/'));
-                //    if (System.IO.File.Exists(oldPath)) System.IO.File.Delete(oldPath);
-                //}
-
-                //using (var fileStream = new FileStream(filePath, FileMode.Create))
-                //{
-                //    await model.ProfileImage.CopyToAsync(fileStream);
-                //}
-
-                //user.ProfileImagePath = "/uploads/profiles/" + uniqueFileName;
 
                 var key = string.Empty;
 
@@ -151,20 +135,20 @@ namespace LuxDrive.Controllers
                 key = $"profilePhotos/{user.Id.ToString()}{extension}";
 
                 using (var stream = model.ProfileImage.OpenReadStream())
-                { 
+                {
                     var url = await _spacesService.UploadAsync(stream, key, model.ProfileImage.ContentType);
 
                     user.ProfileImagePath = url;
                 }
 
-               
+
             }
 
-            
-            
-        
 
-        user.FirstName = model.FirstName;
+
+
+
+            user.FirstName = model.FirstName;
             user.LastName = model.LastName;
             user.PhoneNumber = model.PhoneNumber;
 
@@ -188,7 +172,7 @@ namespace LuxDrive.Controllers
 
             await _signInManager.RefreshSignInAsync(user);
             TempData["Success"] = "Profile updated successfully!";
-            
+
             await _userManager.UpdateAsync(user);
 
             return RedirectToAction("Index");
@@ -259,112 +243,116 @@ namespace LuxDrive.Controllers
         [HttpPost]
         public async Task<IActionResult> AddCard(UserSettingsViewModel model)
         {
-            TempData["ActiveTab"] = "billing";
-            var user = await _userManager.GetUserAsync(User);
-
-            ModelState.Clear();
-
-            bool isCardValid = true;
-
-            if (string.IsNullOrEmpty(model.NewCardNumber) || model.NewCardNumber.Length < 12)
+            try
             {
-                ModelState.AddModelError("NewCardNumber", "Invalid card number.");
-                isCardValid = false;
-            }
+                TempData["ActiveTab"] = "billing";
+                var user = await _userManager.GetUserAsync(User);
 
-            if (string.IsNullOrEmpty(model.NewCardCvc) || model.NewCardCvc.Length != 3)
-            {
-                ModelState.AddModelError("NewCardCvc", "Invalid CVC.");
-                isCardValid = false;
-            }
+                ModelState.Clear();
 
-            if (string.IsNullOrEmpty(model.NewCardExpiry))
-            {
-                ModelState.AddModelError("NewCardExpiry", "Required.");
-                isCardValid = false;
-            }
-            else
-            {
-                var parts = model.NewCardExpiry.Split('/');
-                if (parts.Length != 2 || !int.TryParse(parts[0], out int month) || month < 1 || month > 12)
+                bool isCardValid = true;
+
+                if (string.IsNullOrEmpty(model.NewCardNumber) || model.NewCardNumber.Length < 12)
                 {
-                    ModelState.AddModelError("NewCardExpiry", "Invalid month.");
+                    ModelState.AddModelError("NewCardNumber", "Invalid card number.");
                     isCardValid = false;
                 }
+
+                if (string.IsNullOrEmpty(model.NewCardCvc) || model.NewCardCvc.Length != 3)
+                {
+                    ModelState.AddModelError("NewCardCvc", "Invalid CVC.");
+                    isCardValid = false;
+                }
+
+                if (string.IsNullOrEmpty(model.NewCardExpiry))
+                {
+                    ModelState.AddModelError("NewCardExpiry", "Required.");
+                    isCardValid = false;
+                }
+                else
+                {
+                    var parts = model.NewCardExpiry.Split('/');
+                    if (parts.Length != 2 || !int.TryParse(parts[0], out int month) || month < 1 || month > 12)
+                    {
+                        ModelState.AddModelError("NewCardExpiry", "Invalid month.");
+                        isCardValid = false;
+                    }
+                }
+
+                if (!isCardValid)
+                {
+                    TempData["Error"] = "Please correct the card details.";
+                    return View("Index", await LoadViewModelAsync(user));
+                }
+
+                string cleanNumber = model.NewCardNumber.Replace(" ", "").Trim();
+                string last4 = cleanNumber.Substring(cleanNumber.Length - 4);
+
+                string cardType = cleanNumber.StartsWith("4") ? "visa" :
+                                 cleanNumber.StartsWith("5") ? "mastercard" :
+                                 cleanNumber.StartsWith("3") ? "amex" : "unknown";
+
+                await _paymentCardService.CreateCardAsync(user.Id, last4, cardType);
+                TempData["Success"] = "Card added successfully!";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            if (!isCardValid)
-            {
-                TempData["Error"] = "Please correct the card details.";
-                return View("Index", await LoadViewModelAsync(user));
-            }
-
-            string cleanNumber = model.NewCardNumber.Replace(" ", "");
-            string type = cleanNumber.StartsWith("4") ? "Visa" : "MasterCard";
-            string last4 = cleanNumber.Substring(cleanNumber.Length - 4);
-
-            var newCard = new PaymentCard
-            {
-                UserId = user.Id,
-                CardLast4 = last4,
-                CardType = type
-            };
-
-            _context.PaymentCards.Add(newCard);
-            await _context.SaveChangesAsync();
-
-            TempData["Success"] = "Card added successfully!";
-            return RedirectToAction("Index");
         }
 
         [HttpPost]
         public async Task<IActionResult> RemoveCard(Guid cardId)
         {
-            TempData["ActiveTab"] = "billing";
-            var card = await _context.PaymentCards.FindAsync(cardId);
-            if (card != null)
+            try
             {
-                _context.PaymentCards.Remove(card);
-                await _context.SaveChangesAsync();
+                string? userIdStr = base.GetUserId();
+                if (userIdStr == null) return Unauthorized();
+
+                TempData["ActiveTab"] = "billing";
+
+                await _paymentCardService.DeleteCardAsync(cardId, userIdStr);
+
                 TempData["Success"] = "Card removed.";
+
+                return RedirectToAction("Index");
             }
-            return RedirectToAction("Index");
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAccount()
         {
-            var user = await _userManager.GetUserAsync(User);
-            if (user == null) return NotFound();
-
-            var sharedFiles = _context.SharedFiles.Where(sf => sf.SenderId == user.Id || sf.ReceiverId == user.Id);
-            _context.SharedFiles.RemoveRange(sharedFiles);
-
-            var friendships = _context.UserFriends.Where(f => f.UserId == user.Id || f.FriendId == user.Id);
-            _context.UserFriends.RemoveRange(friendships);
-
-            var friendRequests = _context.FriendRequests.Where(fr => fr.SenderId == user.Id || fr.ReceiverId == user.Id);
-            _context.FriendRequests.RemoveRange(friendRequests);
-
-            var userFiles = _context.Files.Where(f => f.UserId == user.Id);
-            _context.Files.RemoveRange(userFiles);
-
-            var userCards = _context.PaymentCards.Where(c => c.UserId == user.Id);
-            _context.PaymentCards.RemoveRange(userCards);
-
-            await _context.SaveChangesAsync();
-
-            var result = await _userManager.DeleteAsync(user);
-
-            if (result.Succeeded)
+            try
             {
-                await _signInManager.SignOutAsync();
-                return RedirectToAction("Index", "Home");
+                var user = await _userManager.GetUserAsync(User);
+                if (user == null) return NotFound();
+
+                await _applicationUserService.DeleteAccountAsync(user.Id.ToString());
+
+                var result = await _userManager.DeleteAsync(user);
+
+                if (result.Succeeded)
+                {
+                    await _signInManager.SignOutAsync();
+                    return RedirectToAction("Index", "Home");
+                }
+
+                TempData["ErrorMessage"] = "Error deleting account.";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            TempData["ErrorMessage"] = "Error deleting account.";
-            return RedirectToAction("Index");
         }
         [HttpPost]
         [AllowAnonymous]
