@@ -9,6 +9,6 @@ namespace LuxDrive.Services.Interfaces
         Task CreateCardAsync(Guid userId, string last4, string cardType);
         Task DeleteCardAsync(Guid cardId, string userId);
 
-        Task<List<CardViewModel>?> GetUserCards(Guid userId);
+        Task<List<CardViewModel>?> GetUserCardsAsync(Guid userId);
     }
 }

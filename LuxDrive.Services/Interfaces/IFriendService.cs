@@ -10,6 +10,6 @@ namespace LuxDrive.Services.Interfaces
        
         Task<ApplicationUser?> FindUserByEmailAsync(string email);
         Task<IEnumerable<FriendViewModel>> GetFriendsAsync(Guid userId);
-        Task<bool> RemoveFriendAsync(string userId, Guid friendId);
+        Task RemoveFriendAsync(string userId, Guid friendId);
     }
 }

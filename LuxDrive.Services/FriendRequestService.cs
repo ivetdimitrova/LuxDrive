@@ -16,9 +16,10 @@ namespace LuxDrive.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<ReceivedRequestViewModel>?> GetReceivedRequestAsync(string userId)
+        public async Task<IEnumerable<ReceivedRequestViewModel>> GetReceivedRequestsAsync(string userId)
         {
-            if (!Guid.TryParse(userId, out Guid userGuid)) return null;
+            if (!Guid.TryParse(userId, out Guid userGuid)) 
+                throw new ArgumentException("Invalid user id!");
 
             return await _context.FriendRequests
                .Where(r => r.ReceiverId == userGuid && r.Status == FriendRequestStatus.Pending)
@@ -32,9 +33,10 @@ namespace LuxDrive.Services
                .ToListAsync();
         }
 
-        public async Task<IEnumerable<UserSentRequestViewModel>?> GetSentRequestAsync(string userId)
+        public async Task<IEnumerable<UserSentRequestViewModel>> GetSentRequestsAsync(string userId)
         {
-            if (!Guid.TryParse(userId, out Guid userGuid)) return null;
+            if (!Guid.TryParse(userId, out Guid userGuid)) 
+                throw new ArgumentException("Invalid user id!");
 
             return await _context.FriendRequests
                 .Where(r => r.SenderId == userGuid && r.Status == FriendRequestStatus.Pending)
@@ -51,7 +53,7 @@ namespace LuxDrive.Services
         public async Task SendRequestAsync(string senderId, string receiverEmail)
         {
             if (!Guid.TryParse(senderId, out Guid senderIdGuid))
-                throw new ArgumentException("User with this id doesn't exist.");
+                throw new ArgumentException("Invalid user id!");
 
             var receiver = await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == receiverEmail);
@@ -79,6 +81,9 @@ namespace LuxDrive.Services
 
         public async Task AcceptRequestAsync(Guid requestId)
         {
+
+            if (requestId == Guid.Empty)
+                throw new ArgumentException("Invalid request id!");
 
             FriendRequest? request = await _context.FriendRequests
                 .FirstOrDefaultAsync(x => x.Id == requestId); 
@@ -110,6 +115,8 @@ namespace LuxDrive.Services
 
         public async Task RejectRequestAsync(Guid requestId)
         {
+            if (requestId == Guid.Empty)
+                throw new ArgumentException("Invalid request id!");
             var request = await _context.FriendRequests.FindAsync(requestId);
 
             if (request != null)

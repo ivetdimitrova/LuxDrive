@@ -130,49 +130,59 @@ namespace LuxDrive.Controllers
                                  cleanNumber.StartsWith("3") ? "amex" : "unknown";
 
                 await _paymentCardService.CreateCardAsync(user.Id, last4, cardType);
+                string planKey = GetUserKey("CurrentPlan");
+                string expiryKey = GetUserKey("PlanExpiry");
+                DateTime validUntil = DateTime.Now.AddMonths(1);
+                CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(400) };
+
+                Response.Cookies.Append(planKey, model.PlanName, option);
+                Response.Cookies.Append(expiryKey, validUntil.ToString(), option);
+
+                TempData["SuccessMessage"] = $"Successfully activated {model.PlanName} plan!";
+                return RedirectToAction("Index");
+
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
 
-            string planKey = GetUserKey("CurrentPlan");
-            string expiryKey = GetUserKey("PlanExpiry");
-            DateTime validUntil = DateTime.Now.AddMonths(1);
-            CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(400) };
 
-            Response.Cookies.Append(planKey, model.PlanName, option);
-            Response.Cookies.Append(expiryKey, validUntil.ToString(), option);
-
-            TempData["SuccessMessage"] = $"Successfully activated {model.PlanName} plan!";
-            return RedirectToAction("Index");
         }
 
         [Authorize]
         public async Task<IActionResult> QuickPurchase(string plan)
         {
-            var user = await _userManager.GetUserAsync(User);
-            bool hasCardInDb = await _paymentCardService.HasUserLinkedCardAsync(user.Id);
-
-            if (!hasCardInDb)
+            try
             {
-                TempData["ErrorMessage"] = "No saved card found. Please add a card.";
-                return RedirectToAction("Checkout", new { plan = plan });
+                var user = await _userManager.GetUserAsync(User);
+                bool hasCardInDb = await _paymentCardService.HasUserLinkedCardAsync(user.Id);
+
+                if (!hasCardInDb)
+                {
+                    TempData["ErrorMessage"] = "No saved card found. Please add a card.";
+                    return RedirectToAction("Checkout", new { plan = plan });
+                }
+
+                string planKey = GetUserKey("CurrentPlan");
+                string expiryKey = GetUserKey("PlanExpiry");
+
+                await Task.Delay(1500);
+
+                DateTime validUntil = DateTime.Now.AddMonths(1);
+                CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(400) };
+
+                Response.Cookies.Append(planKey, plan, option);
+                Response.Cookies.Append(expiryKey, validUntil.ToString(), option);
+
+                TempData["SuccessMessage"] = $"Successfully upgraded to {plan} plan!";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            string planKey = GetUserKey("CurrentPlan");
-            string expiryKey = GetUserKey("PlanExpiry");
-
-            await Task.Delay(1500);
-
-            DateTime validUntil = DateTime.Now.AddMonths(1);
-            CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(400) };
-
-            Response.Cookies.Append(planKey, plan, option);
-            Response.Cookies.Append(expiryKey, validUntil.ToString(), option);
-
-            TempData["SuccessMessage"] = $"Successfully upgraded to {plan} plan!";
-            return RedirectToAction("Index");
         }
 
         [Authorize]

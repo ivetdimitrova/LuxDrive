@@ -18,20 +18,22 @@ namespace LuxDrive.Services
             _dbContext = dbContext;
         }
 
-        public async Task<bool> ChangeFileNameAsync(string userId, Guid fileId, string newName)
+        public async Task ChangeFileNameAsync(string userId, Guid fileId, string newName)
         {
-            if (string.IsNullOrWhiteSpace(newName) || !Guid.TryParse(userId, out Guid userGuid))
-                return false;
+            if (string.IsNullOrWhiteSpace(newName))
+                throw new ArgumentException("The file's name cannot be empty.");
 
+
+            if (!Guid.TryParse(userId, out Guid userGuid))
+                throw new ArgumentException("Invalid user id!");
 
             var file = await _dbContext.Files
                 .FirstOrDefaultAsync(f => f.Id == fileId && f.UserId == userGuid);
 
-            if (file == null) return false;
+            if (file == null)
+                throw new ArgumentException("File not found!");
 
             string clean = newName.Trim();
-
-            if (string.IsNullOrEmpty(clean) || string.IsNullOrWhiteSpace(clean)) return false;
 
             if (!string.IsNullOrEmpty(file.Extension) &&
                 clean.EndsWith(file.Extension, StringComparison.OrdinalIgnoreCase))
@@ -44,15 +46,17 @@ namespace LuxDrive.Services
                 if (dotIndex > 0) clean = clean.Substring(0, dotIndex);
             }
 
-            if (file.Name == clean) return true;
+            if (file.Name == clean)
+                return;
 
             file.Name = clean;
-            return await _dbContext.SaveChangesAsync() == 1;
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task<Guid?> CreateFileAsync(string userId, IFormFile file)
         {
-            if (!Guid.TryParse(userId, out Guid userGuid)) return null;
+            if (!Guid.TryParse(userId, out Guid userGuid))
+                throw new ArgumentException("Invalid user id!");
 
             if (file == null || string.IsNullOrWhiteSpace(file.FileName))
             {
@@ -79,9 +83,7 @@ namespace LuxDrive.Services
         public async Task<string?> GetFileExtensionAsync(Guid? fileId)
         {
             if (fileId == null || fileId == Guid.Empty)
-            {
-                return null;
-            }
+                throw new ArgumentException("Invalid file id!");
 
             return await _dbContext.Files
                 .AsNoTracking()
@@ -93,7 +95,8 @@ namespace LuxDrive.Services
 
         public async Task<IEnumerable<IndexViewModel>> GetUserFilesAsync(string userId)
         {
-            if (!Guid.TryParse(userId, out Guid userGuid)) return new List<IndexViewModel>();
+            if (!Guid.TryParse(userId, out Guid userGuid))
+                throw new ArgumentException("Invalid user id!");
 
             IEnumerable<IndexViewModel> files = await _dbContext.Files
                 .Where(f => f.UserId == userGuid && f.IsDeleted == false)
@@ -165,20 +168,22 @@ namespace LuxDrive.Services
             return files;
         }
 
-        //public async Task<bool> RemoveFileAsync(FileEntity file)
-        //{
-        //    _dbContext.Files.Remove(file);
-        //    return await _dbContext.SaveChangesAsync() > 0;
-        //}
 
-        public async Task<bool> UpdateFileUrlAsync(Guid? fileId, string url)
+        public async Task UpdateFileUrlAsync(Guid? fileId, string url)
         {
+            if (fileId == null || fileId == Guid.Empty)
+                throw new ArgumentException("Invalid file id!");
+
+            if (string.IsNullOrEmpty(url))
+                throw new ArgumentException("Invalid file's url!");
+
             var file = await _dbContext.Files.FirstOrDefaultAsync(f => f.Id == fileId);
-            if (file == null) return false;
+            if (file == null)
+                throw new ArgumentException("File not found!");
 
             file.StorageUrl = url;
             _dbContext.Update(file);
-            return await _dbContext.SaveChangesAsync() == 1;
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task ShareFileAsync(Guid fileId, string senderId, Guid receiverId)
@@ -212,7 +217,8 @@ namespace LuxDrive.Services
 
         public async Task<IEnumerable<IndexViewModel>> GetSharedWithMeFilesAsync(string userId)
         {
-            if (!Guid.TryParse(userId, out Guid userGuid)) return new List<IndexViewModel>();
+            if (!Guid.TryParse(userId, out Guid userGuid))
+                throw new ArgumentException("Invalid user id!");
 
             return await _dbContext.SharedFiles
                 .Where(sf => sf.ReceiverId == userGuid)
@@ -233,56 +239,56 @@ namespace LuxDrive.Services
 
         public async Task<long> GetTotalUsedStorageAsync(string userId)
         {
-            if (!Guid.TryParse(userId, out Guid userGuid)) return 0;
+            if (!Guid.TryParse(userId, out Guid userGuid))
+                throw new ArgumentException("Invalid user id!");
 
             return await _dbContext.Files
                 .Where(f => f.UserId == userGuid)
                 .SumAsync(f => (long?)f.Size) ?? 0;
         }
 
-        public async Task<bool> DeleteUserFileAsync(Guid id, string userIdStr)
+        public async Task DeleteUserFileAsync(Guid id, string userIdStr)
         {
             if (string.IsNullOrWhiteSpace(userIdStr))
-            {
-                return false;
-            }
+                throw new ArgumentException("Invalid user id!");
 
             var file = await _dbContext.Files
                 .FirstOrDefaultAsync(f => f.Id == id && f.UserId.ToString() == userIdStr);
 
             if (file == null || file.IsDeleted)
-            {
-                return false;
-            }
+                throw new ArgumentException("File not found!");
 
             file.IsDeleted = true;
             file.DeletedOn = DateTime.UtcNow;
             await _dbContext.SaveChangesAsync();
-
-            return true;
         }
 
-        public async Task<bool> RestoreUserFileAsync(Guid id, string userIdStr)
+        public async Task RestoreUserFileAsync(Guid id, string userIdStr)
         {
+            if (!Guid.TryParse(userIdStr, out Guid userId))
+                throw new ArgumentException("Invalid user id!");
+
+            if (id == Guid.Empty)
+                throw new ArgumentException("Invalid file id!");
+
             var file = await _dbContext.Files
-        .FirstOrDefaultAsync(f => f.Id == id && f.UserId.ToString() == userIdStr);
+                .FirstOrDefaultAsync(f => f.Id == id && f.UserId.ToString() == userIdStr);
 
             if (file == null)
-            {
-                return false;
-            }
+                throw new ArgumentException("File not found!");
 
 
             file.IsDeleted = false;
             file.DeletedOn = null;
 
             await _dbContext.SaveChangesAsync();
-            return true;
+
         }
 
         public async Task<IEnumerable<TrashViewModel>?> GetTrashedFilesAsync(string userIdStr)
         {
-            if (!Guid.TryParse(userIdStr, out Guid userGuid)) return null;
+            if (!Guid.TryParse(userIdStr, out Guid userGuid))
+                throw new ArgumentException("Invalid user id!");
 
             return await _dbContext.Files
                 .Where(f => f.UserId == userGuid && f.IsDeleted == true)
@@ -302,15 +308,11 @@ namespace LuxDrive.Services
         public async Task<string?> PermanentDeleteFileAsync(Guid id, string userIdStr)
         {
             if (id == Guid.Empty)
-            {
-
-                return null;
-            }
+                throw new ArgumentException("Invalid file id!");
 
             if (!Guid.TryParse(userIdStr, out Guid userGuid) || userGuid == Guid.Empty)
-            {
-                return null;
-            }
+                throw new ArgumentException("Invalid user id!");
+
             FileEntity? file = await _dbContext.Files
                   .FirstOrDefaultAsync(f => f.Id == id && f.UserId.ToString() == userIdStr);
 
@@ -329,9 +331,7 @@ namespace LuxDrive.Services
         public async Task<bool> DeleteMultipleFilesAsync(List<Guid> ids, string userIdStr)
         {
             if (!Guid.TryParse(userIdStr, out Guid userGuid) || userGuid == Guid.Empty)
-            {
-                return false;
-            }
+                throw new ArgumentException("Invalid user id!");
 
             List<FileEntity> filesToDelete = await _dbContext.Files
                 .Where(f => ids.Contains(f.Id) && f.UserId == userGuid && !f.IsDeleted)
@@ -352,34 +352,31 @@ namespace LuxDrive.Services
             return true;
         }
 
-        public async Task<bool> ShareMultipleFilesAsync(List<Guid> ids, string userIdStr, Guid receiverId)
+        public async Task ShareMultipleFilesAsync(List<Guid> ids, string userIdStr, Guid receiverId)
         {
             if (receiverId == Guid.Empty)
-            {
-                return false;
-            }
+                throw new ArgumentException("Invalid receiver id!");
 
             foreach (var fileId in ids)
             {
-                try
-                {
-                    await this.ShareFileAsync(fileId, userIdStr, receiverId);
-                }
-                catch { continue; }
+
+                await this.ShareFileAsync(fileId, userIdStr, receiverId);
+
             }
 
-            return true;
         }
 
         public async Task<List<string>?> EmptyTrashAsync(string userIdStr)
         {
-            if (!Guid.TryParse(userIdStr, out Guid userGuid)) return null;
+            if (!Guid.TryParse(userIdStr, out Guid userGuid))
+                throw new ArgumentException("Invalid user id!");
 
             List<FileEntity> trashedFiles = await _dbContext.Files
                 .Where(f => f.UserId == userGuid && f.IsDeleted)
                 .ToListAsync();
 
-            if (!trashedFiles.Any()) return null;
+            if (!trashedFiles.Any()) 
+                return null;
 
             List<string> filesStorageUrls = trashedFiles
                 .Select(f => f.StorageUrl)
@@ -402,7 +399,7 @@ namespace LuxDrive.Services
         public async Task<bool> RestoreMultipleFilesAsync(List<Guid> ids, string userIdStr)
         {
             if (ids == null || !ids.Any() || !Guid.TryParse(userIdStr, out Guid userGuid))
-                return false;
+                throw new ArgumentException("Invalid ids!");
 
             var files = await _dbContext.Files
                 .Where(f => ids.Contains(f.Id) && f.UserId == userGuid && f.IsDeleted)
@@ -421,48 +418,22 @@ namespace LuxDrive.Services
             return true;
         }
 
-        //Remove
-        public async Task<List<string>?> PermanentDeleteMultipleFileсAsync(List<Guid> ids, string userIdStr)
-        {
-            if (!Guid.TryParse(userIdStr, out Guid userGuid)) return null;
-
-            List<FileEntity> trashedFiles = await _dbContext.Files
-                .Where(f => f.UserId == userGuid && f.IsDeleted)
-                .ToListAsync();
-
-            if (!trashedFiles.Any()) return null;
-
-            List<string> filesStorageUrls = trashedFiles
-                .Select(f => f.StorageUrl)
-                .ToList();
-
-            if (filesStorageUrls.Any(f => string.IsNullOrEmpty(f)))
-            {
-                return null;
-            }
-
-            foreach (var file in trashedFiles)
-            {
-                _dbContext.Files.Remove(file);
-            }
-
-            await _dbContext.SaveChangesAsync();
-            return filesStorageUrls;
-        }
 
         public async Task<DownloadFileViewModel?> GetFileToDownloadAsync(Guid id, string userIdStr)
         {
-            if (!Guid.TryParse(userIdStr, out Guid userGuid)) return null;
+            if (!Guid.TryParse(userIdStr, out Guid userGuid))
+                throw new ArgumentException("Invalid user id!");
 
-            if (id == Guid.Empty) return null;
+            if (id == Guid.Empty)
+                throw new ArgumentException("Invalid file id!");
 
             return await _dbContext.Files
-                .Where(f => f.Id == id && f.UserId == userGuid && !f.IsDeleted)
+                .Where(f => f.Id == id && f.IsDeleted == false)
                 .AsNoTracking()
                 .Select(f => new DownloadFileViewModel
                 {
                     Name = f.Name,
-                    Extension= f.Extension,
+                    Extension = f.Extension,
                     StorageUrl = f.StorageUrl
                 })
                 .FirstOrDefaultAsync();
@@ -471,7 +442,7 @@ namespace LuxDrive.Services
         public async Task<List<DownloadFileViewModel>?> GetMultipleFilesToDownloadAsync(List<Guid> ids, string userIdStr)
         {
             if (ids == null || !ids.Any() || !Guid.TryParse(userIdStr, out Guid userGuid))
-                return new List<DownloadFileViewModel>();
+                throw new ArgumentException("Invalid ids!");
 
             return await _dbContext.Files
                 .Where(f => ids.Contains(f.Id) && f.UserId == userGuid && !f.IsDeleted)

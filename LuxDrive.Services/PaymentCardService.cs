@@ -3,7 +3,6 @@ using LuxDrive.Data.Models;
 using LuxDrive.Services.Interfaces;
 using LuxDrive.ViewModels.Settings;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Client;
 
 namespace LuxDrive.Services
 {
@@ -60,7 +59,7 @@ namespace LuxDrive.Services
 
         }
 
-        public async Task<List<CardViewModel>?> GetUserCards(Guid userId)
+        public async Task<List<CardViewModel>?> GetUserCardsAsync(Guid userId)
         {
 
             if(userId == Guid.Empty)

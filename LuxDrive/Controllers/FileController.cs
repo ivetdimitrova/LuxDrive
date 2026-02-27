@@ -41,13 +41,12 @@ namespace LuxDrive.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            string? userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
-
             try
             {
+                string? userIdStr = GetUserId();
+                if (userIdStr == null) return Unauthorized();
+
                 IEnumerable<IndexViewModel> allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
-                //var activeFiles = allUserFiles.Where(f => !f.IsDeleted).ToList();
 
                 string planKey = GetUserKey("CurrentPlan");
                 string currentPlan = Request.Cookies[planKey] ?? "Free";
@@ -56,9 +55,9 @@ namespace LuxDrive.Controllers
 
                 return View(allUserFiles);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return View(new List<IndexViewModel>());
+                return BadRequest(ex.Message);
             }
 
         }
@@ -66,93 +65,112 @@ namespace LuxDrive.Controllers
         [HttpGet]
         public async Task<IActionResult> SharedWithMe()
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
+            try
+            {
+                var userIdStr = GetUserId();
+                if (userIdStr == null) return Unauthorized();
 
-            IEnumerable<IndexViewModel> sharedFiles = await this.fileService.GetSharedWithMeFilesAsync(userIdStr);
-            IEnumerable<IndexViewModel> userFiles = await this.fileService.GetUserFilesAsync(userIdStr); // Да се изнесе
+                IEnumerable<IndexViewModel> sharedFiles = await this.fileService.GetSharedWithMeFilesAsync(userIdStr);
+                IEnumerable<IndexViewModel> userFiles = await this.fileService.GetUserFilesAsync(userIdStr); // Да се изнесе
 
-            string planKey = GetUserKey("CurrentPlan");
-            string currentPlan = Request.Cookies[planKey] ?? "Free";
+                string planKey = GetUserKey("CurrentPlan");
+                string currentPlan = Request.Cookies[planKey] ?? "Free";
 
-            CalculateStorageUsage(userFiles, currentPlan);
+                CalculateStorageUsage(userFiles, currentPlan);
 
-            return View("Index", sharedFiles);
+                return View("Index", sharedFiles);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
 
         [HttpGet]
         public async Task<IActionResult> Trash()
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
+            try
+            {
+                var userIdStr = GetUserId();
+                if (userIdStr == null) return Unauthorized();
 
-            var allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
-            string planKey = GetUserKey("CurrentPlan");
-            string currentPlan = Request.Cookies[planKey] ?? "Free";
-            CalculateStorageUsage(allUserFiles, currentPlan);
+                var allUserFiles = await this.fileService.GetUserFilesAsync(userIdStr);
+                string planKey = GetUserKey("CurrentPlan");
+                string currentPlan = Request.Cookies[planKey] ?? "Free";
+                CalculateStorageUsage(allUserFiles, currentPlan);
 
-            IEnumerable<TrashViewModel>? trashedFiles = await this.fileService.GetTrashedFilesAsync(userIdStr);
+                IEnumerable<TrashViewModel>? trashedFiles = await this.fileService.GetTrashedFilesAsync(userIdStr);
 
-            return View(trashedFiles);
+                return View(trashedFiles);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Upload(List<IFormFile> files)
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
-
-            if (files == null || files.Count == 0)
+            try
             {
-                TempData["UploadError"] = "Select at least one file.";
-                return RedirectToAction(nameof(Index));
-            }
+                var userIdStr = GetUserId();
+                if (userIdStr == null) return Unauthorized();
 
-            string planKey = GetUserKey("CurrentPlan");
-            string currentPlan = Request.Cookies[planKey] ?? "Free";
-            long maxStorageBytes = GetMaxBytesForPlan(currentPlan);
-
-            long currentUsedBytes = await this.fileService.GetTotalUsedStorageAsync(userIdStr);
-            long newFilesBytes = files.Sum(f => f.Length);
-
-            if (currentUsedBytes + newFilesBytes > maxStorageBytes)
-            {
-                TempData["UploadError"] = $"Not enough space! You are trying to upload {FormatBytes(newFilesBytes)}, but you have {FormatBytes(maxStorageBytes - currentUsedBytes)} left on your {currentPlan} plan.";
-                return RedirectToAction(nameof(Index));
-            }
-
-            foreach (var file in files)
-            {
-                if (file == null || file.Length == 0) continue;
-
-                Guid? fileId = await this.fileService.CreateFileAsync(userIdStr, file);
-                if (fileId == null) continue;
-
-                string? extension = await this.fileService.GetFileExtensionAsync(fileId);
-                if (string.IsNullOrEmpty(extension))
+                if (files == null || files.Count == 0)
                 {
-                    extension = Path.GetExtension(file.FileName);
+                    TempData["UploadError"] = "Select at least one file.";
+                    return RedirectToAction(nameof(Index));
                 }
 
-                var key = $"{userIdStr}/{fileId}{extension}";
+                string planKey = GetUserKey("CurrentPlan");
+                string currentPlan = Request.Cookies[planKey] ?? "Free";
+                long maxStorageBytes = GetMaxBytesForPlan(currentPlan);
 
-                try
+                long currentUsedBytes = await this.fileService.GetTotalUsedStorageAsync(userIdStr);
+                long newFilesBytes = files.Sum(f => f.Length);
+
+                if (currentUsedBytes + newFilesBytes > maxStorageBytes)
                 {
+                    TempData["UploadError"] = $"Not enough space! You are trying to upload {FormatBytes(newFilesBytes)}, but you have {FormatBytes(maxStorageBytes - currentUsedBytes)} left on your {currentPlan} plan.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                foreach (var file in files)
+                {
+                    if (file == null || file.Length == 0) continue;
+
+                    Guid? fileId = await this.fileService.CreateFileAsync(userIdStr, file);
+                    if (fileId == null) continue;
+
+                    string? extension = await this.fileService.GetFileExtensionAsync(fileId);
+                    if (string.IsNullOrEmpty(extension))
+                    {
+                        extension = Path.GetExtension(file.FileName);
+                    }
+
+                    var key = $"{userIdStr}/{fileId}{extension}";
+
+
                     using var stream = file.OpenReadStream();
                     var url = await _spacesService.UploadAsync(stream, key, file.ContentType);
 
                     await this.fileService.UpdateFileUrlAsync(fileId, url);
-                }
-                catch (Exception)
-                {
-                    continue;
+
+
                 }
 
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            return RedirectToAction(nameof(Index));
         }
 
         [HttpPost]
@@ -169,9 +187,7 @@ namespace LuxDrive.Controllers
                     return BadRequest("Name cannot be empty.");
                 }
 
-                bool isRenamed = await this.fileService.ChangeFileNameAsync(userIdStr, id, newName);
-
-                if (!isRenamed) return NotFound();
+                await this.fileService.ChangeFileNameAsync(userIdStr, id, newName);
 
                 return Ok();
             }
@@ -191,23 +207,17 @@ namespace LuxDrive.Controllers
                 var userIdStr = GetUserId();
                 if (userIdStr == null) return Unauthorized();
 
-                bool isDeleted = await fileService.DeleteUserFileAsync(id, userIdStr);
+                await fileService.DeleteUserFileAsync(id, userIdStr);
 
-                if (!isDeleted)
-                {
-                    TempData["AlertMessage"] = "The file was not found or you do not have access to it.";
-
-                }
-
+                return RedirectToAction(nameof(Index));
 
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                TempData["AlertMessage"] = "An unexpected error occurred while attempting to delete!";
+                return BadRequest(ex.Message);
             }
 
-            TempData.Keep("AlertMessage");
-            return RedirectToAction(nameof(Index));
+
         }
 
         [HttpPost]
@@ -218,92 +228,96 @@ namespace LuxDrive.Controllers
                 var userIdStr = GetUserId();
                 if (userIdStr == null) return Unauthorized();
 
-                bool isRestored = await fileService.RestoreUserFileAsync(id, userIdStr);
+                await fileService.RestoreUserFileAsync(id, userIdStr);
 
-                if (!isRestored)
-                {
-                    TempData["AlertMessage"] = "File not found or access denied";
-                }
-
+                return RedirectToAction(nameof(Trash));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                TempData["AlertMessage"] = "File not found or access denied";
+                return BadRequest(ex.Message);
             }
 
-
-            return RedirectToAction(nameof(Trash));
         }
 
         [HttpPost]
         public async Task<IActionResult> PermanentDelete(Guid id)
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
-
-            string? fileStorageUrl = await this.fileService.PermanentDeleteFileAsync(id, userIdStr);
-
-            if (!string.IsNullOrEmpty(fileStorageUrl))
+            try
             {
-                try
-                {
+                var userIdStr = GetUserId();
+                if (userIdStr == null) return Unauthorized();
 
+                string? fileStorageUrl = await this.fileService.PermanentDeleteFileAsync(id, userIdStr);
+
+                if (!string.IsNullOrEmpty(fileStorageUrl))
+                {
                     var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/";
                     var key = fileStorageUrl.Replace(endpoint, string.Empty);
                     await _spacesService.DeleteAsync(key);
 
                 }
-                catch { }
 
-
+                return RedirectToAction(nameof(Trash));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-            return RedirectToAction(nameof(Trash));
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteMultiple([FromBody] List<Guid> ids)
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
-
-
-            bool areDeleted = await this.fileService.DeleteMultipleFilesAsync(ids, userIdStr);
-
-            if (!areDeleted)
+            try
             {
-                return NotFound("No files were found or they are already deleted.");
+                var userIdStr = GetUserId();
+                if (userIdStr == null) return Unauthorized();
+
+
+                bool areDeleted = await this.fileService.DeleteMultipleFilesAsync(ids, userIdStr);
+
+                if (!areDeleted)
+                {
+                    return NotFound("No files were found or they are already deleted.");
+                }
+                return Ok();
             }
-            return Ok();
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpPost]
         public async Task<IActionResult> ShareMultiple(Guid receiverId, [FromBody] List<Guid> fileIds)
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
+
 
             try
             {
-                bool areShared = await this.fileService.ShareMultipleFilesAsync(fileIds, userIdStr, receiverId);
+                var userIdStr = GetUserId();
+                if (userIdStr == null) return Unauthorized();
 
-                if (!areShared)
-                {
-                    return BadRequest("Could not share files. They might be missing or you don't have permission.");
-                }
+                await this.fileService.ShareMultipleFilesAsync(fileIds, userIdStr, receiverId);
 
                 return Ok("Files shared successfully.");
             }
-            catch { return BadRequest("Error sharing files."); }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
         [HttpPost]
         public async Task<IActionResult> Share(Guid fileId, Guid receiverId)
         {
-            var userIdStr = base.GetUserId();
-            if (userIdStr == null) return BadRequest();
 
             try
             {
+                var userIdStr = base.GetUserId();
+                if (userIdStr == null) return BadRequest();
+
                 await fileService.ShareFileAsync(fileId, userIdStr, receiverId);
 
                 TempData["AlertMessage"] = "File was shared.";
@@ -311,7 +325,7 @@ namespace LuxDrive.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest("Error sharing file!");
+                return BadRequest(ex.Message);
             }
         }
 
@@ -345,37 +359,39 @@ namespace LuxDrive.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EmptyTrash()
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
-
-
-            List<string>? filesUrls = await fileService.EmptyTrashAsync(userIdStr);
-
-            if (filesUrls != null)
+            try
             {
-                return BadRequest("No valid files were selected for sharing.");
-            }
+                var userIdStr = GetUserId();
+                if (userIdStr == null) return Unauthorized();
 
 
-            foreach (var url in filesUrls)
-            {
-                try
+                List<string>? filesUrls = await fileService.EmptyTrashAsync(userIdStr);
+
+                if (filesUrls != null)
                 {
+                    return BadRequest("No valid files were selected for sharing.");
+                }
+
+
+                foreach (var url in filesUrls)
+                {
+
 
                     var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/";
                     var key = url.Replace(endpoint, string.Empty);
                     await _spacesService.DeleteAsync(key);
 
                 }
-                catch
-                {
-                    return BadRequest("No valid files were selected for sharing.");
-                }
+
+
+                TempData["SuccessMessage"] = "Trash emptied successfully!";
+                return RedirectToAction(nameof(Trash));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-
-            TempData["SuccessMessage"] = "Trash emptied successfully!";
-            return RedirectToAction(nameof(Trash));
         }
 
         private string FormatBytes(long bytes)
@@ -392,97 +408,113 @@ namespace LuxDrive.Controllers
         [HttpPost]
         public async Task<IActionResult> RestoreMultiple(List<Guid> ids)
         {
-            var userId = GetUserId();
-            if (ids == null || !ids.Any()) return BadRequest("No files selected.");
-
-            bool isRestored = await this.fileService.RestoreMultipleFilesAsync(ids, userId);
-
-            if (isRestored)
+            try
             {
-                return BadRequest("Problem restoring files!");
+                var userId = GetUserId();
+                if (ids == null || !ids.Any()) return BadRequest("No files selected.");
+
+                bool isRestored = await this.fileService.RestoreMultipleFilesAsync(ids, userId);
+
+                if (isRestored)
+                {
+                    return BadRequest("Problem restoring files!");
+                }
+                return RedirectToAction(nameof(Trash));
             }
-            return RedirectToAction(nameof(Trash));
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteMultiplePermanent(List<Guid> ids)
         {
-            var userId = GetUserId();
-            if (ids == null || !ids.Any()) return BadRequest("No files selected.");
-
-
-            List<string>? filesUrls = await fileService.EmptyTrashAsync(userId);
-
-            if (filesUrls == null)
+            try
             {
-                return BadRequest("No valid files were selected for sharing.");
-            }
+                var userId = GetUserId();
+                if (ids == null || !ids.Any()) return BadRequest("No files selected.");
 
 
-            foreach (var url in filesUrls)
-            {
-                try
+                List<string>? filesUrls = await fileService.EmptyTrashAsync(userId);
+
+                if (filesUrls == null)
+                {
+                    return BadRequest("No valid files were selected for sharing.");
+                }
+
+
+                foreach (var url in filesUrls)
                 {
 
                     var endpoint = "https://luxdrive.ams3.digitaloceanspaces.com/";
                     var key = url.Replace(endpoint, string.Empty);
                     await _spacesService.DeleteAsync(key);
 
+
+
                 }
-                catch
-                {
-                    return BadRequest("No valid files were selected for sharing.");
-                }
+
+
+                TempData["SuccessMessage"] = "Files was delete successfully!";
+                return RedirectToAction(nameof(Trash));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
 
-
-            TempData["SuccessMessage"] = "Files was delete successfully!";
-            return RedirectToAction(nameof(Trash));
         }
         [HttpGet]
         public async Task<IActionResult> Download(Guid id)
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
-
-            DownloadFileViewModel? file = await fileService.GetFileToDownloadAsync(id,userIdStr);
-
-            if (file == null) return NotFound();
-
-            using var httpClient = new HttpClient();
             try
             {
+                var userIdStr = GetUserId();
+                if (userIdStr == null) return Unauthorized();
+
+                DownloadFileViewModel? file = await fileService.GetFileToDownloadAsync(id, userIdStr);
+
+                if (file == null) return NotFound();
+
+                using var httpClient = new HttpClient();
+
                 var response = await httpClient.GetAsync(file.StorageUrl);
                 if (!response.IsSuccessStatusCode) return BadRequest("File not found in storage.");
 
                 var stream = await response.Content.ReadAsStreamAsync();
 
                 return File(stream, "application/octet-stream", file.Name + file.Extension);
+
+
             }
-            catch
+            catch (Exception ex)
             {
-                return BadRequest("Connection to storage failed.");
+                return BadRequest(ex.Message);
             }
+
         }
         [HttpPost]
         public async Task<IActionResult> DownloadMultiple([FromBody] List<Guid> ids)
         {
-            var userIdStr = GetUserId();
-            if (userIdStr == null) return Unauthorized();
-
-            List<DownloadFileViewModel>? files = await this.fileService.GetMultipleFilesToDownloadAsync(ids, userIdStr);
-
-            if (files == null) return NotFound();
-
-            using var ms = new MemoryStream();
-            using (var archive = new System.IO.Compression.ZipArchive(ms, System.IO.Compression.ZipArchiveMode.Create, true))
+            try
             {
-                using var httpClient = new HttpClient();
+                var userIdStr = GetUserId();
+                if (userIdStr == null) return Unauthorized();
 
-                foreach (var file in files)
+                List<DownloadFileViewModel>? files = await this.fileService.GetMultipleFilesToDownloadAsync(ids, userIdStr);
+
+                if (files == null) return NotFound();
+
+                using var ms = new MemoryStream();
+                using (var archive = new System.IO.Compression.ZipArchive(ms, System.IO.Compression.ZipArchiveMode.Create, true))
                 {
-                    try
+                    using var httpClient = new HttpClient();
+
+                    foreach (var file in files)
                     {
+
                         var response = await httpClient.GetAsync(file.StorageUrl);
                         if (response.IsSuccessStatusCode)
                         {
@@ -492,13 +524,19 @@ namespace LuxDrive.Controllers
                             using var entryStream = entry.Open();
                             await fileStream.CopyToAsync(entryStream);
                         }
+
                     }
-                    catch { }
                 }
+
+                ms.Position = 0;
+                return File(ms.ToArray(), "application/zip", "LuxDrive_Download.zip");
+            }
+            catch (Exception ex)
+            {
+
+                return BadRequest(ex.Message);
             }
 
-            ms.Position = 0;
-            return File(ms.ToArray(), "application/zip", "LuxDrive_Download.zip");
         }
 
 

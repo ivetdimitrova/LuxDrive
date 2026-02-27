@@ -1,12 +1,10 @@
-﻿using LuxDrive.Data;
-using LuxDrive.Data.Models;
+﻿using LuxDrive.Data.Models;
 using LuxDrive.Services;
 using LuxDrive.Services.Interfaces;
 using LuxDrive.ViewModels.Settings;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace LuxDrive.Controllers
 {
@@ -15,7 +13,6 @@ namespace LuxDrive.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-
         private readonly SpacesService _spacesService;
         private readonly IPaymentCardService _paymentCardService;
         private readonly IApplicationUserService _applicationUserService;
@@ -44,7 +41,7 @@ namespace LuxDrive.Controllers
                 LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                SavedCards = await _paymentCardService.GetUserCards(user.Id),
+                SavedCards = await _paymentCardService.GetUserCardsAsync(user.Id),
                 ProfileImageUrl = string.IsNullOrEmpty(user.ProfileImagePath)
                                   ? "/images/default-avatar.png"
                                   : user.ProfileImagePath

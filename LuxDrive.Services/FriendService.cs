@@ -15,10 +15,6 @@ namespace LuxDrive.Services
             _context = context;
         }
 
-   
-
-    
-
         public async Task<ApplicationUser?> FindUserByEmailAsync(string email)
         {
             return await _context.Users
@@ -27,6 +23,9 @@ namespace LuxDrive.Services
 
         public async Task<IEnumerable<FriendViewModel>> GetFriendsAsync(Guid userId)
         {
+            if (userId == Guid.Empty)
+                throw new ArgumentException("Invalid user id!");
+
             return await _context.UserFriends
                 .Where(uf => uf.UserId == userId||uf.FriendId==userId)
                 .Include(uf => uf.Friend)
@@ -50,9 +49,10 @@ namespace LuxDrive.Services
                 .ToListAsync();
         }
 
-        public async Task<bool> RemoveFriendAsync(string userId, Guid friendId)
+        public async Task RemoveFriendAsync(string userId, Guid friendId)
         {
-            if (!Guid.TryParse(userId, out Guid userGuid)) return false;
+            if (!Guid.TryParse(userId, out Guid userGuid))
+                throw new ArgumentException("Invalid user id!");
 
 
             var friendship = await _context.UserFriends
@@ -61,7 +61,6 @@ namespace LuxDrive.Services
             if (friendship != null) _context.UserFriends.Remove(friendship);
 
             await _context.SaveChangesAsync();
-            return true;
         }
 
  
