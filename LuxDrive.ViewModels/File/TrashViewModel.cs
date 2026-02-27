@@ -6,11 +6,6 @@ namespace LuxDrive.ViewModels.File
 {
     public class TrashViewModel
     {
-        public IEnumerable<TrashItemViewModel> Files { get; set; } = new List<TrashItemViewModel>();
-    }
-
-    public class TrashItemViewModel
-    {
         public string Id { get; set; }
         public string Name { get; set; }
         public string Extension { get; set; }
