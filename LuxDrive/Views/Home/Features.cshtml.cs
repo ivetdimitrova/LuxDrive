@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace LuxDrive.Views.Features
+namespace LuxDrive.Views.Home
 {
     public class IndexModel : PageModel
     {
