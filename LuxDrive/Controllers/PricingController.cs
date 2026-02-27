@@ -1,5 +1,6 @@
 ﻿using LuxDrive.Data;
 using LuxDrive.Data.Models;
+using LuxDrive.Services.Interfaces;
 using LuxDrive.ViewModels.Pricing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -8,15 +9,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LuxDrive.Controllers
 {
-    public class PricingController : Controller
+    public class PricingController : BaseController
     {
-        private readonly LuxDriveDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IPaymentCardService _paymentCardService;
 
-        public PricingController(LuxDriveDbContext context, UserManager<ApplicationUser> userManager)
+        public PricingController(LuxDriveDbContext context, UserManager<ApplicationUser> userManager, IPaymentCardService paymentCardService)
         {
-            _context = context;
             _userManager = userManager;
+            _paymentCardService = paymentCardService;
         }
 
         private string GetUserKey(string baseKey)
@@ -28,58 +29,66 @@ namespace LuxDrive.Controllers
 
         public async Task<IActionResult> Index()
         {
-            string currentPlan = "None";
-            string expiryDateStr = "";
-            bool hasCard = false;
-
-            if (User.Identity != null && User.Identity.IsAuthenticated)
+            try
             {
-                var user = await _userManager.GetUserAsync(User);
-                if (user != null)
+                string currentPlan = "None";
+                string expiryDateStr = "";
+                bool hasCard = false;
+
+                if (User.Identity != null && User.Identity.IsAuthenticated)
                 {
-                    hasCard = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id);
-
-                    string planKey = GetUserKey("CurrentPlan");
-                    string expiryKey = GetUserKey("PlanExpiry");
-
-                    currentPlan = Request.Cookies[planKey] ?? "None";
-                    string storedDate = Request.Cookies[expiryKey];
-
-                    if (currentPlan != "None" && !string.IsNullOrEmpty(storedDate))
+                    var user = await _userManager.GetUserAsync(User);
+                    if (user != null)
                     {
-                        if (DateTime.TryParse(storedDate, out DateTime expiryDate))
+                        hasCard = await this._paymentCardService.HasUserLinkedCardAsync(user.Id);
+
+                        string planKey = GetUserKey("CurrentPlan");
+                        string expiryKey = GetUserKey("PlanExpiry");
+
+                        currentPlan = Request.Cookies[planKey] ?? "None";
+                        string storedDate = Request.Cookies[expiryKey];
+
+                        if (currentPlan != "None" && !string.IsNullOrEmpty(storedDate))
                         {
-                            if (DateTime.Now > expiryDate)
+                            if (DateTime.TryParse(storedDate, out DateTime expiryDate))
                             {
-                                if (hasCard)
+                                if (DateTime.Now > expiryDate)
                                 {
-                                    expiryDate = DateTime.Now.AddMonths(1);
-                                    CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(400) };
-                                    Response.Cookies.Append(expiryKey, expiryDate.ToString(), option);
-                                    expiryDateStr = expiryDate.ToString("dd.MM.yyyy");
+                                    if (hasCard)
+                                    {
+                                        expiryDate = DateTime.Now.AddMonths(1);
+                                        CookieOptions option = new CookieOptions { Expires = DateTime.Now.AddDays(400) };
+                                        Response.Cookies.Append(expiryKey, expiryDate.ToString(), option);
+                                        expiryDateStr = expiryDate.ToString("dd.MM.yyyy");
+                                    }
+                                    else
+                                    {
+                                        currentPlan = "None";
+                                        Response.Cookies.Delete(planKey);
+                                        Response.Cookies.Delete(expiryKey);
+                                        expiryDateStr = "";
+                                    }
                                 }
                                 else
                                 {
-                                    currentPlan = "None";
-                                    Response.Cookies.Delete(planKey);
-                                    Response.Cookies.Delete(expiryKey);
-                                    expiryDateStr = "";
+                                    expiryDateStr = expiryDate.ToString("dd.MM.yyyy");
                                 }
-                            }
-                            else
-                            {
-                                expiryDateStr = expiryDate.ToString("dd.MM.yyyy");
                             }
                         }
                     }
                 }
+
+                ViewBag.CurrentPlan = currentPlan;
+                ViewBag.HasCard = hasCard;
+                ViewBag.ExpiryDate = expiryDateStr;
+
+                return View();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest("Error removing: " + ex.Message);
             }
 
-            ViewBag.CurrentPlan = currentPlan;
-            ViewBag.HasCard = hasCard;
-            ViewBag.ExpiryDate = expiryDateStr;
-
-            return View();
         }
 
         [Authorize]
@@ -120,19 +129,7 @@ namespace LuxDrive.Controllers
                                  cleanNumber.StartsWith("5") ? "mastercard" :
                                  cleanNumber.StartsWith("3") ? "amex" : "unknown";
 
-                bool exists = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id && c.CardLast4 == last4);
-
-                if (!exists)
-                {
-                    var newCard = new PaymentCard
-                    {
-                        UserId = user.Id,
-                        CardLast4 = last4,
-                        CardType = cardType
-                    };
-                    _context.PaymentCards.Add(newCard);
-                    await _context.SaveChangesAsync();
-                }
+                await _paymentCardService.CreateCard(user.Id, last4, cardType);
             }
             catch (Exception) { }
 
@@ -152,7 +149,7 @@ namespace LuxDrive.Controllers
         public async Task<IActionResult> QuickPurchase(string plan)
         {
             var user = await _userManager.GetUserAsync(User);
-            bool hasCardInDb = await _context.PaymentCards.AnyAsync(c => c.UserId == user.Id);
+            bool hasCardInDb = await _paymentCardService.HasUserLinkedCardAsync(user.Id);
 
             if (!hasCardInDb)
             {

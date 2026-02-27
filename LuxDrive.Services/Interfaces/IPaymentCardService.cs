@@ -2,6 +2,8 @@
 {
     public interface IPaymentCardService
     {
-        Task<bool> HasUserLinkedCardAsync(string userId);
+        Task<bool> HasUserLinkedCardAsync(Guid userId);
+
+        Task CreateCard(Guid userId, string last4, string cardType);
     }
 }
