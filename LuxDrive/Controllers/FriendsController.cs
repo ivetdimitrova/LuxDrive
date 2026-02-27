@@ -2,9 +2,6 @@
 using LuxDrive.ViewModels.Friends;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace LuxDrive.Controllers
 {
@@ -23,15 +20,7 @@ namespace LuxDrive.Controllers
             _fileService = fileService;
             _friendRequestService = friendRequestService;
         }
-        //private Guid CurrentUserId
-        //{
-        //    get
-        //    {
-        //        var id = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        //        if (string.IsNullOrEmpty(id)) throw new UnauthorizedAccessException();
-        //        return Guid.Parse(id);
-        //    }
-        //}
+       
 
         [HttpPost]
         public async Task<IActionResult> Send([FromForm] string receiverEmail)
