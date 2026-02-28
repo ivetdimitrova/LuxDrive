@@ -13,13 +13,13 @@ namespace LuxDrive.Services
             _services = services;
         }
 
-        /*
-        <summary>
-        Метод за автоматично почистване на кошчето на всеки 24 часа.
-        Намира файлове, които са изтрити преди повече от 30 дни, премахва ги окончателно от облачното хранилище (DigitalOcean) и след това изтрива записите им от базата данни.
-        </summary>
-        <param name="stoppingToken">Токен, който спира фоновата задача при изключване на приложението.</param>
-        */
+        
+        ///<summary>
+        ///Метод за автоматично почистване на кошчето на всеки 24 часа.
+        ///Намира файлове, които са изтрити преди повече от 30 дни, премахва ги окончателно от облачното хранилище (DigitalOcean) и след това изтрива записите им от базата данни.
+        ///</summary>
+        ///<param name="stoppingToken">Токен, който спира фоновата задача при изключване на приложението.</param>
+        
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)
