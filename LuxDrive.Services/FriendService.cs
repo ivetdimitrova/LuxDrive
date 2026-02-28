@@ -15,12 +15,29 @@ namespace LuxDrive.Services
             _context = context;
         }
 
+        /*
+        <summary>
+        Метод за търсене на потребител в системата по неговия имейл адрес.
+        Използва се основно, за да се провери дали даден човек съществува, преди да му се изпрати покана за приятелство.
+        </summary>
+        <param name="email">Имейл адресът на търсения потребител.</param>
+        <returns>Връща обекта на потребителя, ако е намерен, или null, ако не съществува.</returns>
+        */
         public async Task<ApplicationUser?> FindUserByEmailAsync(string email)
         {
             return await _context.Users
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
 
+        /*
+        <summary>
+        Метод за извличане на пълния списък с приятели на даден потребител.
+        Методът проверява връзките в двете посоки (кой кого е добавил) и подготвя данните за визуализация – имена, имейл и профилна снимка.
+        </summary>
+        <param name="userId">Уникалното Id на потребителя, чиито приятели търсим.</param>
+        <returns>Списък с модели, съдържащи информация за приятелите.</returns>
+        <exception cref="ArgumentException">Гърми, ако Id-то на потребителя е празно.</exception>
+        */
         public async Task<IEnumerable<FriendViewModel>> GetFriendsAsync(Guid userId)
         {
             if (userId == Guid.Empty)
@@ -49,6 +66,16 @@ namespace LuxDrive.Services
                 .ToListAsync();
         }
 
+        /*
+        <summary>
+        Метод за прекратяване на приятелство между двама потребители.
+        Намира записа в базата данни, независимо кой е инициаторът на приятелството, и го премахва окончателно.
+        </summary>
+        <param name="userId">Id-то на текущия потребител.</param>
+        <param name="friendId">Id-то на приятеля, който трябва да бъде премахнат.</param>
+        <exception cref="ArgumentException">Гърми, ако Id-то на потребителя не е валидно.</exception>
+        са
+        */
         public async Task RemoveFriendAsync(string userId, Guid friendId)
         {
             if (!Guid.TryParse(userId, out Guid userGuid))
