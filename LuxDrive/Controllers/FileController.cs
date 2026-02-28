@@ -495,7 +495,7 @@ namespace LuxDrive.Controllers
 
                 List<string>? filesUrls = await _fileService.EmptyTrashAsync(userIdStr);
 
-                if (filesUrls != null)
+                if (filesUrls == null)
                 {
                     return BadRequest("No valid files were selected for sharing.");
                 }
