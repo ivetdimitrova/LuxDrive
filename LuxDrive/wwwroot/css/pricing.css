@@ -1,131 +1,5 @@
-﻿html, body {
-    margin: 0;
-    padding: 0;
-    background-color: #050505;
-    color: #fff;
-    font-family: 'Montserrat', 'Segoe UI', sans-serif;
-    overflow-x: hidden;
-    width: 100%;
-}
-
-.hero {
-    height: 60vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    perspective: 1000px;
-}
-
-.hero-bg {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
-    z-index: 0;
-}
-
-.spotlight {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 1;
-    background: radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(198, 166, 100, 0.15), transparent 40%);
-}
-
-#particles-canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-    pointer-events: none;
-}
-
-.hero-cloud {
-    position: absolute;
-    z-index: 3;
-    opacity: 0.8;
-    filter: drop-shadow(0 0 20px rgba(198, 166, 100, 0.2));
-    pointer-events: none;
-    will-change: transform;
-}
-
-.cloud-1 {
-    top: 5%;
-    left: -5%;
-    width: 350px;
-    filter: blur(2px);
-    opacity: 0.6;
-}
-
-.cloud-2 {
-    bottom: 10%;
-    right: -5%;
-    width: 400px;
-    filter: blur(3px);
-    opacity: 0.5;
-}
-
-.cloud-3 {
-    top: 20%;
-    right: 15%;
-    width: 150px;
-    opacity: 0.8;
-}
-
-.cloud-5 {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 700px;
-    opacity: 0.05;
-    z-index: 1;
-    filter: blur(10px);
-}
-
-.hero-text {
-    position: relative;
-    z-index: 10;
-    max-width: 900px;
-    padding: 0 20px;
-    animation: fadeUpHero 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-    .hero-text h1 {
-        font-size: 4.5rem;
-        margin-bottom: 25px;
-        line-height: 1.1;
-        font-weight: 700;
-        text-shadow: 0 10px 40px rgba(0,0,0,0.9);
-    }
-
-    .hero-text p {
-        color: #d1d1d1;
-        font-size: 1.3rem;
-        margin-bottom: 20px;
-        font-weight: 300;
-        line-height: 1.6;
-    }
-
-.gold-shimmer {
-    background: linear-gradient(to right, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c);
-    background-size: 200% auto;
-    color: transparent;
-    -webkit-background-clip: text;
-    background-clip: text;
-    animation: shine 4s linear infinite;
-    font-weight: 800;
-}
-
+﻿/* 1. ИНФОРМАЦИОННА КАРТА ЗА ТЕКУЩИЯ СТАТУС (CURRENT PLAN)
+   Показва се над цените, за да види потребителят какво ползва в момента. */
 .lux-status-card {
     display: inline-flex;
     flex-direction: column;
@@ -158,6 +32,7 @@
     opacity: 0.8;
 }
 
+/* 2. МРЕЖА С ЦЕНОВИ ПЛАНОВЕ (PRICING GRID) */
 .features {
     display: flex;
     flex-wrap: wrap;
@@ -169,6 +44,7 @@
     z-index: 2;
 }
 
+/* Стил за индивидуалната карта (План Basic / Pro) */
 .feature {
     width: 350px;
     text-align: center;
@@ -208,6 +84,7 @@
         line-height: 1.6;
     }
 
+/* 3. ПОКАЗВАНЕ НА ЦЕНАТА (PRICE TAG) */
 .price-tag {
     color: #c6a664;
     font-size: 2.5rem;
@@ -226,6 +103,7 @@
         font-weight: 400;
     }
 
+/*  4. БУТОНИ ЗА АБОНИРАНЕ / ПОНИЖАВАНЕ НА ПЛАН */
 .btn-glow {
     position: relative;
     padding: 12px 35px;
@@ -254,6 +132,7 @@
         color: #fff !important;
     }
 
+    /* Стил, когато потребителят ВЕЧЕ Е на този план */
     .btn-glow.active-plan {
         background: rgba(46, 204, 113, 0.15) !important;
         border: 1px solid #2ecc71 !important;
@@ -263,6 +142,7 @@
         pointer-events: none;
     }
 
+/* Бутон за връщане към безплатен план (Downgrade) */
 .btn-downgrade {
     background: transparent;
     border: 1px solid #444;
@@ -283,24 +163,7 @@
         box-shadow: 0 0 15px rgba(198, 166, 100, 0.2);
     }
 
-@keyframes shine {
-    to {
-        background-position: 200% center;
-    }
-}
-
-@keyframes fadeUpHero {
-    from {
-        opacity: 0;
-        transform: translateY(50px) scale(0.95);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
+/* 5. АНИМАЦИИ И РЕСПОНСИВЕН ДИЗАЙН */
 @keyframes floatCard {
     0%, 100% {
         transform: translateY(0);
@@ -312,14 +175,6 @@
 }
 
 @media (max-width: 768px) {
-    .hero {
-        height: 50vh;
-    }
-
-    .hero-text h1 {
-        font-size: 2.8rem;
-    }
-
     .feature {
         width: 100%;
         max-width: 350px;
