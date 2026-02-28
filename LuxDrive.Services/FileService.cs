@@ -390,7 +390,7 @@ namespace LuxDrive.Services
             if (!Guid.TryParse(userIdStr, out Guid userGuid))
                 throw new ArgumentException("Invalid user id!");
 
-            return await _dbContext.Files
+            IEnumerable<TrashViewModel>? files =  await _dbContext.Files
                 .Where(f => f.UserId == userGuid && f.IsDeleted == true)
                 .OrderByDescending(f => f.DeletedOn)
                 .AsNoTracking()
@@ -400,9 +400,61 @@ namespace LuxDrive.Services
                     Name = f.Name,
                     Extension = f.Extension,
                     DeletedOn = f.DeletedOn,
+                    StorageUrl = f.StorageUrl
                 })
 
                 .ToListAsync();
+
+            foreach (TrashViewModel file in files)
+            {
+                switch (file.Extension.ToLower())
+                {
+                    case ".jpg":
+                    case ".jpeg":
+                    case ".png":
+                    case ".gif":
+                    case ".webp":
+                        file.Icon = "fas fa-image";
+                        break;
+
+                    case ".mp4":
+                    case ".avi":
+                    case ".mov":
+                        file.Icon = "fas fa-play";
+                        break;
+
+                    case ".mp3":
+                    case ".wav":
+                        file.Icon = "fas fa-music";
+                        break;
+
+                    case ".pdf":
+                        file.Icon = "fas fa-file-pdf";
+                        break;
+
+                    case ".doc":
+                    case ".docx":
+                        file.Icon = "fas fa-file-word";
+                        break;
+
+                    case ".xls":
+                    case ".xlsx":
+                        file.Icon = "fas fa-file-excel";
+                        break;
+
+                    case ".zip":
+                    case ".rar":
+                    case ".7z":
+                        file.Icon = "fas fa-file-archive";
+                        break;
+
+                    default:
+                        file.Icon = "fas fa-file";
+                        break;
+                }
+            }
+
+            return files;
         }
 
 

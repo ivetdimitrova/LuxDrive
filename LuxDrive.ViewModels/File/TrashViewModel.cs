@@ -1,14 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-namespace LuxDrive.ViewModels.File
+﻿namespace LuxDrive.ViewModels.File
 {
     public class TrashViewModel
     {
         public string Id { get; set; }
         public string Name { get; set; }
         public string Extension { get; set; }
+
+        public string Icon { get; set; } = string.Empty;
+
+        public string StorageUrl { get; set; } = string.Empty;
+
         public DateTime? DeletedOn { get; set; }
 
         
@@ -26,5 +27,12 @@ namespace LuxDrive.ViewModels.File
         }
         //Форматира разширението за по-добра четимост в потребителския интерфейс(UI Optimization).
         public string DisplayExtension => Extension?.ToUpper() ?? "";
+
+        /* ИЗЧИСЛИМО СВОЙСТВО (Computed Property):
+          Капсулира бизнес логиката за идентификация на изображения.  */
+        public bool IsImage =>
+            !string.IsNullOrEmpty(Extension) &&
+            new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg" }
+            .Contains(Extension.ToLower());
     }
 }

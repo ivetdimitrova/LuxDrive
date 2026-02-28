@@ -91,7 +91,17 @@
                         <div class="preview-box">
                             @* Custom чекбокс за селектиране чрез JavaScript логика *@
                             <div class="check-circle" onclick="toggleSelect(this, '@file.Id')"></div>
-                            <i class="fas fa-file type-icon" style="color: var(--gold); opacity: 0.8;"></i>
+                          @*   <i class="fas fa-file type-icon" style="color: var(--gold); opacity: 0.8;"></i> *@
+
+                            @* Условно рендиране: Image Preview срещу Generic Icon *@
+                            @if (file.IsImage)
+                            {
+                                <img src="@file.StorageUrl" alt="@file.Name" loading="lazy" />
+                            }
+                            else
+                            {
+                                <i class="@file.Icon type-icon"></i>
+                            }
 
                             @* Слой за бързи действия: Възстановяване или Перманентно изтриване *@
                             <div class="actions-overlay">
