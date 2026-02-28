@@ -1,4 +1,6 @@
-﻿:root {
+﻿/* 1. ГЛОБАЛНИ ПРОМЕНЛИВИ И БАЗОВИ СТИЛОВЕ
+   Съдържа основните цветове, градиенти и ефекти за преход. */
+:root {
     --gold: #d4af37;
     --gold-glow: rgba(212, 175, 55, 0.4);
     --bg-dark: #050505;
@@ -17,6 +19,7 @@ body {
     overflow-x: hidden;
 }
 
+/* Основен контейнер на приложението с анимиран градиентен фон */
 .app-wrapper {
     display: flex;
     min-height: 100vh;
@@ -48,6 +51,8 @@ body {
     }
 }
 
+/* 2. СТРАНИЧНА НАВИГАЦИЯ (SIDEBAR)
+   Лявото меню с линковете и индикатора за свободно пространство. */
 .sidebar {
     width: 260px;
     background: rgba(10, 10, 10, 0.9);
@@ -55,7 +60,7 @@ body {
     border-right: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
-    padding: 5px 25px 20px 25px; 
+    padding: 5px 25px 20px 25px;
     position: sticky;
     top: 0;
     height: 100vh;
@@ -63,12 +68,12 @@ body {
 }
 
 .nav-title {
-    font-size: 1.1rem; 
+    font-size: 1.1rem;
     text-transform: uppercase;
-    color: #fff; 
+    color: #fff;
     letter-spacing: 2px;
     margin-bottom: 12px;
-    margin-top: 10px; 
+    margin-top: 10px;
     font-weight: 800;
     padding-left: 10px;
     position: relative;
@@ -86,7 +91,7 @@ body {
     }
 
 .nav-section {
-    margin-bottom: 15px; 
+    margin-bottom: 15px;
 }
 
 .nav-item {
@@ -115,6 +120,7 @@ body {
         border-left: 3px solid var(--gold);
     }
 
+/* Кутията показваща колко памет е използвана (Storage Indicator) */
 .storage-box {
     margin-top: auto;
     margin-bottom: 20px;
@@ -176,6 +182,7 @@ body {
         transform: translateY(-2px) !important;
     }
 
+/* 3. ГЛАВНО СЪДЪРЖАНИЕ И ГОРНА ЛЕНТА (MAIN CONTENT & HEADER) */
 .content {
     flex: 1;
     padding: 40px 50px;
@@ -193,6 +200,7 @@ body {
     margin-bottom: 40px;
 }
 
+/* Поле за търсене */
 .search-bar {
     position: relative;
     width: 420px;
@@ -222,6 +230,7 @@ body {
         color: #666;
     }
 
+/* Бутон за качване на файл (Upload) */
 .upload-btn {
     background: linear-gradient(135deg, #b88a44, #e6c86e);
     color: #000;
@@ -242,6 +251,8 @@ body {
         box-shadow: 0 10px 30px rgba(198,166,100,0.4);
     }
 
+/* 4. СТАТИСТИКИ И ФИЛТРИ
+   Малките кутийки горе (Снимки, Документи и т.н.) и бутоните за филтриране. */
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -294,6 +305,7 @@ body {
     font-size: 1.4rem;
 }
 
+/* Филтър менюто */
 .filter-menu {
     display: flex;
     gap: 10px;
@@ -321,6 +333,8 @@ body {
         color: var(--gold);
     }
 
+/* 5. МРЕЖА С ФАЙЛОВЕ (FILE ITEMS)
+   Стилове за индивидуалните файлове (картинки, документи). */
 .files-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -330,7 +344,7 @@ body {
 
 .file-item {
     background: var(--card-bg);
-    border: 1px solid var(--glass-border); 
+    border: 1px solid var(--glass-border);
     border-radius: 20px;
     padding: 15px;
     position: relative;
@@ -344,14 +358,15 @@ body {
     .file-item:hover {
         transform: translateY(-10px);
         background: rgba(30, 30, 30, 0.6);
-        border-color: rgba(198, 166, 100, 0.4); 
+        border-color: rgba(198, 166, 100, 0.4);
         box-shadow: 0 20px 50px rgba(0,0,0,0.5);
     }
 
+/* Превю на изображението на файла */
 .preview-box {
     width: 100%;
     height: 160px;
-    background: transparent; 
+    background: transparent;
     border-radius: 12px;
     margin-bottom: 15px;
     display: flex;
@@ -359,8 +374,9 @@ body {
     justify-content: center;
     overflow: hidden;
     position: relative;
-    border: none; 
+    border: none;
 }
+
     .preview-box img {
         width: 100% !important;
         height: 100% !important;
@@ -387,6 +403,7 @@ body {
     text-shadow: 0 0 20px var(--gold-glow);
 }
 
+/* Меню за действия при Hover (Сваляне, Споделяне, Триене) */
 .actions-overlay {
     position: absolute;
     inset: 0;
@@ -445,6 +462,8 @@ body {
     justify-content: space-between;
 }
 
+/* 6. СЕЛЕКЦИЯ НА ФАЙЛОВЕ И МАСОВИ ДЕЙСТВИЯ (BULK ACTIONS) */
+/* Кръгче за маркиране на файла */
 .check-circle {
     position: absolute;
     top: 10px;
@@ -483,6 +502,7 @@ body {
     box-shadow: 0 0 15px rgba(198, 166, 100, 0.2);
 }
 
+/* Долна изскачаща лента за маркирани файлове */
 .bulk-bar {
     position: fixed;
     bottom: 30px;
@@ -504,9 +524,10 @@ body {
         transform: translateX(-40%) translateY(0);
     }
 
-
+/* 7. МОДАЛНИ ПРОЗОРЦИ И СИСТЕМНИ СЪОБЩЕНИЯ */
+/* Тъмен полупрозрачен фон зад модалните прозорци */
 .modal-overlay {
-    display: none; 
+    display: none;
     position: fixed;
     top: 0;
     left: 0;
@@ -515,37 +536,10 @@ body {
     background: rgba(0, 0, 0, 0.7);
     backdrop-filter: blur(8px);
     z-index: 1000;
-    justify-content: center; 
-    align-items: center; 
-}
-
-
-.social-hub {
-    background: #1e1e1e;
-    width: 550px;
-    margin: 80px auto;
-    border-radius: 15px;
-    border-top: 3px solid #ffcc00;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    color: white;
-    overflow: hidden;
-}
-
-.avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border: 2px solid #ffc107;
-    border-radius: 50%;
-}
-
-.tab-content {
-    padding: 25px 30px;
-    border-bottom: 1px solid #222;
-    display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
 }
+
 .modal-header-custom {
     padding: 20px 25px;
     display: flex;
@@ -553,285 +547,18 @@ body {
     align-items: center;
     border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
-.header-title {
-    font-size: 1.2rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
 
-.yellow-text {
-    color: #fdd835;
-}
-
-.modal-tabs {
-    display: flex;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    padding: 0 10px;
-}
-
-.tab-link {
-    flex: 1;
-    background: none;
-    border: none;
-    color: #888;
-    padding: 16px;
-    cursor: pointer;
-    font-weight: 600;
-    border-bottom: 3px solid transparent;
-    transition: 0.3s;
-}
-
-    .tab-link.active {
-        color: white;
-        border-bottom: 3px solid #fdd835;
-    }
-
-.friend-row {
-    display: flex;
-    align-items: center;
-    background: rgba(255,255,255,0.05);
-    margin-bottom: 8px;
-    padding: 10px;
-    border-radius: 8px;
-}
-
-.friend-avatar {
-    width: 35px;
-    height: 35px;
-    background: #ffcc00;
-    color: black;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    margin-right: 12px;
-}
-
-.friend-info {
-    flex: 1;
-}
-
-.friend-name {
-    font-size: 0.9rem;
-    font-weight: 600;
-}
-
-.friend-email {
-    font-size: 0.75rem;
-    color: #888;
-}
-
-.friend-actions {
-    display: flex;
-    align-items: center;
-}
-    .friend-actions form {
-        display: inline;
-        margin: 0;
-        padding: 0;
-    }
-
-   
-    .friend-actions button {
-        background: none;
-        border: none;
-        padding: 0;
-        margin-left: 10px;
-        cursor: pointer;
-        outline: none;
-    }
-        .friend-actions i {
-    margin-left: 10px;
-    cursor: pointer;
-    color: #666;
-    transition: 0.3s;
-}
-
-.info-icon:hover {
-    color: #00d1ff;
-}
-
-.remove-icon:hover {
-    color: #ff4444;
-}
-
-.btn-invite {
-    background: #ffcc00;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 5px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.close-btn {
-    cursor: pointer;
-    font-size: 1.8rem; 
-    color: rgba(255, 255, 255, 0.5); 
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 45px;
-    height: 45px;
-    border-radius: 12px; 
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-    .close-btn:hover {
-        color: var(--gold); 
-        background: rgba(212, 175, 55, 0.1); 
-        border-color: var(--gold);
-        transform: scale(1.1) rotate(90deg); 
-        box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); 
-    }
-
-input-label {
-    color: #cccccc;
-    font-size: 14px;
-    margin-bottom: 8px;
-    font-family: sans-serif;
-}
-
-.invite-box {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid var(--glass-border);
-    border-radius: 14px;
-    padding: 6px; 
-    display: flex;
-    margin-bottom: 25px;
-    transition: var(--transition);
-}
-
-.invite-box:focus-within {
-    border-color: var(--gold);
-    background: rgba(0, 0, 0, 0.2);
-}
-
-.invite-box form {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    gap: 10px; 
-}
-
-.custom-input {
-    flex: 1;
-    background: none;
-    border: none;
-    padding: 15px;
-    color: #fff;
-    outline: none;
-}
-
-.btn-invite {
-    background: linear-gradient(135deg, #b88a44, #e6c86e); 
-    color: #000;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 22px;
-    font-weight: 700;
-    cursor: pointer;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    transition: all 0.3s ease;
-    white-space: nowrap; 
-}
-
-    .btn-invite:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(198, 166, 100, 0.3);
-        filter: brightness(1.1);
-    }
-
-    .btn-invite:active {
-        transform: translateY(0);
-    }
-
-.pending-section {
-    border-top: 1px solid #333;
-    padding-top: 15px;
-}
-
-.small-label {
-    font-size: 11px;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-.empty-msg {
-    color: #aaa;
-    font-size: 14px;
-    margin-top: 10px;
-    text-align: center;
-}
-
-.req-card {
-    background: #181818;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    border-left: 3px solid var(--gold);
-}
-
-.req-actions {
-    margin-left: auto;
-    display: flex;
-    gap: 10px;
-}
-
-.btn-yes {
-    background: #2ecc71;
-    color: #000;
-    border: none;
-    padding: 5px 15px;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.btn-no {
-    background: transparent;
-    border: 1px solid #444;
-    color: #888;
-    padding: 5px 15px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
-.user-avatar {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    background: #222;
-    color: var(--gold);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    margin-right: 15px;
-    border: 2px solid #333;
-    position: relative;
-}
-
+/* Изглед когато няма качени файлове (Empty State) */
 .empty-state-container {
-    grid-column: 1 / -1; 
+    grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 300px; 
+    min-height: 300px;
     text-align: center;
     padding: 50px;
-    opacity: 0.5; 
+    opacity: 0.5;
 }
 
     .empty-state-container i {
@@ -847,8 +574,9 @@ input-label {
         color: #fff;
         margin: 0;
     }
+
 #empty-state {
-    min-height: 40vh; 
+    min-height: 40vh;
     justify-content: center;
     transition: all 0.3s ease;
 }
@@ -857,11 +585,13 @@ input-label {
     display: block;
     margin: 0 auto 15px;
 }
+
+/* Резервни стилове за лентата за селекция (Ако се ползва другата версия) */
 .bulk-bar {
     position: fixed;
     bottom: 30px;
     left: 50%;
-    transform: translateX(-50%) translateY(150px); 
+    transform: translateX(-50%) translateY(150px);
     background: rgba(15, 15, 15, 0.95);
     border: 1px solid var(--gold);
     border-radius: 100px;
@@ -872,7 +602,7 @@ input-label {
 }
 
     .bulk-bar.active {
-        transform: translateX(-50%) translateY(0); 
+        transform: translateX(-50%) translateY(0);
     }
 
 .bulk-content {
@@ -920,7 +650,7 @@ input-label {
     }
 
     .bulk-btn.delete {
-        color: #ff5f5f; 
+        color: #ff5f5f;
     }
 
         .bulk-btn.delete:hover {
@@ -928,119 +658,7 @@ input-label {
             color: #ff3333;
         }
 
-
-/*Za _ShareModal*/
-.custom-share-modal {
-    background-color: #1a1a1a;
-    border: 1px solid var(--glass-border);
-    border-radius: 20px;
-    padding: 0;
-    width: 100%;
-    max-width: 450px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-    overflow: hidden;
-    color: #ffffff;
-}
-
-.modal-header-custom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 25px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-    .modal-header-custom h4 {
-        margin: 0;
-        color: #fdd835; 
-        font-size: 1.2rem;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        text-transform: none; 
-    }
-
-.close-modal {
-    cursor: pointer;
-    font-size: 1.8rem;
-    color: rgba(255, 255, 255, 0.5);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 45px;
-    height: 45px;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    outline: none;
-}
-    .close-modal:hover {
-        color: var(--gold);
-        background: rgba(212, 175, 55, 0.1);
-        border-color: var(--gold);
-        transform: scale(1.1) rotate(90deg); 
-        box-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
-    }
-
-
-.share-form {
-    padding: 25px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 10px;
-    color: #bbb;
-    font-size: 0.9rem;
-}
-
-.custom-select {
-    background-color: #1a1a1a !important; 
-    border: 1px solid var(--glass-border) !important;
-    color: #fff !important;
-    border-radius: 12px !important;
-    padding: 12px 15px !important;
-    width: 100%;
-    outline: none !important;
-    box-shadow: none !important;
-    cursor: pointer;
-    transition: var(--transition);
-}
-
-    .custom-select:focus {
-        border-color: var(--gold) !important;
-        outline: none !important;
-        box-shadow: 0 0 10px rgba(212, 175, 55, 0.2) !important;
-    }
-    .custom-select option {
-        background-color: #1a1a1a; 
-        color: #fff;
-        padding: 10px;
-    }
-
-
-.btn-share-submit {
-    background-color: #ffc107;
-    color: #000;
-    border: none;
-    border-radius: 8px;
-    padding: 12px;
-    width: 100%;
-    font-weight: bold;
-    margin-top: 20px;
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.2s;
-}
-
-    .btn-share-submit:hover {
-        background-color: #e5ac00;
-        transform: translateY(-2px);
-    }
-
-    .btn-share-submit:active {
-        transform: translateY(0);
-    }
-
-
+/* Изскачащи съобщения за успех/грешка (Alerts) */
 #customAlert {
     position: fixed;
     top: 5%;
@@ -1057,7 +675,6 @@ input-label {
     display: none;
 }
 
-  
     #customAlert::before {
         position: absolute;
         left: 22px;
@@ -1066,7 +683,6 @@ input-label {
         font-size: 28px;
         color: #F4BD61;
     }
-
 
 .alert-content::before {
     display: block;
@@ -1078,7 +694,6 @@ input-label {
     letter-spacing: 1px;
 }
 
-
 #alertMessage {
     color: #FFFFFF;
     margin: 0;
@@ -1086,6 +701,8 @@ input-label {
     font-weight: 400;
     line-height: 1.4;
 }
+
+/*  8. ИНСТРУМЕНТИ ЗА МАРКИРАНЕ В ГОРНАТА ЧАСТ */
 #selection-tools {
     animation: slideInTrash 0.4s ease-out;
     width: 100%;
@@ -1099,7 +716,7 @@ input-label {
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(15px);
     border: 1px solid rgba(198, 166, 100, 0.2);
-    border-left: 4px solid #d4af37; 
+    border-left: 4px solid #d4af37;
     padding: 12px 25px;
     border-radius: 16px;
     box-sizing: border-box;
