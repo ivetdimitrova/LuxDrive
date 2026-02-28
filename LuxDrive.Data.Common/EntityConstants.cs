@@ -28,7 +28,7 @@
         }
 
         public static class FriendRequest
-            {
+        {
             public const string IdComment = "Unique identifier for the friend request";
             public const string SenderIdComment = "Identifier of the user who sent the friend request";
             public const string ReceiverIdComment = "Identifier of the user who received the friend request";

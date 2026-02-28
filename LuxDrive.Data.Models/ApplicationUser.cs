@@ -10,5 +10,8 @@ namespace LuxDrive.Data.Models
 
         public virtual ICollection<File> Files { get; set; }
          = new HashSet<File>();
+
+        public virtual ICollection<PaymentCard> Cards { get; set; }
+       = new HashSet<PaymentCard>();
     }
 }
