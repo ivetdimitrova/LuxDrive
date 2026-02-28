@@ -1,6 +1,9 @@
-﻿using LuxDrive.Data.Models;
+﻿using static LuxDrive.Data.Common.EntityConstants.FriendRequest;
+
+using LuxDrive.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
 
 
 namespace LuxDrive.Data.Configurations
@@ -9,6 +12,26 @@ namespace LuxDrive.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<FriendRequest> entity)
         {
+            entity
+                .Property(f => f.Id)
+                .HasComment(IdComment);
+
+            entity
+                .Property(f => f.SenderId)
+                .HasComment(SenderIdComment);
+
+            entity
+                .Property(f => f.ReceiverId)
+                .HasComment(ReceiverIdComment);
+
+            entity
+                .Property(f => f.Status)
+                .HasComment(StatusComment);
+
+            entity
+                .Property(f => f.CreatedOn)
+                .HasComment(CreatedOnComment);
+
             entity
                 .HasOne(x => x.Sender)
                 .WithMany()

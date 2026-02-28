@@ -1,4 +1,6 @@
-﻿using LuxDrive.Data.Models;
+﻿using static LuxDrive.Data.Common.EntityConstants.UserFriend;
+
+using LuxDrive.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,6 +12,14 @@ namespace LuxDrive.Data.Configurations
         {
             entity
                 .HasKey(x => new { x.UserId, x.FriendId });
+
+            entity
+              .Property(f => f.UserId)
+              .HasComment(UserIdComment);
+
+            entity
+              .Property(f => f.FriendId)
+              .HasComment(FriendIdComment);
 
             entity
                 .HasOne(x => x.User)
