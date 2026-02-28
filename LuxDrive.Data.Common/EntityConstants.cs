@@ -26,5 +26,38 @@
             public const string UserIdComment = "Identifier of the user who uploaded the file";
 
         }
+
+        public static class FriendRequest
+            {
+            public const string IdComment = "Unique identifier for the friend request";
+            public const string SenderIdComment = "Identifier of the user who sent the friend request";
+            public const string ReceiverIdComment = "Identifier of the user who received the friend request";
+            public const string StatusComment = "Current status of the friend request (Pending, Accepted, Rejected)";
+            public const string CreatedOnComment = "UTC date and time when the friend request was created";
+        }
+
+        public static class PaymentCard
+        {
+            public const string IdComment = "Unique identifier for the payment card record";
+            public const string UserIdComment = "Identifier of the user who owns the payment card";
+            public const string CardLast4Comment = "Last four digits of the payment card number";
+            public const string CardTypeComment = "Type of the payment card (e.g., Visa, MasterCard)";
+        }
+
+        public static class SharedFile
+        {
+            public const string IdComment = "Unique identifier for the file share record";
+            public const string FileIdComment = "Identifier of the file being shared";
+            public const string SenderIdComment = "Identifier of the user who shared the file";
+            public const string ReceiverIdComment = "Identifier of the user who received the shared file";
+            public const string SharedOnComment = "UTC date and time when the file was shared";
+        }
+
+        public static class UserFriend
+        {
+            public const string UserIdComment = "Identifier of the user in the friendship relationship";
+            public const string FriendIdComment = "Identifier of the related friend user";
+        }
+
     }
 }
