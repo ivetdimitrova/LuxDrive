@@ -495,7 +495,7 @@ namespace LuxDrive.Controllers
 
                 List<string>? filesUrls = await _fileService.EmptyTrashAsync(userIdStr);
 
-                if (filesUrls != null)
+                if (filesUrls == null)
                 {
                     return BadRequest("No valid files were selected for sharing.");
                 }
@@ -539,7 +539,7 @@ namespace LuxDrive.Controllers
 
                 bool isRestored = await _fileService.RestoreMultipleFilesAsync(ids, userId);
 
-                if (isRestored)
+                if (!isRestored)
                 {
                     return BadRequest("Problem restoring files!");
                 }
@@ -570,7 +570,7 @@ namespace LuxDrive.Controllers
                 if (ids == null || !ids.Any()) return BadRequest("No files selected.");
 
 
-                List<string>? filesUrls = await _fileService.EmptyTrashAsync(userId);
+                List<string>? filesUrls = await _fileService.DeleteMultiplePermanentAsync(userId, ids);
 
                 if (filesUrls == null)
                 {
