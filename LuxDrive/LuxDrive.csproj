@@ -24,10 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="wwwroot\uploads\profiles\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Update="wwwroot\images\default-avatar.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
