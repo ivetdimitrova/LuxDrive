@@ -19,6 +19,8 @@ namespace LuxDrive.Tests.Services
         [SetUp]
         public void Setup()
         {
+            // Използваме InMemory база данни с уникално име (Guid), 
+            // за да гарантираме, че всеки тест работи в напълно изолирана среда.
             var options = new DbContextOptionsBuilder<LuxDriveDbContext>()
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
                 .Options;
@@ -30,21 +32,26 @@ namespace LuxDrive.Tests.Services
         [TearDown]
         public void TearDown()
         {
+            // Изтриваме базата след всеки тест, за да не се натрупват "боклуци" в паметта.
             _dbContext.Database.EnsureDeleted();
             _dbContext.Dispose();
         }
 
+        /// <summary>
+        /// Тества успешното изпращане на покана за приятелство по имейл.
+        /// Уверява се, че се създава запис в базата със статус Pending.
+        /// </summary>
         [Test]
         public async Task SendRequestAsync_WithValidData_CreatesNewPendingRequest()
         {
-            // Arrange 
+            // Arrange
             var senderId = Guid.NewGuid();
             var receiver = new ApplicationUser
             {
                 Id = Guid.NewGuid(),
                 Email = "receiver@test.com",
                 UserName = "Receiver",
-                FirstName = "Ivan", 
+                FirstName = "Ivan",
                 LastName = "Ivanov"
             };
 
@@ -52,7 +59,7 @@ namespace LuxDrive.Tests.Services
             await _dbContext.SaveChangesAsync();
 
             // Act 
-            await _service.SendRequestAsync(senderId, "receiver@test.com");
+            await _service.SendRequestAsync(senderId.ToString(), "receiver@test.com");
 
             // Assert 
             var request = await _dbContext.FriendRequests.FirstOrDefaultAsync();
@@ -63,6 +70,9 @@ namespace LuxDrive.Tests.Services
             Assert.AreEqual(FriendRequestStatus.Pending, request.Status);
         }
 
+        /// <summary>
+        /// Тества дали сървисът хвърля правилната грешка, ако се опитаме да пратим покана на несъществуващ имейл.
+        /// </summary>
         [Test]
         public void SendRequestAsync_ReceiverDoesNotExist_ThrowsInvalidOperationException()
         {
@@ -72,11 +82,14 @@ namespace LuxDrive.Tests.Services
 
             // Act & Assert 
             var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
-                await _service.SendRequestAsync(senderId, fakeEmail));
+                await _service.SendRequestAsync(senderId.ToString(), fakeEmail));
 
             Assert.AreEqual("The user with the provided email does not exist.", ex.Message);
         }
 
+        /// <summary>
+        /// Тества защитата срещу изпращане на покана за приятелство на самия себе си.
+        /// </summary>
         [Test]
         public async Task SendRequestAsync_SendingToSelf_ThrowsInvalidOperationException()
         {
@@ -86,8 +99,8 @@ namespace LuxDrive.Tests.Services
             {
                 Id = userId,
                 Email = "myself@test.com",
-                FirstName = "Ivan", 
-                LastName = "Ivanov" 
+                FirstName = "Ivan",
+                LastName = "Ivanov"
             };
 
             _dbContext.Users.Add(user);
@@ -95,13 +108,17 @@ namespace LuxDrive.Tests.Services
 
             // Act & Assert
             var ex = Assert.ThrowsAsync<InvalidOperationException>(async () =>
-                await _service.SendRequestAsync(userId, "myself@test.com"));
+                await _service.SendRequestAsync(userId.ToString(), "myself@test.com"));
 
             Assert.AreEqual("You cannot send an invitation to yourself..", ex.Message);
         }
 
+        /// <summary>
+        /// Тества приемането на покана. Според новата логика, методът създава запис 
+        /// в таблицата UserFriends и след това ИЗТРИВА самата покана от FriendRequests.
+        /// </summary>
         [Test]
-        public async Task AcceptRequestAsync_ValidRequest_UpdatesStatusAndCreatesFriendships()
+        public async Task AcceptRequestAsync_ValidRequest_CreatesFriendshipAndRemovesRequest()
         {
             // Arrange
             var requestId = Guid.NewGuid();
@@ -124,15 +141,19 @@ namespace LuxDrive.Tests.Services
             await _service.AcceptRequestAsync(requestId);
 
             // Assert
-            var updatedRequest = await _dbContext.FriendRequests.FindAsync(requestId);
-            Assert.AreEqual(FriendRequestStatus.Accepted, updatedRequest.Status);
+            // Проверяваме дали поканата е изтрита от базата 
+            var deletedRequest = await _dbContext.FriendRequests.FindAsync(requestId);
+            Assert.IsNull(deletedRequest);
 
+            // Проверяваме дали е създадено приятелството
             var friendships = await _dbContext.UserFriends.ToListAsync();
-            Assert.AreEqual(2, friendships.Count);
+            Assert.AreEqual(1, friendships.Count);
             Assert.IsTrue(friendships.Any(f => f.UserId == senderId && f.FriendId == receiverId));
-            Assert.IsTrue(friendships.Any(f => f.UserId == receiverId && f.FriendId == senderId));
         }
 
+        /// <summary>
+        /// Тества дали сървисът хвърля грешка, ако се опитаме да приемем несъществуваща или вече приета покана.
+        /// </summary>
         [Test]
         public void AcceptRequestAsync_RequestNotFoundOrNotPending_ThrowsException()
         {
@@ -143,8 +164,39 @@ namespace LuxDrive.Tests.Services
             Assert.AreEqual("Invitation not found or not active.", ex.Message);
         }
 
+        /// <summary>
+        /// Тества изтриването (отхвърлянето) на покана за приятелство. Трябва да я премахне от базата.
+        /// </summary>
         [Test]
-        public async Task GetReceivedRequestAsync_ReturnsOnlyPendingRequestsForUser()
+        public async Task RejectRequestAsync_ValidRequest_RemovesRequestFromDatabase()
+        {
+            // Arrange
+            var requestId = Guid.NewGuid();
+            var request = new FriendRequest
+            {
+                Id = requestId,
+                SenderId = Guid.NewGuid(),
+                ReceiverId = Guid.NewGuid(),
+                Status = FriendRequestStatus.Pending
+            };
+
+            _dbContext.FriendRequests.Add(request);
+            await _dbContext.SaveChangesAsync();
+
+            // Act
+            await _service.RejectRequestAsync(requestId);
+
+            // Assert
+            var deletedRequest = await _dbContext.FriendRequests.FindAsync(requestId);
+            Assert.IsNull(deletedRequest);
+        }
+
+        /// <summary>
+        /// Тества извличането на входящите покани за приятелство. 
+        /// Трябва да върне само тези, които са със статус Pending.
+        /// </summary>
+        [Test]
+        public async Task GetReceivedRequestsAsync_ReturnsOnlyPendingRequestsForUser()
         {
             // Arrange
             var receiverId = Guid.NewGuid();
@@ -152,22 +204,25 @@ namespace LuxDrive.Tests.Services
             var sender2 = new ApplicationUser { Id = Guid.NewGuid(), UserName = "User2", Email = "2@test.com", FirstName = "C", LastName = "D" };
 
             _dbContext.FriendRequests.Add(new FriendRequest { Id = Guid.NewGuid(), ReceiverId = receiverId, SenderId = sender1.Id, Sender = sender1, Status = FriendRequestStatus.Pending });
-
             _dbContext.FriendRequests.Add(new FriendRequest { Id = Guid.NewGuid(), ReceiverId = receiverId, SenderId = sender2.Id, Sender = sender2, Status = FriendRequestStatus.Accepted });
 
             await _dbContext.SaveChangesAsync();
 
             // Act
-            var result = await _service.GetReceivedRequestAsync(receiverId);
+            var result = await _service.GetReceivedRequestsAsync(receiverId.ToString());
 
             // Assert
             var requests = result.ToList();
             Assert.AreEqual(1, requests.Count);
-            Assert.AreEqual("User1", requests[0].SenderName); 
+            Assert.AreEqual("User1", requests[0].SenderName);
         }
 
+        /// <summary>
+        /// Тества извличането на изходящите покани за приятелство.
+        /// Трябва да върне списък на хората, на които потребителят е пратил покана (със статус Pending).
+        /// </summary>
         [Test]
-        public async Task GetSentRequestAsync_ReturnsOnlyPendingRequestsSentByUser()
+        public async Task GetSentRequestsAsync_ReturnsOnlyPendingRequestsSentByUser()
         {
             // Arrange
             var senderId = Guid.NewGuid();
@@ -175,13 +230,12 @@ namespace LuxDrive.Tests.Services
             var receiver2 = new ApplicationUser { Id = Guid.NewGuid(), UserName = "Receiver2", Email = "2@test.com", FirstName = "C", LastName = "D" };
 
             _dbContext.FriendRequests.Add(new FriendRequest { Id = Guid.NewGuid(), SenderId = senderId, ReceiverId = receiver1.Id, Receiver = receiver1, Status = FriendRequestStatus.Pending });
-
             _dbContext.FriendRequests.Add(new FriendRequest { Id = Guid.NewGuid(), SenderId = senderId, ReceiverId = receiver2.Id, Receiver = receiver2, Status = FriendRequestStatus.Accepted });
 
             await _dbContext.SaveChangesAsync();
 
             // Act
-            var result = await _service.GetSentRequestAsync(senderId);
+            var result = await _service.GetSentRequestsAsync(senderId.ToString());
 
             // Assert
             var requests = result.ToList();
