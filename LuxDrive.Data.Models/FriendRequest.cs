@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using LuxDrive.Data.Models.Enums;
+﻿using LuxDrive.Data.Models.Enums;
 
-    namespace LuxDrive.Data.Models
+namespace LuxDrive.Data.Models
     {
         public class FriendRequest
         {
