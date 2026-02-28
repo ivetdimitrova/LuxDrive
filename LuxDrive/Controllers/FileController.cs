@@ -570,7 +570,7 @@ namespace LuxDrive.Controllers
                 if (ids == null || !ids.Any()) return BadRequest("No files selected.");
 
 
-                List<string>? filesUrls = await _fileService.EmptyTrashAsync(userId);
+                List<string>? filesUrls = await _fileService.DeleteMultiplePermanentAsync(userId,ids);
 
                 if (filesUrls == null)
                 {

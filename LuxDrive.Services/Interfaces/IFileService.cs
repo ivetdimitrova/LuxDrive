@@ -41,5 +41,7 @@ namespace LuxDrive.Services.Interfaces
         Task<DownloadFileViewModel?> GetFileToDownloadAsync(Guid id,string userIdStr);
 
         Task<List<DownloadFileViewModel>?> GetMultipleFilesToDownloadAsync(List<Guid> ids, string userIdStr);
+
+        Task<List<string>?> DeleteMultiplePermanentAsync(string userId, List<Guid> ids);
     }
 }
