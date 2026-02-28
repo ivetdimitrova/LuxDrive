@@ -21,7 +21,13 @@ namespace LuxDrive.Controllers
             _friendRequestService = friendRequestService;
         }
 
-
+        /// <summary>
+        /// Метод за изпращане на покана за приятелство чрез имейл адрес.
+        /// Идентифицира подателя и използва услугата за заявки, за да създаде нова покана към потребителя с посочения имейл.
+        /// След иницииране на заявката, потребителят се пренасочва обратно към файловия мениджър.
+        /// </summary>
+        /// <param name="receiverEmail">Имейл адресът на потребителя, до когото се изпраща поканата.</param>
+        /// <returns>Пренасочва към Index на FileController или връща BadRequest при грешка.</returns>
         [HttpPost]
         public async Task<IActionResult> Send([FromForm] string receiverEmail)
         {
@@ -36,6 +42,13 @@ namespace LuxDrive.Controllers
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
+
+        /// <summary>
+        /// Метод за приемане на покана за приятелство.
+        ///  След успешно изпълнение пренасочва потребителя към списъка с файлове с потвърждаващо съобщение.
+        /// </summary>
+        /// <param name="requestId">Уникалният идентификатор на поканата, която се приема.</param>
+        /// <returns>Пренасочва към Index страницата на FileController или връщаBadRequest при грешка.</returns>
         [HttpPost("friends/accept-request")]
         public async Task<IActionResult> Accept([FromForm] Guid requestId)
         {
@@ -51,6 +64,14 @@ namespace LuxDrive.Controllers
             { return BadRequest(ex.Message); }
         }
 
+
+        /// <summary>
+        /// Метод за търсене на потребител в системата по неговия имейл адрес.
+        /// При успех връща основни данни (Id, потребителско име и имейл) в JSON формат, 
+        /// а при липса на съвпадение – съобщение, че потребителят не е открит.
+        /// </summary>
+        /// <param name="email">Имейл адресът, по който се извършва търсенето.</param>
+        /// <returns>Връща статус 200 (Ok) с данните на потребителя, 404 (NotFound) или BadRequest при грешка.</returns>
         [HttpGet("search")]
         public async Task<IActionResult> SearchUser(string email)
         {
@@ -67,6 +88,13 @@ namespace LuxDrive.Controllers
 
         }
 
+
+        /// <summary>
+        /// Метод за подготовка и визуализация на основния социален панел (Friends Modal).
+        /// Агрегира данни от няколко услуги, за да предостави пълен изглед на списъка с приятели, 
+        /// изпратените покани и получените заявки за приятелство.
+        /// </summary>
+        /// <returns>Връща частично изгледно съдържание (PartialView) с консолидиран модел за социални взаимодействия.</returns>
         [HttpGet]
         public async Task<IActionResult> LoadFriendList()
         {
@@ -95,6 +123,13 @@ namespace LuxDrive.Controllers
 
         }
 
+
+        /// <summary>
+        /// Метод за подготовка и визуализация на модалния прозорец за споделяне на файл с приятел.
+        /// Извлича списъка с приятели на текущия потребител и ги зарежда в модела за споделяне.
+        /// </summary>
+        /// <param name="fileId">Идентификаторът на файла, който потребителят желае да сподели.</param>
+        /// <returns>Връща частично изгледно съдържание (PartialView), представляващо модалния диалог за споделяне.</returns>
         [HttpPost("load-share-list", Name = "LoadShareRoute")]
         public async Task<ActionResult> LoadShareList([FromForm] Guid fileId)
         {
@@ -115,6 +150,14 @@ namespace LuxDrive.Controllers
 
         }
 
+
+        /// <summary>
+        /// Метод за споделяне на файл с друг потребител.
+        /// Извлича идентификатора на подателя, проверява неговата оторизация и извиква услугата за споделяне.
+        /// </summary>
+        /// <param name="fileId">Уникалният идентификатор на файла, който ще бъде споделен.</param>
+        /// <param name="receiverId">Уникалният идентификатор на потребителя, който ще получи достъп до файла.</param>
+        /// <returns>Връща статус 200 (Ok) при успех или BadRequest с описание на грешката.</returns>
         [HttpPost("share")]
         public async Task<IActionResult> ShareFile(Guid fileId, Guid receiverId)
         {
@@ -132,6 +175,14 @@ namespace LuxDrive.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Метод за премахване на потребител от списъка с приятели.
+        /// Извлича идентификатора на текущия потребител и извиква услугата за изтриване на връзката с посочения приятел.
+        /// При успех визуализира съобщение и пренасочва потребителя към основния файлов панел.
+        /// </summary>
+        /// <param name="friendId">Уникалният идентификатор на приятеля, който трябва да бъде премахнат.</param>
+        /// <returns>Пренасочва към Index на FileController или връща BadRequest при възникнала грешка.</returns>
         [HttpPost("remove")]
         public async Task<IActionResult> RemoveFriend([FromForm] Guid friendId)
         {
@@ -156,6 +207,13 @@ namespace LuxDrive.Controllers
 
         }
 
+
+        /// <summary>
+        /// Метод за отхвърляне на покана за приятелство.
+        /// След успешното отхвърляне, потребителят се пренасочва обратно към файловия мениджър с потвърждаващо съобщение.
+        /// </summary>
+        /// <param name="requestId">Уникалният идентификатор на поканата, която трябва да бъде отхвърлена.</param>
+        /// <returns>Пренасочва към списъка с файлове или връща грешка при проблем с обработката.</returns>
         [HttpPost("reject")]
         public async Task<IActionResult> Reject([FromForm] Guid requestId)
         {

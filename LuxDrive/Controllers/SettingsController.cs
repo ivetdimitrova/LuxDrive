@@ -31,6 +31,10 @@ namespace LuxDrive.Controllers
             _applicationUserService = applicationUserService;
         }
 
+        /// <summary>
+        /// Помощен метод за подготвяне на модела с данни за настройките.
+        /// Извлича потребителското име, личните данни, профилната снимка и списъка със запазени карти.
+        /// </summary>
         private async Task<UserSettingsViewModel> LoadViewModelAsync(ApplicationUser user)
         {
 
@@ -49,6 +53,10 @@ namespace LuxDrive.Controllers
 
         }
 
+
+        /// <summary>
+        /// Зарежда основната страница с настройки, като попълва всички актуални данни за потребителя.
+        /// </summary>
         [HttpGet]
         public async Task<IActionResult> Index()
         {
@@ -66,6 +74,12 @@ namespace LuxDrive.Controllers
 
         }
 
+
+        /// <summary>
+        /// Обработва промените в профила – имена, имейл и телефон. 
+        /// Тук е логиката за качване на нова профилна снимка в DigitalOcean Spaces 
+        /// или изтриване на старата, както и опресняване на сесията на потребителя.
+        /// </summary>
         [HttpPost]
         public async Task<IActionResult> UpdateProfile(UserSettingsViewModel model, string RemovePhoto)
         {
@@ -174,6 +188,14 @@ namespace LuxDrive.Controllers
 
             return RedirectToAction("Index");
         }
+
+
+        /// <summary>
+        /// Метод за премахване на профилната снимка на текущия потребител.
+        /// Проверява дали потребителят има зададена снимка, изтрива физическия файл от сървъра (wwwroot), 
+        /// нулира пътя към нея в базата данни и връща потвърждение за успех.
+        /// </summary>
+        /// <returns>Пренасочва потребителя обратно към страницата с настройки.</returns>
         [HttpPost]
         public async Task<IActionResult> RemoveProfilePicture()
         {
@@ -191,6 +213,15 @@ namespace LuxDrive.Controllers
             return RedirectToAction("Index");
         }
 
+
+        /// <summary>
+        /// Метод за сигурна промяна на потребителската парола.
+        /// Извършва валидация на задължителните полета, проверява дали новата парола е потвърдена правилно 
+        /// и дали текущата парола е вярна. При успех обновява паролата в базата данни и опреснява 
+        /// автентикационната сесия на потребителя, за да остане вписан.
+        /// </summary>
+        /// <param name="model">Моделът, съдържащ текущата парола, новата парола и нейното потвърждение.</param>
+        /// <returns>Пренасочва към началната страница с настройки при успех или презарежда изгледа с грешки при неуспех.</returns>
         [HttpPost]
         public async Task<IActionResult> ChangePassword(UserSettingsViewModel model)
         {
@@ -237,6 +268,15 @@ namespace LuxDrive.Controllers
             }
         }
 
+
+        /// <summary>
+        /// Метод за добавяне на нова дебитна или кредитна карта към потребителския профил.
+        /// Извършва детайлна валидация на номера на картата, CVC кода и срока на годност.
+        /// При валидни данни идентифицира типа на картата (Visa, Mastercard, Amex), 
+        /// извлича последните четири цифри за целите на сигурността и запазва информацията в базата данни.
+        /// </summary>
+        /// <param name="model">Моделът, съдържащ данните за новата карта.</param>
+        /// <returns>Пренасочва към настройките при успех или презарежда страницата с описание на грешките.</returns>
         [HttpPost]
         public async Task<IActionResult> AddCard(UserSettingsViewModel model)
         {
@@ -300,6 +340,15 @@ namespace LuxDrive.Controllers
 
         }
 
+
+        /// <summary>
+        /// Метод за сигурно премахване на запазена разплащателна карта.
+        /// Първо извлича идентификатора на текущия потребител и проверява неговата автентичност. 
+        /// След това извиква услугата за изтриване на картата по нейното уникално Id, като гарантира, 
+        /// че картата принадлежи на същия потребител, за да се предотврати неоторизиран достъп.
+        /// </summary>
+        /// <param name="cardId">Уникалният идентификатор на картата, която трябва да бъде изтрита.</param>
+        /// <returns>Пренасочва към страницата с настройки (таб „Billing“) със съобщение за успех или връща грешка.</returns>
         [HttpPost]
         public async Task<IActionResult> RemoveCard(Guid cardId)
         {
@@ -323,6 +372,14 @@ namespace LuxDrive.Controllers
 
         }
 
+
+        /// <summary>
+        /// Метод за окончателно изтриване на потребителския профил от системата.
+        /// Първо премахва всички свързани данни чрез външната услуга , 
+        /// след което изтрива самия потребител от Identity базата данни. 
+        /// При успех изписва потребителя (SignOut) и го пренасочва към началната страница.
+        /// </summary>
+        /// <returns>Пренасочва към началната страница при успех или показва съобщение за грешка при проблем.</returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteAccount()
@@ -351,6 +408,16 @@ namespace LuxDrive.Controllers
             }
 
         }
+
+
+        /// <summary>
+        /// Метод за симулирано нулиране на потребителска парола чрез административен токен.
+        /// Намира потребителя по имейл, генерира автоматично токен за нулиране и прилага новата парола.
+        /// Използва се основно за автоматизирано тестване или бързо възстановяване на достъп.
+        /// </summary>
+        /// <param name="email">Имейл адресът на потребителя, чиято парола ще бъде нулирана.</param>
+        /// <param name="newPassword">Новата парола, която да бъде зададена.</param>
+        /// <returns>Връща JSON обект за успех или списък с грешки при невалидна парола.</returns>
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> SimulateResetPassword(string email, string newPassword)
