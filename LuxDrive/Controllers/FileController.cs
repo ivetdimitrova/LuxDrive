@@ -539,7 +539,7 @@ namespace LuxDrive.Controllers
 
                 bool isRestored = await _fileService.RestoreMultipleFilesAsync(ids, userId);
 
-                if (isRestored)
+                if (!isRestored)
                 {
                     return BadRequest("Problem restoring files!");
                 }
