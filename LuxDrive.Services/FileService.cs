@@ -149,7 +149,7 @@ namespace LuxDrive.Services
 
             foreach (IndexViewModel file in files)
             {
-                file.Extension = await this.GetFileIcon(file.Extension);
+                file.Icon = await this.GetFileIcon(file.Extension);
             }
             return files;
         }
@@ -344,7 +344,7 @@ namespace LuxDrive.Services
             if (!Guid.TryParse(userIdStr, out Guid userGuid))
                 throw new ArgumentException("Invalid user id!");
 
-            IEnumerable<TrashViewModel>? files =  await _dbContext.Files
+            IEnumerable<TrashViewModel>? files = await _dbContext.Files
                 .Where(f => f.UserId == userGuid && f.IsDeleted == true)
                 .OrderByDescending(f => f.DeletedOn)
                 .AsNoTracking()
@@ -361,8 +361,10 @@ namespace LuxDrive.Services
 
             foreach (TrashViewModel file in files)
             {
-                file.Extension = await this.GetFileIcon(file.Extension);
+                file.Icon = await this.GetFileIcon(file.Extension);
+
             }
+
 
             return files;
         }
@@ -382,12 +384,12 @@ namespace LuxDrive.Services
                 case ".png":
                 case ".gif":
                 case ".webp":
-                   return "fas fa-image";
+                    return "fas fa-image";
 
                 case ".mp4":
                 case ".avi":
                 case ".mov":
-                    return  "fas fa-play";
+                    return "fas fa-play";
 
                 case ".mp3":
                 case ".wav":
