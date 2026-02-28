@@ -31,6 +31,8 @@ namespace LuxDrive.Data
 
             builder.ApplyConfiguration(new FriendRequestConfiguration());
             builder.ApplyConfiguration(new SharedFileConfiguration());
+
+            builder.ApplyConfiguration(new PaymentCardConfiguration());
         }
        
     }
