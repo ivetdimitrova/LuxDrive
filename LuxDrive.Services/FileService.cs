@@ -149,53 +149,7 @@ namespace LuxDrive.Services
 
             foreach (IndexViewModel file in files)
             {
-                switch (file.Extension.ToLower())
-                {
-                    case ".jpg":
-                    case ".jpeg":
-                    case ".png":
-                    case ".gif":
-                    case ".webp":
-                        file.Icon = "fas fa-image";
-                        break;
-
-                    case ".mp4":
-                    case ".avi":
-                    case ".mov":
-                        file.Icon = "fas fa-play";
-                        break;
-
-                    case ".mp3":
-                    case ".wav":
-                        file.Icon = "fas fa-music";
-                        break;
-
-                    case ".pdf":
-                        file.Icon = "fas fa-file-pdf";
-                        break;
-
-                    case ".doc":
-                    case ".docx":
-                        file.Icon = "fas fa-file-word";
-                        break;
-
-                    case ".xls":
-                    case ".xlsx":
-                        file.Icon = "fas fa-file-excel";
-                        break;
-
-                    case ".zip":
-                    case ".rar":
-                    case ".7z":
-                        file.Icon = "fas fa-file-archive";
-                        break;
-
-                    default:
-                        file.Icon = "fas fa-file";
-                        break;
-                }
-
-
+                file.Extension = await this.GetFileIcon(file.Extension);
             }
             return files;
         }
@@ -407,54 +361,57 @@ namespace LuxDrive.Services
 
             foreach (TrashViewModel file in files)
             {
-                switch (file.Extension.ToLower())
-                {
-                    case ".jpg":
-                    case ".jpeg":
-                    case ".png":
-                    case ".gif":
-                    case ".webp":
-                        file.Icon = "fas fa-image";
-                        break;
-
-                    case ".mp4":
-                    case ".avi":
-                    case ".mov":
-                        file.Icon = "fas fa-play";
-                        break;
-
-                    case ".mp3":
-                    case ".wav":
-                        file.Icon = "fas fa-music";
-                        break;
-
-                    case ".pdf":
-                        file.Icon = "fas fa-file-pdf";
-                        break;
-
-                    case ".doc":
-                    case ".docx":
-                        file.Icon = "fas fa-file-word";
-                        break;
-
-                    case ".xls":
-                    case ".xlsx":
-                        file.Icon = "fas fa-file-excel";
-                        break;
-
-                    case ".zip":
-                    case ".rar":
-                    case ".7z":
-                        file.Icon = "fas fa-file-archive";
-                        break;
-
-                    default:
-                        file.Icon = "fas fa-file";
-                        break;
-                }
+                file.Extension = await this.GetFileIcon(file.Extension);
             }
 
             return files;
+        }
+
+
+        /// <summary>
+        /// Определя съответната FontAwesome икона въз основа на разширението на файла.
+        /// </summary>
+        /// <param name="extension">Разширението на файла (напр. ".jpg", ".pdf").</param>
+        /// <returns>Стринг, съдържащ CSS класовете за FontAwesome икона.</returns>
+        private async Task<string> GetFileIcon(string extension)
+        {
+            switch (extension)
+            {
+                case ".jpg":
+                case ".jpeg":
+                case ".png":
+                case ".gif":
+                case ".webp":
+                   return "fas fa-image";
+
+                case ".mp4":
+                case ".avi":
+                case ".mov":
+                    return  "fas fa-play";
+
+                case ".mp3":
+                case ".wav":
+                    return "fas fa-music";
+
+                case ".pdf":
+                    return "fas fa-file-pdf";
+
+                case ".doc":
+                case ".docx":
+                    return "fas fa-file-word";
+
+                case ".xls":
+                case ".xlsx":
+                    return "fas fa-file-excel";
+
+                case ".zip":
+                case ".rar":
+                case ".7z":
+                    return "fas fa-file-archive";
+
+                default:
+                    return "fas fa-file";
+            }
         }
 
 
