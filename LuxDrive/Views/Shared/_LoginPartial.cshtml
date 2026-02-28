@@ -1,25 +1,37 @@
-﻿@using LuxDrive.Data.Models
+﻿@* Импортиране на необходимите пространства от имена за достъп до потребителския модел и Identity логиката *@
+@using LuxDrive.Data.Models
 @using Microsoft.AspNetCore.Identity
+
+@* Инжектиране на услуги (Dependency Injection) директно във View-то за управление на аутентикацията и потребителските данни *@
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
 @{
+    /* Асинхронно извличане на текущия потребител от базата данни чрез UserManager */
     var user = await UserManager.GetUserAsync(User);
+
+    /* Логика за форматиране на екранното име (Display Name) */
+    /* Дава се приоритет на Първо и Фамилно име; ако липсват, се използва системният Identity Name (имейл/username) */
     var displayName = user != null && !string.IsNullOrEmpty(user.FirstName)
         ? $"{user.FirstName} {user.LastName}"
         : User.Identity?.Name;
 }
 
+@* Проверка на състоянието на сесията: Рендиране на различни интерфейсни елементи според това дали потребителят е оторизиран *@
 @if (SignInManager.IsSignedIn(User))
 {
+    @* Път към управление на профила (Manage/Index) – използва силно типизирани маршрути (asp-area/asp-page) *@
     <a class="lux-nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello, @displayName!</a>
 
+    @* ВАЖНО ЗА СИГУРНОСТ: Logout операцията се извършва чрез POST заявка в рамките на форма. *@
+    @* Това предотвратява неволно отписване чрез GET заявки и осигурява защита срещу CSRF атаки. *@
     <form class="d-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" style="margin:0;">
         <button type="submit" class="lux-nav-link" style="background: none; border: none; cursor: pointer; padding: 0; font-family: inherit; font-size: inherit;">Logout</button>
     </form>
 }
 else
 {
+    @* Навигация за анонимни потребители: Насърчаване на конверсията чрез регистрация и вход *@
     <a class="lux-nav-link" asp-area="Identity" asp-page="/Account/Register">Register</a>
     <a class="lux-nav-link" asp-area="Identity" asp-page="/Account/Login">Login</a>
 }

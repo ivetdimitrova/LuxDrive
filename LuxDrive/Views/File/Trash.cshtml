@@ -1,30 +1,38 @@
-﻿@using LuxDrive.ViewModels.File;
+﻿@* Инжектиране на специфични ViewModels за стриктна типизация и избягване на грешки по време на изпълнение *@
+@using LuxDrive.ViewModels.File;
 @model IEnumerable<TrashViewModel>
 
 @{
+    /* Дефиниране на метаданни за страницата; Използва се в Layout-а за динамично заглавие на таба */
     ViewData["Title"] = "LuxDrive | Trash Bin";
 }
 
+@* Зареждане на външни библиотеки за икони и шрифтове - подобрява професионалния вид на UI *@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+@* Локални стилове с версия за предотвратяване на проблеми с кеширането в браузъра *@
 <link rel="stylesheet" href="~/css/file.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/trash.css" asp-append-version="true" />
 
 <div class="app-wrapper">
+    @* Визуален ефект с частици за по-модерно усещане на интерфейса (Micro-interactions) *@
     <div class="particles-container">
         <div class="particles-1"></div><div class="particles-2"></div><div class="particles-3"></div>
     </div>
 
     <aside class="sidebar">
         <div class="nav-section" style="margin-top: 30px;">
+            @* Навигация за връщане към основната директория (User Flow Optimization) *@
             <a href="@Url.Action("Index", "File")" class="nav-item">
                 <i class="fas fa-chevron-left"></i> Go Back
             </a>
+            @* Визуално маркиране на текущата активна секция *@
             <a href="@Url.Action("Trash", "File")" class="nav-item active">
                 <i class="fas fa-trash-can"></i> Trash Bin
             </a>
         </div>
 
+        @* Информационен компонент за бизнес логиката: Автоматично почистване на база данни *@
         <div class="trash-info-box">
             <h4 style="color: var(--gold); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Auto-Cleanup</h4>
             <p style="font-size: 11px; color: #888; line-height: 1.4; margin: 0;">
@@ -34,20 +42,24 @@
     </aside>
 
     <div class="content">
+        @* Хедър с акцент върху типографията и бързи действия за администрация на кошчето *@
         <div class="top-header" style="justify-content: space-between; align-items: center; min-height: 60px;">
             <h2 style="margin:0; font-weight:800; letter-spacing:-1px; text-transform: uppercase;">
                 Trash <span style="color:var(--gold)">Bin</span>
             </h2>
 
-            @if (Model!= null && Model.Any())
+            @* Бутон за пълно изпразване - показва се само ако има налични данни (Conditional Rendering) *@
+            @if (Model != null && Model.Any())
             {
                 <form asp-action="EmptyTrash" method="post" onsubmit="return confirm('Clear all files?');">
+                    @* Защита срещу Cross-Site Request Forgery (CSRF) *@
                     @Html.AntiForgeryToken()
                     <button type="submit" class="purge-btn"><i class="fas fa-broom"></i> Empty Bin</button>
                 </form>
             }
         </div>
 
+        @* Контейнер за инструменти при селекция - управлява се динамично чрез JavaScript *@
         <div id="selection-tools" style="display: none; width: 100%; margin: 20px 0;">
             <div class="selection-inner">
                 <div class="selection-info">
@@ -69,6 +81,7 @@
             </div>
         </div>
 
+        @* Мрежа за визуализация на файловете в състояние на 'Soft Delete' *@
         <div class="files-grid">
             @if (Model != null && Model.Any())
             {
@@ -76,22 +89,26 @@
                 {
                     <div class="file-item in-trash" id="file-@file.Id">
                         <div class="preview-box">
+                            @* Custom чекбокс за селектиране чрез JavaScript логика *@
                             <div class="check-circle" onclick="toggleSelect(this, '@file.Id')"></div>
                             <i class="fas fa-file type-icon" style="color: var(--gold); opacity: 0.8;"></i>
 
+                            @* Слой за бързи действия: Възстановяване или Перманентно изтриване *@
                             <div class="actions-overlay">
                                 <form action="/File/Restore/@file.Id" method="post" style="display:inline;">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="action-btn"><i class="fas fa-trash-arrow-up"></i></button>
+                                    <button type="submit" class="action-btn" title="Restore"><i class="fas fa-trash-arrow-up"></i></button>
                                 </form>
                                 <form action="/File/PermanentDelete/@file.Id" method="post" style="display:inline;" onsubmit="return confirm('Delete forever?');">
                                     @Html.AntiForgeryToken()
-                                    <button type="submit" class="action-btn"><i class="fas fa-xmark"></i></button>
+                                    <button type="submit" class="action-btn" title="Permanent Delete"><i class="fas fa-xmark"></i></button>
                                 </form>
                             </div>
                         </div>
                         <div class="file-info">
+                            @* Използване на 'title' атрибут за достъпност при дълги имена на файлове *@
                             <h3 title="@file.Name">@file.Name</h3>
+                            @* Визуализация на метаданни: разширение и брояч на дните до автоматично изтриване *@
                             <p><span>@file.DisplayExtension</span> <span class="urgent-timer" style="margin-left:auto;">@file.DaysLeft d left</span></p>
                         </div>
                     </div>
@@ -99,6 +116,7 @@
             }
             else
             {
+                @* UX Fallback: Визуално потвърждение за празно състояние (Empty State) *@
                 <div style="grid-column: 1 / -1; text-align: center; padding: 120px 20px;">
                     <i class="fas fa-trash-can" style="font-size: 3rem; color: var(--gold); opacity: 0.1; margin-bottom: 20px;"></i>
                     <h3 style="color: #444; font-weight: 500; letter-spacing: 1px;">Your trash bin is empty</h3>
@@ -106,11 +124,13 @@
             }
         </div>
 
+        @* Скрита форма за масови операции: Транспортира IDs към сървъра в пакет (Batch Update) *@
         <form id="bulkActionForm" method="post" style="display:none;">
             @Html.AntiForgeryToken()
             <div id="hiddenInputsContainer"></div>
         </form>
 
+        @* Плаваща лента за Bulk Actions - активира се при селектиране на повече от един обект *@
         <div id="bulkBar" class="bulk-bar" style="background: rgba(15,15,15,0.95); border: 1px solid rgba(198, 166, 100, 0.3); display:none; align-items:center; justify-content:space-between; padding: 15px 40px; position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); border-radius: 100px; min-width: 450px; z-index: 1000; backdrop-filter: blur(10px); box-shadow: 0 20px 40px rgba(0,0,0,0.6);">
             <span id="bulkCount" style="color:var(--gold); font-weight:700; font-size: 0.9rem;">0 SELECTED</span>
 
@@ -118,6 +138,7 @@
                 <button type="button" onclick="submitBulk('RestoreMultiple')" class="btn-bulk-restore">
                     <i class="fas fa-undo"></i> Restore
                 </button>
+                @* Визуален разделител за по-добра четимост *@
                 <div style="width: 1px; height: 20px; background: rgba(255,255,255,0.1);"></div>
                 <button type="button" onclick="submitBulk('DeleteMultiplePermanent')" class="btn-bulk-delete">
                     <i class="fas fa-trash-can"></i> Delete Forever
@@ -127,4 +148,5 @@
     </div>
 </div>
 
+@* Включване на външен JavaScript файл за управление на DOM манипулациите *@
 <script src="~/js/trash.js" asp-append-version="true"></script>

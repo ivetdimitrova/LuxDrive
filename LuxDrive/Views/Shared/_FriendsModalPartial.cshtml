@@ -1,28 +1,35 @@
-﻿@using LuxDrive.ViewModels.Friends;
+﻿@* Импортиране на специфичните ViewModels за функционалността на приятелствата *@
+@using LuxDrive.ViewModels.Friends;
 @model FriendsMainViewModel
 
 <div class="social-hub">
+    @* Хедър на компонента с капсулирана логика за затваряне на модалния прозорец *@
     <div class="modal-header-custom">
         <div class="header-title">
+            @* Използване на FontAwesome икони с брандиран златист акцент *@
             <i class="fas fa-users yellow-text"></i>
             <span>Friends</span>
         </div>
         <span class="close-btn" onclick="closeFriendsTab()">&times;</span>
     </div>
 
+    @* Навигационни табове за превключване между различните състояния на социалния модул *@
     <div class="modal-tabs">
         <button class="tab-link active" onclick="openTab('MyFriends')">My Friends</button>
         <button class="tab-link" onclick="openTab('AddNew')">Add New</button>
         <button class="tab-link" onclick="openTab('Requests')">Requests</button>
     </div>
 
+    @* СПИСЪК С ПРИЯТЕЛИ *@
     <div id="MyFriends" class="tab-content" style="display: block;">
+        @* Проверка за наличие на данни (Null-check и Any) за избягване на грешки при рендиране *@
         @if (Model.Friends != null && Model.Friends.Any())
         {
             @foreach (var friend in Model.Friends)
             {
                 <div class="friend-row">
                     <div class="friend-avatar">
+                        @* Логика за Fallback: Показване на първата буква от името, ако потребителят няма зададена снимка *@
                         @if (!string.IsNullOrEmpty(friend.ProfileImageUrl))
                         {
                             <img src="@friend.ProfileImageUrl" alt="@friend.Name" class="avatar-img" />
@@ -38,12 +45,13 @@
                         <div class="friend-name">@friend.Name</div>
                         <div class="friend-email">@friend.Email</div>
                     </div>
+                    @* Действие за премахване: Използва POST метод за защита на състоянието на базата данни *@
                     <div class="friend-actions">
                         <form asp-controller="Friends" asp-action="RemoveFriend" method="post">
                             <input type="hidden" name="friendId" value="@friend.Id" />
 
-                            <button type="submit" >
-                                <i class="fas fa-user-minus remove-icon"></i>
+                            <button type="submit">
+                                <i class="fas fa-user-minus remove-icon" title="Remove Friend"></i>
                             </button>
                         </form>
                     </div>
@@ -52,18 +60,19 @@
         }
         else
         {
+            @* UX Fallback: Визуално потвърждение при празен списък *@
             <p style="text-align:center;color:#666;padding:20px;">No friends added yet.</p>
         }
-
     </div>
 
+    @*  ДОБАВЯНЕ НА НОВ ПРИЯТЕЛ *@
     <div id="AddNew" class="tab-content" style="display: none;">
         <p class="input-label">Enter email to send an invite:</p>
         <div class="invite-box">
-            <form asp-controller="Friends"
-                  asp-action="Send"
-                  method="post">
+            @* Форма за изпращане на покани чрез имейл идентификация *@
+            <form asp-controller="Friends" asp-action="Send" method="post">
 
+                @* Клиентска валидация в реално време чрез вградени HTML5 атрибути и custom JS съобщения *@
                 <input type="email"
                        name="receiverEmail"
                        class="custom-input"
@@ -75,6 +84,8 @@
                 <button type="submit" class="btn-invite">INVITE</button>
             </form>
         </div>
+
+        @* Списък с изпратени, но непотвърдени заявки (Outgoing Requests) *@
         <div class="pending-section">
             <p class="small-label">SENT PENDING REQUESTS</p>
             @if (Model.SentRequests != null && Model.SentRequests.Any())
@@ -82,25 +93,25 @@
                 @foreach (var request in Model.SentRequests)
                 {
                     <div style="display:flex; justify-content:space-between; padding:12px; border-bottom:1px solid #222;">
-                        <span>@request.ReceiverName</span><span style="color:var(--gold)">
-                            Pending
-                        </span>
+                        <span>@request.ReceiverName</span>
+                        <span style="color:var(--gold)">Pending</span>
                     </div>
                 }
-
             }
             else
             {
                 <p class="empty-msg">No sent requests.</p>
             }
-
         </div>
-</div>
+    </div>
+
+    @* ВХОДЯЩИ ЗАЯВКИ *@
     <div id="Requests" class="tab-content" style="display: none;">
         @if (Model.ReceivedRequests != null && Model.ReceivedRequests.Any())
         {
             @foreach (var request in Model.ReceivedRequests)
             {
+                @* Карта за заявка с опции за одобрение или отхвърляне (Binary Choice UX) *@
                 <div class="req-card">
                     <div class="user-avatar">
                         @if (!string.IsNullOrEmpty(request.ProfileImageUrl))
@@ -109,22 +120,23 @@
                         }
                         else
                         {
-                            <div class="avatar-letter">
-                                @request.SenderName.First()
-                            </div>
+                            <div class="avatar-letter">@request.SenderName.First()</div>
                         }
                     </div>
                     <div style="margin-left:10px;">@request.SenderName</div>
+
+                    @* Агрегирани действия за управление на входящия трафик от приятелства *@
                     <div class="req-actions">
+                        @* Приемане на заявка: Трансформира състоянието от 'Pending' в 'Accepted' *@
                         <form asp-controller="Friends" asp-action="Accept" method="post">
                             <input type="hidden" name="requestId" value="@request.Id" />
                             <button type="submit" class="btn-yes">Accept</button>
                         </form>
+                        @* Отхвърляне на заявка: Изтрива рекорда за връзка от базата данни *@
                         <form asp-controller="Friends" asp-action="Reject" method="post">
                             <input type="hidden" name="requestId" value="@request.Id" />
                             <button class="btn-no">Reject</button>
                         </form>
-                      
                     </div>
                 </div>
             }
@@ -133,7 +145,5 @@
         {
             <p class="empty-msg center">No incoming requests.</p>
         }
-
     </div>
-
 </div>

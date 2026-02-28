@@ -1,4 +1,5 @@
 ﻿@{
+    /* Глобално задаване на заглавието на страницата – базова стъпка за SEO оптимизация и разпознаваемост на таба */
     ViewData["Title"] = "LuxDrive - The Future of Cloud";
 }
 
@@ -6,13 +7,17 @@
     <link rel="stylesheet" href="~/css/home.css" asp-append-version="true" />
 }
 
+@* Hero секция: Проектирана да заема целия Viewport (Above-the-fold content) за максимален визуален импакт *@
 <section class="hero" id="hero-section">
+    @* Декоративни слоеве за дълбочина и динамично осветление (Spotlight ефект) *@
     <div class="hero-bg"></div>
-
     <div class="spotlight"></div>
 
+    @* Високопроизводителен Canvas елемент за рендиране на частици – използва хардуерно ускорение за гладки анимации *@
     <canvas id="particles-canvas"></canvas>
 
+    @* Паралакс обекти (Облаци): Използване на custom 'data-' атрибути за предаване на математически вектори към паралакс скрипта *@
+    @* Стойностите 'speed' и 'depth' определят отместването спрямо движението на мишката за 3D ефект *@
     <img src="/images/gold-cloud.png" class="hero-cloud cloud-1" data-speed="0.05" data-depth="0.2" />
     <img src="/images/gold-cloud.png" class="hero-cloud cloud-2" data-speed="-0.06" data-depth="0.3" />
     <img src="/images/gold-cloud.png" class="hero-cloud cloud-3" data-speed="0.04" data-depth="0.5" />
@@ -20,22 +25,29 @@
     <img src="/images/gold-cloud.png" class="hero-cloud cloud-5" data-speed="0.01" data-depth="0.1" />
     <img src="/images/gold-cloud.png" class="hero-cloud cloud-6" data-speed="0.08" data-depth="0.6" />
 
+    @* Текстов контейнер с CSS анимация за плавно появяване (Fade-in) *@
     <div class="hero-text fade-in">
         <h1>The <span class="gold-shimmer">Future</span> of<br>Cloud Storage</h1>
         <p>Fast. Secure. Limitless. LuxDrive redefines your digital world.<br>Where performance meets absolute perfection.</p>
 
+        @* Логика за условно рендиране (Conditional Rendering) въз основа на състоянието на автентикация *@
         @if (User.Identity.IsAuthenticated)
         {
+            /* Потребителят е логнат: Директен път към функционалната част (Dashboard) */
             <a class="btn-glow" asp-controller="File" asp-action="Index">Go to Dashboard</a>
         }
         else
         {
+            /* Анонимен потребител: Призив към действие (Call-to-Action) за конверсия към регистрация */
             <a class="btn-glow" asp-area="Identity" asp-page="/Account/Register">Get Started</a>
         }
     </div>
 </section>
 
+@* Секция с характеристики (Features): Демонстрира модулна структура и адаптивност *@
 <section class="features">
+    @* Използване на клас 'hidden' в комбинация с Intersection Observer API в JS за анимация при скрол *@
+    @* 'transition-delay' създава каскаден ефект (staggered animation) при визуализиране на картите *@
     <div class="feature hidden" style="transition-delay: 0s;">
         <h2>⚡ Lightning Fast</h2>
         <p>Powered by next-gen infrastructure. Upload, sync, and access files instantly.</p>
@@ -58,5 +70,6 @@
 </section>
 
 @section Scripts {
+    @* Инжектиране на клиентската логика за началната страница – управление на Canvas, Паралакс и Scroll-reveal анимации *@
     <script src="~/js/home.js" asp-append-version="true"></script>
 }

@@ -1,4 +1,5 @@
 ﻿@{
+    /* Инжектиране на мета-заглавие, специфично за секцията, за оптимизация на търсачките (SEO) */
     ViewData["Title"] = "Features - LuxDrive";
 }
 
@@ -6,27 +7,36 @@
     <link rel="stylesheet" href="~/css/features.css" asp-append-version="true" />
 }
 
+@* Hero секция: Използване на хардуерно ускорени визуални компоненти за максимално потапяне (Immersive UI) *@
 <section class="hero" id="hero-section">
     <div class="hero-bg"></div>
-    <div class="spotlight"></div>
+    <div class="spotlight"></div> @* Декоративен елемент за динамично осветление *@
+
+    @* Canvas елемент за високопроизводителни частици, рендирани чрез JavaScript (Low-level rendering) *@
     <canvas id="particles-canvas"></canvas>
 
+    @* Паралакс слоеве: Използване на data-атрибути за предаване на параметри (скорост и дълбочина) към JS логиката *@
     <img src="~/images/gold-cloud.png" class="hero-cloud cloud-1" data-speed="0.05" data-depth="0.2" />
     <img src="~/images/gold-cloud.png" class="hero-cloud cloud-2" data-speed="-0.06" data-depth="0.3" />
     <img src="~/images/gold-cloud.png" class="hero-cloud cloud-3" data-speed="0.04" data-depth="0.5" />
 
     <div class="hero-text">
+        @* Използване на 'gold-shimmer' клас за постигане на премиум визуален ефект върху заглавието *@
         <h1>LuxDrive <span class="gold-shimmer">Features</span></h1>
         <p>Discover the cutting-edge technology that powers LuxDrive — built for speed, privacy, and limitless scalability.</p>
     </div>
 </section>
 
+@* Информационна мрежа: Използва CSS Grid архитектура за адаптивно разположение на елементите *@
 <section class="features-grid">
+
+    @* Feature Card: Демонстрира използване на inline 'transition-delay' за постигане на 'staggered animation' (каскадно появяване) *@
     <div class="feature-card" style="transition-delay: 0s;">
         <h3 class="gold-text">⚡ Ultra-Fast Transfers</h3>
         <p>Experience lightning-fast uploads and downloads with our global CDN and SSD-backed storage nodes optimized for high throughput.</p>
     </div>
 
+    @* Подчертаване на сигурността: Споменаване на E2EE (End-to-End Encryption) като ключов USP (Unique Selling Point) *@
     <div class="feature-card" style="transition-delay: 0.1s;">
         <h3 class="gold-text">🔒 End-to-End Encryption</h3>
         <p>Your files are encrypted before leaving your device, ensuring no one — not even LuxDrive — can access your private data.</p>
@@ -42,6 +52,7 @@
         <p>Automatic, versioned backups mean your data is never lost — restore older versions with one click.</p>
     </div>
 
+    @* Секция за интелигентна организация - акцент върху UX и автоматизацията на файловата структура *@
     <div class="feature-card" style="transition-delay: 0.1s;">
         <h3 class="gold-text">📂 Smart Library Organization</h3>
         <p>Keep your digital life tidy. Automatically categorize your files into Photos, Videos, and Documents for effortless browsing.</p>
@@ -62,6 +73,7 @@
         <p>Sending files to your friends has never been easier. Build your network, manage sharing permissions, and access shared libraries from your friends list.</p>
     </div>
 
+    @* Разработчик-ориентирана функционалност: Демонстрира разширяемост на платформата чрез REST API *@
     <div class="feature-card" style="transition-delay: 0.2s;">
         <h3 class="gold-text">🔧 API & Developers</h3>
         <p>Integrate LuxDrive into your own apps and workflows using our open REST API with detailed documentation.</p>
@@ -69,5 +81,6 @@
 </section>
 
 @section Scripts {
+    @* Зареждане на скриптов модул за управление на интеракциите и анимациите в страницата *@
     <script src="~/js/features.js" asp-append-version="true"></script>
 }

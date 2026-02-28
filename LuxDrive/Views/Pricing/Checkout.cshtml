@@ -1,18 +1,23 @@
-﻿@model LuxDrive.ViewModels.Pricing.CheckoutViewModel
+﻿@* Силна типизация на модела за осигуряване на стриктна структура на данните при плащане *@
+@model LuxDrive.ViewModels.Pricing.CheckoutViewModel
 
 @{
+    /* Дефиниране на метаданни; Заглавието е важно за проследяване на конверсиите в аналитичните системи */
     ViewData["Title"] = "Checkout";
 }
 
 @section Styles {
+    @* Изолиране на стиловете за разплащателния модул с цел оптимизация на скоростта на зареждане *@
     <link rel="stylesheet" href="~/css/checkout.css" />
 }
 
 <div class="lux-payment-wrapper">
     <div class="lux-card">
+        @* Секция за обработка на транзакционни грешки, предавани чрез TempData (Post-Redirect-Get патърн) *@
         @if (TempData["ErrorMessage"] != null)
         {
             <div class="error-banner">
+                @* SVG икона за визуална сигнализация при проблем с оторизацията на картата *@
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
                     <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
                 </svg>
@@ -20,31 +25,40 @@
             </div>
         }
 
+        @* Хедър на поръчката: Динамично извличане на избрания план и неговата ценова стойност *@
         <div class="checkout-header">
             <h2>@Model.PlanName Plan</h2>
             <p>Secure Credit Card Payment</p>
             <span class="price-display">€@Model.PriceDisplay</span>
         </div>
 
+        @* Основна разплащателна форма; 'novalidate' се използва, за да се позволи на jQuery Validation да поеме контрола *@
         <form method="post" asp-controller="Pricing" asp-action="Process" id="payment-form" novalidate>
+            @* Критична защита срещу CSRF атаки – генерира уникален токен за валидация на сесията *@
             @Html.AntiForgeryToken()
+
+            @* Скрити полета за запазване на контекста на плана по време на POST заявката *@
             <input type="hidden" asp-for="PlanName" />
 
+            @* Име на картодържателя: Свързване с модела за валидация на символното съдържание *@
             <div class="form-floating mb-3">
                 <input type="text" class="form-control" asp-for="CardName" placeholder="Name on Card">
                 <label asp-for="CardName">Name on Card</label>
                 <span asp-validation-for="CardName" class="text-danger"></span>
             </div>
 
+            @* Номер на картата: Използване на maxlength за базова клиентска защита (Input Masking се поема от JS) *@
             <div class="form-floating mb-3">
                 <input type="text" class="form-control" id="cardNumber" asp-for="CardNumber" placeholder="0000 0000 0000 0000" maxlength="19">
                 <label for="cardNumber">Card Number</label>
                 <span asp-validation-for="CardNumber" class="text-danger"></span>
             </div>
 
+            @* Комбиниран ред за чувствителни данни (Expiry & CVC) – оптимизация на пространството *@
             <div class="row-gaps">
                 <div class="col-half">
                     <div class="form-floating mb-3">
+                        @* Срок на валидност: Форматът се контролира чрез DataAnnotations в ViewModel *@
                         <input type="text" class="form-control" id="expiry" asp-for="Expiry" placeholder="MM/YY" maxlength="5">
                         <label for="expiry">Expiry (MM/YY)</label>
                         <span asp-validation-for="Expiry" class="text-danger"></span>
@@ -52,6 +66,7 @@
                 </div>
                 <div class="col-half">
                     <div class="form-floating mb-3">
+                        @* CVC код: Тип 'password' за скриване на цифрите при въвеждане (Privacy by Design) *@
                         <input type="password" class="form-control" id="cvc" asp-for="CVC" placeholder="123" maxlength="3">
                         <label for="cvc">CVC</label>
                         <span asp-validation-for="CVC" class="text-danger"></span>
@@ -59,8 +74,10 @@
                 </div>
             </div>
 
+            @* Action бутон за финализиране на транзакцията *@
             <button type="submit" class="btn-lux" id="pay-btn">Pay Now</button>
 
+            @* Доверителен бадж (Trust Badge): Използване на векторен символ за потвърждаване на криптираната връзка *@
             <div class="secure-badge">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="#c6a664" viewBox="0 0 16 16">
                     <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z" />
@@ -72,6 +89,8 @@
 </div>
 
 @section Scripts {
+    @* Зареждане на библиотеките за Unobtrusive Validation – валидация на клиента без презареждане *@
     <partial name="_ValidationScriptsPartial" />
+    @* Custom логика за форматиране на номера на картата и обработка на UI събития *@
     <script src="~/js/checkout.js"></script>
 }

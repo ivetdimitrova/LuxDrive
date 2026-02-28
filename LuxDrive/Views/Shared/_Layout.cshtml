@@ -1,17 +1,25 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
+    @* Мета данни за кодировка и адаптивност (Responsive Design) *@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    @* Динамично заглавие, което се предава от всяка индивидуална View страница чрез ViewData *@
     <title>@ViewData["Title"] - LuxDrive</title>
 
+    @* Интегриране на индустриалния стандарт Bootstrap за бързо и надеждно оформяне на UI *@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    @* Основен CSS файл с asp-append-version="true" за автоматично обновяване на кеша при промяна (Cache Busting) *@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 
+    @* Резервирано място за специфични стилове, необходими само за определени страници *@
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
 
+    @* Глобална система за известия: Визуализира съобщения за успех, съхранени в TempData (Session-based) *@
     @if (TempData["SuccessMessage"] != null)
     {
         <div id="success-alert" class="lux-alert">
@@ -23,33 +31,41 @@
         </div>
     }
 
+    @* Главен контейнер, дефиниращ структурата на приложението (Layout Wrapper) *@
     <div class="container-fluid p-0 m-0 layout-wrapper">
         <header class="lux-header">
+            @* Брандинг елемент с фокус върху визуалната идентичност на LuxDrive *@
             <div class="lux-logo">
                 <span class="highlight">Lux</span>Drive
             </div>
 
+            @* Навигационен модул с условна логика според състоянието на автентикация *@
             <nav class="lux-nav">
                 @if (User.Identity != null && User.Identity.IsAuthenticated)
                 {
+                    @* Потребителят е логнат: Навигация към Dashboard (File/Index) *@
                     <a class="lux-nav-link" asp-controller="File" asp-action="Index">Home</a>
                 }
                 else
                 {
+                    @* Анонимен потребител: Навигация към публичната начална страница *@
                     <a class="lux-nav-link" asp-controller="Home" asp-action="Index">Home</a>
                 }
 
                 <a class="lux-nav-link" asp-controller="Home" asp-action="Features">Features</a>
                 <a class="lux-nav-link" asp-controller="Pricing" asp-action="Index">Pricing</a>
 
+                @* Инжектиране на Partial View за управление на Login/Logout състоянията (Identity) *@
                 <partial name="_LoginPartial" />
             </nav>
         </header>
 
+        @* Основна област за съдържание: Тук ASP.NET Core инжектира специфичния код от всяко отделно View *@
         <main role="main" class="lux-main">
             @RenderBody()
         </main>
 
+        @* Футър компонент с информация за правата и връзки към юридически документи *@
         <footer class="lux-footer text-center">
             <p>
                 © 2026 <strong>LuxDrive</strong> — All rights reserved |
@@ -59,10 +75,12 @@
         </footer>
     </div>
 
+    @* Зареждане на клиентски скриптове (jQuery и Bootstrap Bundle) в края на body за по-бързо рендиране на DOM *@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
+    @* Резервирано място за инжектиране на специфични скриптове от индивидуалните страници *@
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

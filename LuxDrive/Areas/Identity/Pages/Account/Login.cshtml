@@ -1,53 +1,73 @@
 ﻿@page
-@model LoginModel
+@model LoginModel /* Указва силно типизирания модел (Code-behind), който управлява логиката и данните */
 
 @{
+    /* Задаване на метаданни в речника ViewData, които се рендират в главния Layout файл */
     ViewData["Title"] = "Log in";
 }
 
+@* Включване на външен CSS със защитен механизъм срещу кеширане на стари версии в браузъра *@
 <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
 
-<div class="lux-login-wrapper">
-    <div class="lux-card">
+<div class="lux-login-wrapper"> @* Главен контейнер за центриране на интерфейса *@
+    <div class="lux-card"> @* Капсулация на формата в модерен картов дизайн *@
 
+        @* Брандиращ елемент с декоративен клас за светлинен ефект *@
         <div class="brand-logo"><span class="glow">Lux</span>Drive</div>
         <p class="subtitle">Welcome back. Please log in.</p>
 
+        @* Деклариране на форма; asp-antiforgery="true" се добавя автоматично за защита срещу CSRF атаки *@
         <form id="account" method="post">
+            
+            @* Рендира грешките, върнати отModelState в бекенда (напр. грешна парола) *@
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
+            @* Група за входни данни с 'floating label' ефект за модерна интерактивност *@
             <div class="form-floating">
+                @* asp-for свързва инпута с променливата Email в обекта Input от модела *@
                 <input asp-for="Input.Email" class="form-control" autocomplete="username" placeholder="name@example.com" />
+                @* asp-for на лейбъла автоматично изтегля Display името, дефинирано в C# модела *@
                 <label asp-for="Input.Email">Email Address</label>
+                @* Контейнер за динамични съобщения при грешка (напр. невалиден имейл формат) *@
                 <span asp-validation-for="Input.Email" class="text-danger" style="font-size:0.8rem; color:#ff5c5c; margin-left:5px;"></span>
             </div>
 
+            @* Контейнер за парола с автоматично маскиране на символите *@
             <div class="form-floating">
                 <input asp-for="Input.Password" class="form-control" autocomplete="current-password" placeholder="password" />
                 <label asp-for="Input.Password">Password</label>
                 <span asp-validation-for="Input.Password" class="text-danger" style="font-size:0.8rem; color:#ff5c5c; margin-left:5px;"></span>
             </div>
 
+            @* Блок за допълнителни потребителски предпочитания и навигация *@
             <div class="form-options">
                 <div class="form-check">
+                    @* Индикатор за създаване на персистентно cookie за сесията *@
                     <input class="form-check-input" asp-for="Input.RememberMe" />
                     <label class="form-check-label" asp-for="Input.RememberMe">Remember me</label>
                 </div>
+                @* Навигация към страница за възстановяване на достъпа *@
                 <a id="forgot-password" asp-page="./ForgotPassword" class="forgot-link">Forgot Password?</a>
             </div>
 
+            @* Основен бутон за изпращане (Submit) на формата към OnPostAsync метода в бекенда *@
             <button id="login-submit" type="submit" class="btn-lux">Log In</button>
 
+            @* Секция за регистрация на нов потребител с предаване на текущия ReturnUrl *@
             <div class="auth-footer">
                 <p class="mb-2">Don't have an account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Sign Up</a></p>
             </div>
         </form>
     </div>
 </div>
+
+@* Модален компонент за Reset Password; разбит на стъпки (Steps) за по-добро потребителско преживяване *@
 <div id="forgotPasswordModal" class="lux-modal" style="display:none;">
     <div class="lux-modal-content">
+        @* Икона за затваряне на модалния прозорец чрез JavaScript функция *@
         <span class="close-modal" onclick="closeForgotModal()">&times;</span>
 
+        @* Първа фаза: Инициализация на процеса чрез имейл идентификация *@
         <div id="reset-step-1">
             <h3 class="gold-text">Forgot Password</h3>
             <p>Enter your email to receive a code.</p>
@@ -55,13 +75,16 @@
             <button class="btn-lux w-100" onclick="simulateSendCode()">Send Code</button>
         </div>
 
+        @* Втора фаза: Въвеждане на OTP (One-Time Password) за потвърждение на самоличността *@
         <div id="reset-step-2" style="display:none;">
             <h3 class="gold-text">Verify Code</h3>
             <p>We've sent a code to your email. </p>
+            @* Ограничение на дължината до 4 знака за сигурност и прецизност *@
             <input type="text" id="reset-code-input" class="form-control mb-3" placeholder="Enter 4-digit code" maxlength="4" />
             <button class="btn-lux w-100" onclick="simulateVerifyCode()">Verify</button>
         </div>
 
+        @* Трета фаза: Финална смяна на паролата с потвърждение за избягване на печатни грешки *@
         <div id="reset-step-3" style="display:none;">
             <h3 class="gold-text">New Password</h3>
             <input type="password" id="new-password" class="form-control mb-2" placeholder="New Password" />
@@ -70,6 +93,9 @@
         </div>
     </div>
 </div>
+
 @section Scripts {
+    @* Зарежда библиотеките jquery.validate и jquery.validate.unobtrusive *@
+    @* Това позволява валидация на полетата на клиента, преди изобщо данните да стигнат до сървъра *@
     <partial name="_ValidationScriptsPartial" />
 }

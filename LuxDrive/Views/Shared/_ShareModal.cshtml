@@ -1,26 +1,41 @@
-﻿@model LuxDrive.ViewModels.Friends.ShareWithFriendViewModel
+﻿@* Използване на специализиран ViewModel за прецизно прехвърляне на метаданни за файлове и социални връзки *@
+@model LuxDrive.ViewModels.Friends.ShareWithFriendViewModel
 
+@* Капсулиран UI компонент за споделяне, реализиран като модален прозорец (Modality Pattern) *@
 <div class="modal-content custom-share-modal">
     <div class="modal-header-custom">
         <h4><i class="fas fa-share-alt"></i> Share file</h4>
+        @* Механизъм за програмно затваряне на обекта чрез манипулация на DOM дървото *@
         <button type="button" class="close-modal" onclick="closeShareModal()">&times;</button>
     </div>
 
+    @* Форма за споделяне: Пренасочва заявката към 'File' контролера чрез сигурна POST транзакция *@
+    @* 'handleShareSubmit' позволява асинхронно изпращане (AJAX) за по-плавен интерфейс без презареждане *@
     <form asp-controller="File" asp-action="Share" method="post" class="share-form" onsubmit="handleShareSubmit(event, this)">
+
+        @* Скрито поле (Hidden Input): Транспортира уникалния идентификатор на файла, запазвайки контекста на операцията *@
         <input type="hidden" asp-for="FileId" />
 
         <div class="form-group">
             <label asp-for="ReceiverId">Select a friend to share with</label>
+
+            @* Динамичен падащ списък (Select): Интегрира клиентска валидация и персонализирани съобщения за грешка *@
             <select asp-for="ReceiverId" class="form-select custom-select" required
                     oninvalid="this.setCustomValidity('Please select a friend from the list.')"
                     onchange="this.setCustomValidity('')">
+
+                @* Логика за управление на 'Empty State': Проверка на социалния граф в реално време *@
                 @if (!Model.Friends.Any())
                 {
+                    @* Fallback опция при липса на социални връзки – подобрява разбираемостта на интерфейса *@
                     <option value="" selected disabled>-- You don't have friends --</option>
                 }
                 else
                 {
+                    @* Плейсхолдър, който се скрива след активиране на менюто (User Guidance) *@
                     <option value="" selected disabled hidden>Choose friend</option>
+
+                    @* Итерация през колекцията от приятели за генериране на опции за избор (Data Binding) *@
                     @foreach (var f in Model.Friends)
                     {
                         <option value="@f.Id">@f.Name</option>
@@ -29,6 +44,7 @@
             </select>
         </div>
 
+        @* Action бутон за финализиране на процеса по делегиране на достъп (Permissions Delegation) *@
         <button type="submit" class="btn btn-share-submit">
             Share with Friend
         </button>

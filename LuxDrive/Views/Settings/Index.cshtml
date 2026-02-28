@@ -1,25 +1,33 @@
-﻿@model LuxDrive.ViewModels.Settings.UserSettingsViewModel
+﻿@* Интегриране на специализиран ViewModel за сигурно пренасяне на потребителските данни между слоевете *@
+@model LuxDrive.ViewModels.Settings.UserSettingsViewModel
 @{
+    /* Дефиниране на мета-заглавие и логика за запазване на активния изглед (Active Tab) */
+    /* Използва се TempData за съхранение на състоянието на UI след POST заявка (Post-Redirect-Get патърн) */
     ViewData["Title"] = "Account Settings";
     var activeTab = TempData["ActiveTab"] as string ?? "profile";
 }
 
+@* Прилагане на механизъм за cache-busting чрез Tag Helper-а asp-append-version *@
 <link rel="stylesheet" href="~/css/settings.css" asp-append-version="true" />
 
+@* Система за контекстуална обратна връзка (Feedback Loop) чрез Toast нотификации *@
 @if (TempData["Success"] != null || TempData["Error"] != null)
 {
     <div id="force-toast-container">
         @if (TempData["Success"] != null)
         {
+            @* Визуализация на успешно изпълнена операция с икони за достъпност *@
             <div class="force-toast success"><i class="fas fa-check"></i> @TempData["Success"]</div>
         }
         @if (TempData["Error"] != null)
         {
+            @* Визуализация на системни или логически грешки *@
             <div class="force-toast error"><i class="fas fa-times"></i> @TempData["Error"]</div>
         }
     </div>
 }
 
+@* Използване на data-атрибути за безпроблемна комуникация между сървърната логика и JavaScript клиента *@
 <div class="settings-container" data-active-tab="@activeTab">
     <div class="settings-header">
         <h1>Account <span class="gold-text">Settings</span></h1>
@@ -27,6 +35,7 @@
     </div>
 
     <div class="settings-layout">
+        @* Навигационен панел за табове: Оптимизира пространството и намалява когнитивното натоварване *@
         <div class="settings-sidebar">
             <button id="btn-profile" class="tab-btn active" onclick="openTab(event, 'profile')"><i class="fas fa-user"></i> Profile</button>
             <button id="btn-security" class="tab-btn" onclick="openTab(event, 'security')"><i class="fas fa-lock"></i> Security</button>
@@ -36,27 +45,34 @@
 
         <div class="settings-content">
 
+            @* Секция: Управление на профила и мултимедийно съдържание *@
             <div id="profile" class="tab-content">
                 <h2 class="gold-text" style="margin-bottom: 20px;">Profile Information</h2>
+                @* enctype="multipart/form-data" е критично за коректния стрийминг на IFormFile обекти *@
                 <form asp-action="UpdateProfile" method="post" enctype="multipart/form-data">
                     <div class="profile-upload-section">
+                        @* Динамично зареждане на аватар с fallback механизъм *@
                         <div class="profile-img-container">
                             <img src="@Model.ProfileImageUrl" id="profile-preview" alt="Profile" />
                         </div>
                         <div class="button-group-lux">
+                            @* Програмно задействане на системния диалог за избор на файл (UX Trick) *@
                             <input asp-for="ProfileImage" type="file" id="imageInput" style="display:none;" accept="image/*" onchange="handleImageUpload(event)" />
                             <button type="button" class="btn-lux-change" onclick="document.getElementById('imageInput').click()">EDIT PHOTO</button>
                             <button type="button" class="btn-lux-outline" onclick="markForRemoval()">Remove</button>
                         </div>
                         <p class="upload-info">JPG, PNG or WEBP • Max 2MB</p>
+                        @* Скрит вход за флагово управление на състоянието на аватара *@
                         <input type="hidden" name="RemovePhoto" id="removePhotoFlag" value="false" />
                     </div>
 
+                    @* Полета за идентификация: Username е деактивиран (Read-only) за запазване на системния интегритет *@
                     <div class="form-group">
                         <label>Username</label>
                         <input asp-for="Username" class="lux-input" disabled />
                     </div>
 
+                    @* Организация на данните в редове за по-добър визуален ритъм (Form Layouting) *@
                     <div class="form-row">
                         <div class="form-group">
                             <label>First Name</label>
@@ -85,9 +101,11 @@
                 </form>
             </div>
 
+            @* Секция: Сигурност и криптографско управление на пароли *@
             <div id="security" class="tab-content" style="display:none;">
                 <h2>Change Password</h2>
                 <form asp-action="ChangePassword" method="post">
+                    @* Използване на PasswordBox за предотвратяване на визуална кражба на данни *@
                     <div class="form-group">
                         <label>Current Password</label>
                         <input asp-for="CurrentPassword" type="password" class="lux-input" />
@@ -107,18 +125,22 @@
                 </form>
             </div>
 
+            @* Секция: Разплащателни инструменти и PCI-метаданни *@
             <div id="billing" class="tab-content" style="display:none;">
                 <h2 class="gold-text">Saved Cards</h2>
                 <div class="cards-list">
+                    @* Итерация през колекция от маскирани данни за карти (Security Compliance) *@
                     @if (Model.SavedCards != null && Model.SavedCards.Any())
                     {
                         foreach (var card in Model.SavedCards)
                         {
                             <div class="card-item">
                                 <div class="card-info">
+                                    @* Динамична визуализация на бранда на картата чрез FontAwesome *@
                                     <i class="fab fa-cc-@card.CardType.ToLower()" style="font-size:1.5rem; margin-right:10px;"></i>
                                     <span>**** **** **** @card.CardLast4</span>
                                 </div>
+                                @* Малко-мащабни форми за управление на записи (CRUD - Delete) *@
                                 <form asp-action="RemoveCard" method="post" style="margin:0;">
                                     <input type="hidden" name="cardId" value="@card.Id" />
                                     <button type="submit" class="btn-remove">Remove</button>
@@ -128,11 +150,13 @@
                     }
                     else
                     {
+                        @* Празно състояние (Empty State) за поддържане на интерфейсна яснота *@
                         <p style="color:#666; margin-bottom: 20px;">No cards saved yet.</p>
                     }
                 </div>
                 <hr style="border-color:rgba(255,255,255,0.1); margin: 30px 0;" />
                 <h3 class="gold-text">Add New Card</h3>
+                @* Форма за въвеждане на нови платежни инструменти с вградена клиентска валидация *@
                 <form asp-action="AddCard" method="post">
                     <div class="form-group">
                         <label>Name on Card</label>
@@ -160,11 +184,14 @@
                 </form>
             </div>
 
+            @* Зона за критични действия (Danger Zone): Необратими операции *@
             <div id="danger" class="tab-content" style="display:none;">
                 <h2 class="text-danger">Delete Account</h2>
                 <p>Deleting your account is permanent. All your data will be wiped immediately.</p>
                 <div style="margin-top: 20px;">
+                    @* Потвърждение на ниво клиент (JS Confirm) за превенция на неволни деструктивни действия *@
                     <form asp-action="DeleteAccount" method="post" onsubmit="return confirm('WARNING: Are you sure you want to delete your account? This cannot be undone!');">
+                        @* Защита срещу Cross-Site Request Forgery (CSRF) *@
                         @Html.AntiForgeryToken()
                         <button type="submit" class="btn-danger-glow">DELETE ACCOUNT</button>
                     </form>
@@ -176,8 +203,10 @@
 </div>
 
 @section Scripts {
+    @* Зареждане на клиентски скриптове за табовете и маскиране на входните данни *@
     <script src="~/js/settings.js" asp-append-version="true"></script>
     @{
+        @* Рендиране на частичния изглед за Unobtrusive Validation за асинхронна проверка на полетата *@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }

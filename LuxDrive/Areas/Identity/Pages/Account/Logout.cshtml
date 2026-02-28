@@ -1,20 +1,30 @@
-﻿@page
-@model LogoutModel
+﻿@page 
+@model LogoutModel /* Свързване с бекенд модела, който управлява жизнения цикъл на сесията при изход */
 @{
+    /* Дефиниране на заглавие на страницата в глобалния ViewData речник за SEO и UI консистентност */
     ViewData["Title"] = "Log out";
 }
 
 <header>
+    @* Динамично извличане на заглавието от ViewData обекта *@
     <h1>@ViewData["Title"]</h1>
+    
     @{
+        /* Проверка на текущото състояние на автентикация чрез Claims-based Identity системата на ASP.NET Core */
+        /* Използване на 'null-conditional' (?.) и 'null-coalescing' (??) оператори за избягване на NullReferenceException */
         if (User.Identity?.IsAuthenticated ?? false)
         {
+            /* Използва се FORM с метод POST за сигурност. 
+               Това предотвратява неволно отписване чрез обикновен GET линк (защита срещу CSRF атаки) */
             <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/", new { area = "" })" method="post">
+                
+                @* asp-route-returnUrl автоматично генерира пътя за редирект след успешно унищожаване на сесията *@
                 <button type="submit" class="nav-link btn btn-link text-dark">Click here to Logout</button>
             </form>
         }
         else
         {
+            /* Алтернативен изглед (Fallback), който се показва, ако потребителят вече е анонимен */
             <p>You have successfully logged out of the application.</p>
         }
     }

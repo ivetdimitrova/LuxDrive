@@ -1,12 +1,17 @@
-﻿@using LuxDrive.ViewModels.File;
+﻿@* Импортиране на пространството от имена за достъп до ViewModels, поддържайки разделение на отговорностите (Separation of Concerns) *@
+@using LuxDrive.ViewModels.File;
 @model IEnumerable<IndexViewModel>
 
 @{
+    /* Дефиниране на заглавието и логика за определяне на текущия маршрут (Routing context) */
     ViewData["Title"] = "LuxDrive Dashboard";
     var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "Index";
 
+    /* Инициализация на колекцията и агрегиране на данни чрез LINQ в реално време за статистическия модул */
     var files = Model ?? Enumerable.Empty<IndexViewModel>();
     int totalFiles = files.Count();
+
+    /* Филтриране по категории чрез проверка на разширения и булеви флагове - оптимизира броя обхождания на колекцията */
     int imgCount = files.Count(f => f.IsImage);
     int vidCount = files.Count(f => new[] { ".mp4", ".avi", ".mov", ".mkv" }
         .Contains(f.Extension?.ToLower()));
@@ -16,16 +21,20 @@
         .Contains(f.Extension?.ToLower()));
 }
 
+@* Вмъкване на външни ресурси: FontAwesome за векторни икони и Montserrat за премиум типография *@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+@* Специфични стилове с версия за избягване на кеширане при обновяване на дизайна *@
 <link rel="stylesheet" href="~/css/file.css" asp-append-version="true" />
 <link rel="stylesheet" href="~/css/friends.css" />
 
 <div class="app-wrapper">
+    @* Странична навигация (Sidebar) с условно форматиране на активните елементи въз основа на текущия екшън *@
     <aside class="sidebar">
         <div class="nav-section" style="margin-top:20px;">
             <div class="nav-title">Menu</div>
 
+            @* Динамично прилагане на CSS клас 'active' за визуална обратна връзка (Active State Tracking) *@
             <a asp-controller="File" asp-action="Index" class="nav-item @(currentAction == "Index" ? "active" : "")">
                 <i class="fas fa-house"></i> All Files
             </a>
@@ -34,6 +43,7 @@
                 <i class="fas fa-share-nodes"></i> Shared
             </a>
 
+            @* Използване на 'onclick' за прекъсване на стандартното събитие и зареждане чрез AJAX *@
             <a asp-controller="Friends" asp-action="LoadFriendList" class="nav-item" onclick="showFriends(event, this)">
                 <i class="fas fa-user-group"></i> Friends
             </a>
@@ -47,6 +57,7 @@
             </a>
         </div>
 
+        @* Секция 'Библиотеки' - клиентско филтриране чрез JavaScript за незабавна реакция на интерфейса *@
         <div class="nav-section">
             <div class="nav-title">Libraries</div>
             <a href="#" class="nav-item" onclick="filterFiles(event,'image')"><i class="fas fa-images"></i> Photos</a>
@@ -55,6 +66,7 @@
             <a href="#" class="nav-item" onclick="filterFiles(event,'archive')"><i class="fas fa-box-archive"></i> Archives</a>
         </div>
 
+        @* Визуализация на заетото дисково пространство чрез прогрес бар (Storage Quota Management) *@
         <div class="storage-box">
             <div class="storage-header">
                 <span>Storage</span>
@@ -71,22 +83,25 @@
     </aside>
 
     <div class="content">
-
+        @* Горен хедър с лента за търсене и модул за качване на файлове *@
         <div class="top-header">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" placeholder="Search" onkeyup="searchFiles(this.value)">
             </div>
 
+            @* Форма за качване: Използва multipart/form-data за трансфер на двоични данни и Anti-Forgery Token за сигурност *@
             <form asp-controller="File" asp-action="Upload" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <label for="file-upload" class="upload-btn">
                     <i class="fas fa-cloud-arrow-up"></i> Upload
                 </label>
+                @* Скрит вход, който се задейства автоматично при избор на файл (onchange="this.form.submit()") *@
                 <input type="file" id="file-upload" name="files" multiple hidden onchange="this.form.submit()" />
             </form>
         </div>
 
+        @* Статистически карти: Визуално представяне на изчислените в началото променливи *@
         <div class="stats-grid">
             <div class="stat-card"><div class="stat-info"><h5>All Files</h5><span>@totalFiles</span></div><div class="stat-icon"><i class="fas fa-hard-drive"></i></div></div>
             <div class="stat-card"><div class="stat-info"><h5>Photos</h5><span>@imgCount</span></div><div class="stat-icon"><i class="fas fa-camera"></i></div></div>
@@ -94,6 +109,8 @@
             <div class="stat-card"><div class="stat-info"><h5>Documents</h5><span>@docCount</span></div><div class="stat-icon"><i class="fas fa-file-contract"></i></div></div>
             <div class="stat-card"><div class="stat-info"><h5>Archives</h5><span>@arcCount</span></div><div class="stat-icon"><i class="fas fa-file-zipper"></i></div></div>
         </div>
+
+        @* Инструментариум за масова селекция (Bulk Actions UI) - първоначално скрит *@
         <div id="selection-tools" style="display: none; width: 100%; margin: 20px 0;">
             <div class="selection-inner">
                 <div class="selection-info">
@@ -102,49 +119,35 @@
                         <span id="selectedCountDisplay">0 selected</span>
                     </div>
                 </div>
-
                 <div class="selection-actions">
-                    <button class="sel-btn select-all" onclick="selectAllFiles()">
-                        <span>Select All</span>
-                    </button>
-                    <button class="sel-btn cancel" onclick="clearSelection()">
-                        <i class="fas fa-times"></i>
-                        <span>Cancel</span>
-                    </button>
+                    <button class="sel-btn select-all" onclick="selectAllFiles()"><span>Select All</span></button>
+                    <button class="sel-btn cancel" onclick="clearSelection()"><i class="fas fa-times"></i><span>Cancel</span></button>
                 </div>
             </div>
         </div>
+
+        @* Основна мрежа за файлове: Рендиране на съдържанието чрез итерация *@
         <div class="files-grid">
             @if (Model != null && Model.Any())
             {
                 @foreach (var file in Model)
                 {
+                    @* Логика за класификация на типа файл за нуждите на клиентското филтриране *@
                     string fileCategory = "other";
                     var ext = file.Extension?.ToLower() ?? "";
 
-                    if (file.IsImage)
-                    {
-                        fileCategory = "image";
-                    }
-                    else if (new[] { ".mp4", ".avi", ".mov", ".mkv" }.Contains(ext))
-                    {
-                        fileCategory = "video";
-                    }
-                    else if (new[] { ".pdf", ".doc", ".docx", ".txt", ".xlsx" }.Contains(ext))
-                    {
-                        fileCategory = "document";
-                    }
-                    else if (new[] { ".zip", ".rar", ".7z", ".tar" }.Contains(ext))
-                    {
-                        fileCategory = "archive";
-                    }
-                    <div class="file-item"
-                        id="file-@file.Id"
-                        data-type="@fileCategory" data-download-url="@file.StorageUrl">
+                    if (file.IsImage) fileCategory = "image";
+                    else if (new[] { ".mp4", ".avi", ".mov", ".mkv" }.Contains(ext)) fileCategory = "video";
+                    else if (new[] { ".pdf", ".doc", ".docx", ".txt", ".xlsx" }.Contains(ext)) fileCategory = "document";
+                    else if (new[] { ".zip", ".rar", ".7z", ".tar" }.Contains(ext)) fileCategory = "archive";
 
+                    @* Контейнер на единичен файл с метаданни, съхранени в data-атрибути за JS манипулация *@
+                    <div class="file-item" id="file-@file.Id" data-type="@fileCategory" data-download-url="@file.StorageUrl">
                         <div class="preview-box">
+                            @* Чекбокс за селекция (Custom Checkbox Logic) *@
                             <div class="check-circle" onclick="toggleSelect(this,'@file.Id')"></div>
 
+                            @* Условно рендиране: Image Preview срещу Generic Icon *@
                             @if (file.IsImage)
                             {
                                 <img src="@file.StorageUrl" alt="@file.Name" loading="lazy" />
@@ -155,31 +158,30 @@
                             }
                         </div>
 
+                        @* Слой за бързи действия (Quick Actions Overlay) *@
                         <div class="actions-overlay">
-
                             <a asp-controller="File" asp-action="Download" asp-route-id="@file.Id" class="action-btn" title="Download">
                                 <i class="fas fa-download"></i>
                             </a>
-                           
 
+                            @* Контекстни бутони: Показват се само ако потребителят е в своя 'Index' изглед *@
                             @if (currentAction == "Index")
-                            { <form asp-controller="Friends" asp-action="LoadShareList" method="post" style="display:inline;" onsubmit="showShare(event, this)">
-                                <input type="hidden" name="fileId" value="@file.Id" />
-
-                                <button type="submit" class="action-btn" title="Share" >
-                                    <i class="fas fa-share-alt" ></i>
-                                </button>
-                            </form>
+                            {
+                                <form asp-controller="Friends" asp-action="LoadShareList" method="post" style="display:inline;" onsubmit="showShare(event, this)">
+                                    <input type="hidden" name="fileId" value="@file.Id" />
+                                    <button type="submit" class="action-btn" title="Share"><i class="fas fa-share-alt"></i></button>
+                                </form>
                                 <button class="action-btn" onclick="renameFile('@file.Id', '@file.Name')" title="Rename"><i class="fas fa-pen"></i></button>
                                 <button class="action-btn" onclick="deleteFile('@file.Id')" title="Delete"><i class="fas fa-trash"></i></button>
                             }
-
                         </div>
+
                         <div class="file-info">
                             <h3>@file.Name</h3>
                             <p>@file.Extension • @file.UploadedAt.ToString("dd MMM")</p>
                         </div>
 
+                        @* Показване на името на изпращача, ако файлът е споделен (Social Proofing) *@
                         @if (currentAction == "SharedWithMe")
                         {
                             <p style="color:var(--gold); margin-top:5px;"><i class="fas fa-user-circle"></i> @file.SenderName</p>
@@ -188,40 +190,36 @@
                 }
             }
 
+            @* Празно състояние (Empty State): Важен UX елемент при липса на данни *@
             <div id="empty-state" class="empty-state-container" style="display: @(Model != null && Model.Any() ? "none" : "flex");">
                 <i class="fas fa-folder-open"></i>
                 <p id="empty-text">No files found</p>
             </div>
         </div>
-        <div id="modalContainer" class="modal-overlay" style="display:none;"></div>
 
+        @* Контейнери за динамични модални прозорци (AJAX Content Placeholders) *@
+        <div id="modalContainer" class="modal-overlay" style="display:none;"></div>
         <div id="shareContainer" class="modal-overlay" style="display:none;"></div>
 
+        @* Лента за масови операции: Появява се при селекция на обекти (Contextual Action Bar) *@
         <div id="bulkBar" class="bulk-bar">
             <div class="bulk-content">
                 <span id="bulkCount" class="bulk-count">0 Selected</span>
-
                 <div class="bulk-actions">
-                    <button type="button" class="bulk-btn" onclick="bulkDownload()">
-                        <i class="fas fa-file-download"></i> Download
-                    </button>
+                    <button type="button" class="bulk-btn" onclick="bulkDownload()"><i class="fas fa-file-download"></i> Download</button>
 
                     @if (currentAction == "Index")
                     {
-                        <button type="button" class="bulk-btn" onclick="bulkShare()">
-                            <i class="fas fa-share-nodes"></i> Share
-                        </button>
-
-                        <button type="button" class="bulk-btn delete" onclick="bulkDelete()">
-                            <i class="fas fa-trash-can"></i> Delete
-                        </button>
+                        <button type="button" class="bulk-btn" onclick="bulkShare()"><i class="fas fa-share-nodes"></i> Share</button>
+                        <button type="button" class="bulk-btn delete" onclick="bulkDelete()"><i class="fas fa-trash-can"></i> Delete</button>
                     }
                 </div>
             </div>
         </div>
-</div>
+    </div>
 </div>
 
+@* Система за известия: Интеграция на сървърния TempData с клиентския интерфейс чрез JavaScript *@
 @if (TempData["AlertMessage"] != null)
 {
     <div id="customAlert">
@@ -231,20 +229,17 @@
     </div>
 
     <script>
-       
+        /* Самоизпълняваща се функция (IIFE) за изолиране на обхвата и автоматично скриване на известието */
         (function() {
             const alertBox = document.getElementById("customAlert");
-
             alertBox.style.display = "block";
-
             setTimeout(() => {
                 alertBox.style.opacity = "0";
-                setTimeout(() => {
-                    alertBox.remove(); // Премахва го от HTML-а напълно
-                }, 500);
+                setTimeout(() => { alertBox.remove(); }, 500);
             }, 4000);
         })();
     </script>
 }
 
+@* Включване на външната логика - поддържане на 'Thin View' патърна *@
 <script src="~/js/file.js"></script>

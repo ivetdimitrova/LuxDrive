@@ -1,22 +1,28 @@
 ﻿@{
+    /* Дефиниране на метаданни и извличане на състоянието на потребителя от ViewBag */
     ViewData["Title"] = "Pricing - LuxDrive";
 
+    /* Проверка на автентикационното състояние чрез Identity Middleware */
     bool isLoggedIn = User.Identity != null && User.Identity.IsAuthenticated;
 
+    /* Логика за обработка на текущия абонамент и данни за плащане (Business Logic Extraction) */
     var currentPlan = isLoggedIn ? ViewBag.CurrentPlan as string : null;
     bool hasCard = ViewBag.HasCard is bool val && val;
     var expiryDate = ViewBag.ExpiryDate as string;
 }
 
 @section Styles {
+    @* Модулно зареждане на стилове с версия за избягване на конфликти при обновяване *@
     <link rel="stylesheet" href="~/css/pricing.css" asp-append-version="true" />
 }
 
 <section class="hero" id="hero-section">
     <div class="hero-bg"></div>
     <div class="spotlight"></div>
+    @* Canvas компонент за динамични частици, рендирани в реално време (Performance UI) *@
     <canvas id="particles-canvas"></canvas>
 
+    @* Паралакс слоеве с различни вектори на дълбочина (Depth Perception) *@
     <img src="/images/gold-cloud.png" class="hero-cloud cloud-1" data-speed="0.05" data-depth="0.2" />
     <img src="/images/gold-cloud.png" class="hero-cloud cloud-2" data-speed="-0.06" data-depth="0.3" />
     <img src="/images/gold-cloud.png" class="hero-cloud cloud-5" data-speed="0.01" data-depth="0.1" />
@@ -26,11 +32,13 @@
         <h1>Select Your <span class="gold-shimmer">Plan</span></h1>
         <p>Unlock the full potential of LuxDrive. Simple pricing, no hidden fees.</p>
 
+        @* Статус панел: Визуализира текущото състояние на абонамента само за логнати потребители *@
         @if (isLoggedIn && currentPlan != "None" && !string.IsNullOrEmpty(currentPlan))
         {
             <div class="lux-status-card">
                 <span class="status-label">@currentPlan Plan Active</span>
                 <div class="status-value">
+                    @* Условно форматиране: Индикация за автоматично подновяване срещу изтичащ абонамент *@
                     @if (hasCard)
                     {
                         <span>Auto-renews on: @expiryDate</span>
@@ -45,8 +53,10 @@
     </div>
 </section>
 
+@* Секция с ценови предложения: Използва каскадно зареждане (Staggered Animation) *@
 <section class="features">
 
+    @* --- FREE PLAN --- *@
     <div class="feature" style="transition-delay: 0s;">
         <div>
             <h2>🎁 Free Plan</h2>
@@ -54,20 +64,25 @@
             <div class="price-tag">€0.00 <span>/ free</span></div>
         </div>
 
+        @* Дървовидна логика за бутоните (Action Mapping): *@
         @if (!isLoggedIn)
         {
+            /* 1. За анонимни потребители: Регистрация */
             <a asp-area="Identity" asp-page="/Account/Register" class="btn-glow">Sign Up Free</a>
         }
         else if (currentPlan == "None" || string.IsNullOrEmpty(currentPlan))
         {
+            /* 2. За потребители на текущия план: Информативен бутон */
             <button class="btn-glow active-plan">✓ Current Plan</button>
         }
         else
         {
+            /* 3. За потребители на платен план: Опция за Downgrade */
             <a asp-controller="Pricing" asp-action="Downgrade" class="btn-downgrade">Switch to Free</a>
         }
     </div>
 
+    @* --- BASIC PLAN --- *@
     <div class="feature" style="transition-delay: 0.2s;">
         <div>
             <h2>💼 Basic Plan</h2>
@@ -81,12 +96,14 @@
         }
         else if (currentPlan == "Pro" || currentPlan == "Enterprise")
         {
+            @* Превключване към по-нисък платен план (Upgrade/Downgrade logic) *@
             <a asp-controller="Pricing" asp-action="QuickPurchase" asp-route-plan="Basic" class="btn-downgrade">Switch to Basic</a>
         }
         else
         {
             if (isLoggedIn)
             {
+                @* Оптимизиран User Flow: Ако има карта, прескачаме Checkout страницата (1-Click Buy) *@
                 if (hasCard)
                 {
                     <a asp-controller="Pricing" asp-action="QuickPurchase" asp-route-plan="Basic" class="btn-glow">Get Started</a>
@@ -98,11 +115,13 @@
             }
             else
             {
+                @* Привличане на анонимни потребители с автоматичен редирект обратно към покупката *@
                 <a asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="/Pricing/Checkout?plan=Basic" class="btn-glow">Get Started</a>
             }
         }
     </div>
 
+    @* --- PRO PLAN --- *@
     <div class="feature" style="transition-delay: 0.4s;">
         <div>
             <h2>🚀 Pro Plan</h2>
@@ -122,6 +141,7 @@
         {
             if (isLoggedIn)
             {
+                @* Логика за надграждане (Upgrade) на текущ абонамент *@
                 if (hasCard)
                 {
                     <a asp-controller="Pricing" asp-action="QuickPurchase" asp-route-plan="Pro" class="btn-glow">Upgrade</a>
@@ -138,6 +158,7 @@
         }
     </div>
 
+    @* --- ENTERPRISE PLAN --- *@
     <div class="feature" style="transition-delay: 0.6s;">
         <div>
             <h2>🏢 Enterprise</h2>
@@ -151,6 +172,7 @@
         }
         else
         {
+            @* Канал за директна комуникация при специфични корпоративни нужди *@
             <a asp-controller="Pricing" asp-action="ContactSales" class="btn-glow">Contact Sales</a>
         }
     </div>
@@ -158,5 +180,6 @@
 </section>
 
 @section Scripts {
+    @* Зареждане на клиентската логика за визуализация и анимации *@
     <script src="~/js/pricing.js" asp-append-version="true"></script>
 }

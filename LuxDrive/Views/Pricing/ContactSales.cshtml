@@ -1,10 +1,13 @@
-﻿@model LuxDrive.ViewModels.Pricing.ContactSalesViewModel
+﻿@* Използване на специфичен ViewModel за капсулация на данните, което гарантира Type Safety и чиста архитектура *@
+@model LuxDrive.ViewModels.Pricing.ContactSalesViewModel
 
 @{
+    /* Дефиниране на заглавието на страницата за нуждите на Layout-а и SEO оптимизацията */
     ViewData["Title"] = "Contact Sales";
 }
 
 @section Styles {
+    @* Зареждане на специфични за страницата стилове, поддържайки основния CSS пакет лек (Modular CSS) *@
     <link rel="stylesheet" href="~/css/contact.css" />
 }
 
@@ -12,48 +15,60 @@
     <div class="lux-card">
 
         <div class="contact-header">
+            @* Използване на брандовия стил 'glow' за поддържане на визуална идентичност (Brand Consistency) *@
             <h1>Contact <span class="glow">Sales</span></h1>
             <p>Need a custom enterprise plan? Reach out to our team.</p>
         </div>
 
+        @* Success Banner: Проектиран за SPA-подобно преживяване; първоначално скрит, активира се след успешен AJAX или Postback *@
         <div id="success-message" class="success-banner" style="display: none;">
             <div class="success-icon">
                 <i class="fas fa-check"></i>
             </div>
             <h3>Request Received</h3>
             <p>Thank you. A specialist has been assigned to your case and will contact you shortly.</p>
+            @* Механизъм за ресет на формата чрез опресняване на обекта в паметта (State Reset) *@
             <button class="btn-lux" onclick="location.reload()">Return to Form</button>
         </div>
 
+        @* Форма за контакт: Използва 'novalidate', за да позволи на custom JavaScript валидацията да поеме контрола *@
         <form id="contact-form" asp-action="ContactSales" method="post" novalidate>
+            @* Генериране на скрит Token за защита срещу CSRF (Cross-Site Request Forgery) атаки *@
             @Html.AntiForgeryToken()
 
+            @* Група за име: Двупосочно обвързване (Data Binding) към свойството Name в модела *@
             <div class="form-floating mb-3">
                 <input type="text" class="form-control" asp-for="Name" id="name" placeholder="Full Name">
                 <label asp-for="Name">Full Name</label>
+                @* Динамично показване на грешки при валидация, дефинирани чрез атрибути в C# класа (напр. [Required]) *@
                 <span asp-validation-for="Name" class="text-danger"></span>
             </div>
 
+            @* Група за имейл: HTML5 тип 'email' за базова браузърна валидация на синтаксиса *@
             <div class="form-floating mb-3">
                 <input type="email" class="form-control" asp-for="Email" id="email" placeholder="Email Address">
                 <label asp-for="Email">Email Address</label>
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
 
+            @* Опционално поле: Демонстрира гъвкавост на формата за корпоративни клиенти *@
             <div class="form-floating mb-3">
                 <input type="text" class="form-control" asp-for="Company" id="company" placeholder="Company Name">
                 <label asp-for="Company">Company Name (Optional)</label>
                 <span asp-validation-for="Company" class="text-danger"></span>
             </div>
 
+            @* Текстово поле за съобщение: Ограничено визуално, но позволяващо широк обем от входни данни *@
             <div class="form-floating mb-3">
                 <textarea class="form-control" asp-for="Message" id="message" placeholder="Your Message" style="height: 120px;"></textarea>
                 <label asp-for="Message">How can we help you?</label>
                 <span asp-validation-for="Message" class="text-danger"></span>
             </div>
 
+            @* Основен Action бутон за иницииране на комуникационния процес *@
             <button type="submit" class="btn-lux" id="send-btn">Send Request</button>
 
+            @* Информационна бележка (Trust Indicator): Използва се за изграждане на доверие по отношение на сигурността *@
             <div class="info-note">
                 <i class="fas fa-shield-alt"></i>
                 Data processed securely. 24h response time.
@@ -64,7 +79,9 @@
 </div>
 
 @section Scripts {
+    @* Зареждане на стандартните скриптове за Unobtrusive Validation, които поддържат клиентската валидация без презареждане *@
     <partial name="_ValidationScriptsPartial" />
 
+    @* Custom логика за управление на анимациите при изпращане и показване на success банера *@
     <script src="~/js/contact.js"></script>
 }
