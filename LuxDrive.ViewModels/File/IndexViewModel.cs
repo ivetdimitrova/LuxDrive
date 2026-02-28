@@ -19,6 +19,9 @@ namespace LuxDrive.ViewModels.File
 
         public string? SenderName { get; set; } 
         public DateTime UploadedAt { get; set; }
+
+        /* ИЗЧИСЛИМО СВОЙСТВО (Computed Property):
+           Капсулира бизнес логиката за идентификация на изображения.  */
         public bool IsImage =>
             !string.IsNullOrEmpty(Extension) &&
             new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg" }

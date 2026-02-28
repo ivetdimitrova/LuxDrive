@@ -22,6 +22,8 @@ namespace LuxDrive.ViewModels.Pricing
         [RegularExpression(@"^[0-9]{3,4}$", ErrorMessage = "CVC must be 3 digits")]
         public string CVC { get; set; }
 
+        /* Изчислимо свойство (Computed Property): Използва модерния C# 'switch expression' 
+           за динамично определяне на цената според името на плана. */
         public string PriceDisplay => PlanName?.ToLower() switch
         {
             var p when p.Contains("pro") => "14.99",

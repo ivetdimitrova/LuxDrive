@@ -11,6 +11,9 @@ namespace LuxDrive.ViewModels.File
         public string Extension { get; set; }
         public DateTime? DeletedOn { get; set; }
 
+        
+        /* Изчислимо свойство (Computed Property), което определя оставащите дни до перманентно изтриване.
+         Демонстрира прилагане на бизнес правилото за 30-дневен гратисен период.*/
         public int DaysLeft
         {
             get
@@ -21,7 +24,7 @@ namespace LuxDrive.ViewModels.File
                 return Math.Max(0, days);
             }
         }
-
+        //Форматира разширението за по-добра четимост в потребителския интерфейс(UI Optimization).
         public string DisplayExtension => Extension?.ToUpper() ?? "";
     }
 }
