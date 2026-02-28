@@ -1,8 +1,24 @@
-﻿.urgent-timer {
+﻿/* 1. ИНФОРМАЦИОННИ ЕЛЕМЕНТИ В КОШЧЕТО */
+
+/* Таймерът, който показва колко дни остават до автоматично изтриване */
+.urgent-timer {
     color: var(--gold) !important;
     font-weight: 700;
 }
 
+/* Кутията с информация в горната част ("Файловете се пазят 30 дни") */
+.trash-info-box {
+    margin-top: auto;
+    padding: 15px;
+    background: linear-gradient(145deg, rgba(198, 166, 100, 0.05) 0%, rgba(0,0,0,0) 100%);
+    border-radius: 15px;
+    border-left: 2px solid var(--gold);
+    margin: 20px;
+}
+
+/* 2. ОСНОВНИ БУТОНИ В КОШЧЕТО */
+
+/* Бутон "Изчисти кошчето" (Empty Trash) */
 .purge-btn {
     background: rgba(198, 166, 100, 0.1);
     border: 1px solid var(--gold);
@@ -23,15 +39,7 @@
         box-shadow: 0 0 20px var(--gold-glow);
     }
 
-.trash-info-box {
-    margin-top: auto;
-    padding: 15px;
-    background: linear-gradient(145deg, rgba(198, 166, 100, 0.05) 0%, rgba(0,0,0,0) 100%);
-    border-radius: 15px;
-    border-left: 2px solid var(--gold);
-    margin: 20px;
-}
-
+/* Бутон за масово възстановяване на селектирани файлове */
 .btn-bulk-restore {
     color: #fff;
     background: none;
@@ -48,6 +56,7 @@
         color: var(--gold);
     }
 
+/* Бутон за масово ОКОНЧАТЕЛНО изтриване на селектирани файлове */
 .btn-bulk-delete {
     color: #ff4d4d;
     background: none;
@@ -62,14 +71,18 @@
 
     .btn-bulk-delete:hover {
         color: #ff1a1a;
-        text-shadow: 0 0 10px rgba(255, 77, 77, 0.3);
+        text-shadow: 0 0 10px rgba(255, 77, 77, 0.3); /* Червен светещ ефект за опасност */
     }
 
+/* 3. ВИЗУАЛИЗАЦИЯ НА СЕЛЕКТИРАНИ ФАЙЛОВЕ */
+
+/* Добавя златна рамка и сянка на файла, когато е избран */
 .file-item.selected {
     border-color: var(--gold) !important;
     box-shadow: 0 0 15px rgba(198, 166, 100, 0.2);
 }
 
+/* Стил за чекбокса, когато е отметнат (показва се златна отметка) */
 .check-circle.checked {
     background: var(--gold) !important;
     border-color: var(--gold) !important;
@@ -84,23 +97,22 @@
         font-size: 12px;
         font-weight: 900;
     }
+
+/* 4. ЛЕНТА ЗА МАСОВИ ДЕЙСТВИЯ (BULK SELECTION MENU)
+   Менюто, което се появява, когато маркираш един или повече файлове. */
+
+/* Основен контейнер за инструментите за селекция с анимация за появяване */
 #selection-tools {
     animation: slideInTrash 0.4s ease-out;
-    width: 100%; 
-    margin: 20px 0; 
+    width: 100%;
+    margin: 20px 0;
 }
 
-.selection-actions {
-    display: flex; 
-    flex-direction: row; 
-    gap: 12px; 
-    align-items: center; 
-}
-
+/* Вътрешна част на менюто със стъклен ефект */
 .selection-inner {
     display: flex;
     align-items: center;
-    justify-content: space-between; 
+    justify-content: space-between;
     background: rgba(255, 255, 255, 0.03);
     backdrop-filter: blur(15px);
     border: 1px solid rgba(198, 166, 100, 0.2);
@@ -110,48 +122,7 @@
     box-sizing: border-box;
 }
 
-.sel-btn {
-    border: none;
-    padding: 10px 22px;
-    border-radius: 12px;
-    font-size: 0.85rem;
-    font-weight: 700;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    outline: none;
-}
-    .sel-btn.select-all {
-        background: rgba(198, 166, 100, 0.1) !important; 
-        border: 1px solid var(--gold) !important; 
-        color: var(--gold) !important; 
-    }
-
-        .sel-btn.select-all:hover {
-            background: var(--gold) !important; 
-            color: #000 !important; 
-            box-shadow: 0 0 20px var(--gold-glow) !important; 
-            transform: translateY(-2px);
-        }
-
-            .sel-btn.select-all:hover i {
-                transform: scale(1.1);
-            }
-
-    .sel-btn.cancel {
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: #888;
-    }
-
-        .sel-btn.cancel:hover {
-            background: rgba(255, 77, 77, 0.1);
-            color: #ff4d4d;
-            border-color: rgba(255, 77, 77, 0.2);
-        }
-
+/* Значката, която показва броя избрани файлове (напр. "3 Selected") */
 .selection-badge {
     background: rgba(212, 175, 55, 0.1);
     color: var(--gold);
@@ -165,6 +136,61 @@
     border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
+/* Контейнер за бутоните в менюто за селекция */
+.selection-actions {
+    display: flex;
+    flex-direction: row;
+    gap: 12px;
+    align-items: center;
+}
+
+/* Базов стил за бутоните в менюто (Select All / Cancel) */
+.sel-btn {
+    border: none;
+    padding: 10px 22px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+}
+
+    /* Специфичен стил за бутона "Избери всички" */
+    .sel-btn.select-all {
+        background: rgba(198, 166, 100, 0.1) !important;
+        border: 1px solid var(--gold) !important;
+        color: var(--gold) !important;
+    }
+
+        .sel-btn.select-all:hover {
+            background: var(--gold) !important;
+            color: #000 !important;
+            box-shadow: 0 0 20px var(--gold-glow) !important;
+            transform: translateY(-2px);
+        }
+
+            .sel-btn.select-all:hover i {
+                transform: scale(1.1); /* Увеличава иконата при hover */
+            }
+
+    /* Специфичен стил за бутона "Отказ" (Cancel) */
+    .sel-btn.cancel {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #888;
+    }
+
+        .sel-btn.cancel:hover {
+            background: rgba(255, 77, 77, 0.1); /* Леко червен фон при hover */
+            color: #ff4d4d;
+            border-color: rgba(255, 77, 77, 0.2);
+        }
+
+/* Анимация за плавно слизане/появяване на менюто за селекция */
 @keyframes slideInTrash {
     from {
         opacity: 0;

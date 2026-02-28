@@ -1,14 +1,17 @@
-﻿.lux-login-wrapper {
+﻿/* 1. ГЛАВЕН КОНТЕЙНЕР ЗА ВХОД 
+   Фонът използва тъмен радиален градиент за усещане за дълбочина. */
+.lux-login-wrapper {
     min-height: 100vh;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: center; /* Центрира хоризонтално */
+    align-items: center; /* Центрира вертикално */
     background: radial-gradient(circle at center, #1a1a1a 0%, #000 100%);
     padding: 20px;
     position: relative;
     overflow: hidden;
 }
 
+    /* Декоративен златист ореол (светлина) зад формата за вход */
     .lux-login-wrapper::before {
         content: '';
         position: absolute;
@@ -18,25 +21,28 @@
         width: 600px;
         height: 600px;
         background: radial-gradient(circle, rgba(198, 166, 100, 0.15) 0%, transparent 70%);
-        pointer-events: none;
+        pointer-events: none; /* За да не блокира кликовете върху полетата */
         z-index: 0;
     }
 
+/* 2. КАРТА С ФОРМУЛЯРА (GLASSMORPHISM)
+   Създава ефекта на полупрозрачно, матирано стъкло чрез backdrop-filter.*/
 .lux-card {
     background: rgba(20, 20, 20, 0.6);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(198, 166, 100, 0.3);
+    border-top: 1px solid rgba(198, 166, 100, 0.3); /* Златен акцент на горния ръб */
     border-radius: 20px;
     padding: 50px 40px;
     width: 100%;
     max-width: 450px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); /* Хвърля сянка за 3D ефект */
     position: relative;
     z-index: 1;
 }
 
+/* 3. ЛОГО И ЗАГЛАВНА ЧАСТ НА ФОРМАТА */
 .brand-logo {
     text-align: center;
     font-size: 2rem;
@@ -46,11 +52,13 @@
     letter-spacing: 1px;
 }
 
+    /* Златен светещ ефект върху специфична част от логото ("Lux") */
     .brand-logo span {
         color: #c6a664;
         text-shadow: 0 0 15px rgba(198, 166, 100, 0.4);
     }
 
+/* Малък сив текст под логото ("Welcome back. Please log in.") */
 .subtitle {
     text-align: center;
     color: #888;
@@ -58,11 +66,14 @@
     font-size: 0.95rem;
 }
 
+/*  4. ПОЛЕТА ЗА ВЪВЕЖДАНЕ (FLOATING LABELS)
+   Персонализиране на Bootstrap класа за плаващи етикети в тъмна тема.*/
 .form-floating {
     position: relative;
     margin-bottom: 20px;
 }
 
+    /* Как изглеждат полетата по подразбиране */
     .form-floating input.form-control {
         background-color: rgba(255, 255, 255, 0.05) !important;
         border: 1px solid rgba(255, 255, 255, 0.1) !important;
@@ -71,18 +82,21 @@
         height: 55px;
     }
 
+        /* Как изглеждат полетата, когато потребителят пише в тях (Focus) */
         .form-floating input.form-control:focus {
             background-color: rgba(0, 0, 0, 0.6) !important;
-            border-color: #c6a664 !important;
-            box-shadow: 0 0 10px rgba(198, 166, 100, 0.2) !important;
+            border-color: #c6a664 !important; /* Златна рамка */
+            box-shadow: 0 0 10px rgba(198, 166, 100, 0.2) !important; /* Златно сияние */
             color: #fff !important;
         }
 
+    /* Текстът на етикета (Placeholder-а) */
     .form-floating label {
         color: #888 !important;
         padding-left: 15px;
     }
 
+    /* Анимация: Когато полето е във фокус или има текст, етикетът се качва нагоре и става златен */
     .form-floating > .form-control:focus ~ label,
     .form-floating > .form-control:not(:placeholder-shown) ~ label {
         color: #c6a664 !important;
@@ -90,15 +104,17 @@
         transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
     }
 
+/* Решение на проблема с белия фон при автоматично попълване на пароли (Autofill) */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-    -webkit-box-shadow: 0 0 0 30px #111 inset !important;
+    -webkit-box-shadow: 0 0 0 30px #111 inset !important; /* Заменя белия фон с тъмен */
     -webkit-text-fill-color: white !important;
     transition: background-color 5000s ease-in-out 0s;
 }
 
+/* 5. ГЛАВЕН БУТОН ЗА ВХОД */
 .btn-lux {
     width: 100%;
     padding: 14px;
@@ -107,6 +123,7 @@ input:-webkit-autofill:active {
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #000;
+    /* Луксозен златен градиент */
     background: linear-gradient(135deg, #aa771c 0%, #fcf6ba 50%, #aa771c 100%);
     background-size: 200% auto;
     border: none;
@@ -117,12 +134,14 @@ input:-webkit-autofill:active {
     margin-top: 10px;
 }
 
+    /* При hover: градиентът се анимира и бутонът се повдига */
     .btn-lux:hover {
         background-position: right center;
         transform: translateY(-2px);
         box-shadow: 0 10px 25px rgba(198, 166, 100, 0.5);
     }
 
+/*  6. ОПЦИИ НА ФОРМАТА (Запомни ме / Забравена парола) */
 .form-options {
     display: flex;
     justify-content: space-between;
@@ -131,12 +150,14 @@ input:-webkit-autofill:active {
     font-size: 0.9rem;
 }
 
+/* Стилизиране на чекбокса "Запомни ме" */
 .form-check-input {
     background-color: #333;
     border-color: #555;
     cursor: pointer;
 }
 
+    /* Когато е отметнат, става златен */
     .form-check-input:checked {
         background-color: #c6a664;
         border-color: #c6a664;
@@ -148,6 +169,7 @@ input:-webkit-autofill:active {
     margin-left: 5px;
 }
 
+/* Линк за забравена парола */
 .forgot-link {
     color: #888;
     text-decoration: none;
@@ -158,6 +180,7 @@ input:-webkit-autofill:active {
         color: #c6a664;
     }
 
+/* 7. ДОЛНА ЧАСТ (ЛИНК КЪМ РЕГИСТРАЦИЯ) */
 .auth-footer {
     text-align: center;
     margin-top: 30px;
@@ -172,5 +195,5 @@ input:-webkit-autofill:active {
     }
 
         .auth-footer a:hover {
-            color: #fff;
+            color: #fff; /* При посочване линкът светва в бяло */
         }

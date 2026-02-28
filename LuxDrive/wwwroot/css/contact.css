@@ -1,4 +1,6 @@
-﻿.lux-contact-wrapper {
+﻿/* 1. ОСНОВЕН КОНТЕЙНЕР ЗА СТРАНИЦАТА ЗА КОНТАКТИ
+   Задава тъмен фон с лек радиален градиент в центъра и центрира съдържанието. */
+.lux-contact-wrapper {
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -9,6 +11,8 @@
     overflow: hidden;
 }
 
+    /* Декоративен златист отблясък, разположен зад контактната форма.
+       Pointer-events: none гарантира, че не пречи на кликването. */
     .lux-contact-wrapper::before {
         content: '';
         position: absolute;
@@ -22,12 +26,14 @@
         z-index: 0;
     }
 
+/* 2. КОНТАКТНА КАРТА (ФОРМУЛЯРЪТ)
+   Използва "glassmorphism" (ефект на матирано стъкло) чрез backdrop-filter.*/
 .lux-card {
     background: rgba(20, 20, 20, 0.6);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    border-top: 1px solid rgba(198, 166, 100, 0.3);
+    border-top: 1px solid rgba(198, 166, 100, 0.3); /* Златен акцент на горния ръб */
     border-radius: 20px;
     padding: 50px 40px;
     width: 100%;
@@ -35,9 +41,10 @@
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     position: relative;
     z-index: 1;
-    animation: fadeUp 0.8s ease-out;
+    animation: fadeUp 0.8s ease-out; /* Прилага анимацията за появяване */
 }
 
+/* Анимация: Картата се появява плавно отдолу нагоре при зареждане на страницата */
 @keyframes fadeUp {
     from {
         opacity: 0;
@@ -50,6 +57,7 @@
     }
 }
 
+/* 3. ЗАГЛАВНА ЧАСТ НА ФОРМУЛЯРА (HEADER) */
 .contact-header {
     text-align: center;
     margin-bottom: 35px;
@@ -62,6 +70,7 @@
         margin-bottom: 10px;
     }
 
+    /* Златен светещ ефект за ключови думи в заглавието (ако са в <span>) */
     .contact-header span {
         color: #c6a664;
         text-shadow: 0 0 15px rgba(198, 166, 100, 0.3);
@@ -72,11 +81,14 @@
         font-size: 0.95rem;
     }
 
+/* 4. ПОЛЕТА ЗА ВЪВЕЖДАНЕ (INPUT & TEXTAREA) С ПЛАВАЩИ ЕТИКЕТИ
+   Персонализира стандартните Bootstrap полета за тъмната тема. */
 .form-floating {
     position: relative;
     margin-bottom: 20px;
 }
 
+    /* Базов стил за полетата: леко прозрачни с тъмни граници */
     .form-floating input.form-control,
     .form-floating textarea.form-control {
         background-color: rgba(255, 255, 255, 0.05) !important;
@@ -85,25 +97,29 @@
         border-radius: 10px;
     }
 
+    /* Фиксирана височина за полето за съобщение, без възможност за разпъване */
     .form-floating textarea.form-control {
         height: 150px;
         resize: none;
     }
 
+        /* Състояние, когато потребителят кликне/пише в полето (Focus) */
         .form-floating input.form-control:focus,
         .form-floating textarea.form-control:focus {
             background-color: rgba(0, 0, 0, 0.6) !important;
-            border-color: #c6a664 !important;
+            border-color: #c6a664 !important; /* Става златно */
             box-shadow: 0 0 10px rgba(198, 166, 100, 0.2) !important;
             color: #fff !important;
             outline: none;
         }
 
+    /* Базов стил на текста (placeholder/label) вътре в полето */
     .form-floating label {
         color: #888 !important;
         padding-left: 15px;
     }
 
+    /* Анимация: Премества текста нагоре и го прави златен, когато полето е активно или попълнено */
     .form-floating > .form-control:focus ~ label,
     .form-floating > .form-control:not(:placeholder-shown) ~ label {
         color: #c6a664 !important;
@@ -111,12 +127,14 @@
         transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
     }
 
+/* Премахва досадния бял фон, който браузърите слагат при автоматично попълване (Autofill) */
 input:-webkit-autofill,
 textarea:-webkit-autofill {
     -webkit-box-shadow: 0 0 0 30px #1a1a1a inset !important;
     -webkit-text-fill-color: white !important;
 }
 
+/*  5. ГЛАВЕН БУТОН (ИЗПРАЩАНЕ) */
 .btn-lux {
     width: 100%;
     padding: 14px;
@@ -125,6 +143,7 @@ textarea:-webkit-autofill {
     text-transform: uppercase;
     letter-spacing: 1px;
     color: #000;
+    /* Златен линеен градиент за луксозно усещане */
     background: linear-gradient(135deg, #aa771c 0%, #fcf6ba 50%, #aa771c 100%);
     background-size: 200% auto;
     border: none;
@@ -135,12 +154,14 @@ textarea:-webkit-autofill {
     margin-top: 10px;
 }
 
+    /* При посочване с мишката градиентът се движи и бутонът леко се повдига */
     .btn-lux:hover {
         background-position: right center;
         transform: translateY(-2px);
         box-shadow: 0 10px 25px rgba(198, 166, 100, 0.5);
     }
 
+/* Информационна бележка под бутона (напр. "Очаквайте отговор до 24ч.") */
 .info-note {
     text-align: center;
     margin-top: 25px;
@@ -153,26 +174,29 @@ textarea:-webkit-autofill {
         margin-right: 5px;
     }
 
+/* 6. ЕКРАН ПРИ УСПЕШНО ИЗПРАЩАНЕ
+   Показва се вместо формата, когато съобщението е пратено успешно. */
 .success-banner {
     text-align: center;
     padding: 20px;
     animation: fadeUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+/* Кръгла икона за успех с пулсиращ ефект */
 .success-icon {
     width: 90px;
     height: 90px;
     border: 2px solid #c6a664;
-    background: rgba(198, 166, 100, 0.05); 
+    background: rgba(198, 166, 100, 0.05);
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     margin: 0 auto 25px auto;
     font-size: 2.5rem;
-    color: #c6a664; 
-    box-shadow: 0 0 30px rgba(198, 166, 100, 0.2); 
-    animation: pulseGold 2s infinite;
+    color: #c6a664;
+    box-shadow: 0 0 30px rgba(198, 166, 100, 0.2);
+    animation: pulseGold 2s infinite; /* Постоянна пулсация */
 }
 
 .success-banner h3 {
@@ -193,13 +217,14 @@ textarea:-webkit-autofill {
     margin-right: auto;
 }
 
+/* Анимация за пулсиращата златна сянка около иконата за успех */
 @keyframes pulseGold {
     0% {
         box-shadow: 0 0 0 0 rgba(198, 166, 100, 0.4);
     }
 
     70% {
-        box-shadow: 0 0 0 15px rgba(198, 166, 100, 0);
+        box-shadow: 0 0 0 15px rgba(198, 166, 100, 0); /* Сянката се разширява и изчезва */
     }
 
     100% {
