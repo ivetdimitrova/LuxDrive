@@ -147,3 +147,21 @@ async function simulateFinishReset() {
         showLuxToast("Fatal Error", "Failed to update password.", "error");
     }
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleBtn = document.querySelector('.lux-menu-toggle');
+    const navMenu = document.querySelector('.lux-nav');
+
+    toggleBtn.addEventListener('click', function () {
+      
+        navMenu.classList.toggle('show');
+
+       
+        this.classList.toggle('open');
+    });
+
+ 
+    document.querySelectorAll('.lux-nav-link').forEach(link => {
+        link.addEventListener('click', () => navMenu.classList.remove('show'));
+    });
+});
